@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       timeoutId = setTimeout(() => {
         clearTimers();
-        // reveal final word (the spelled-out number like "one", "two", etc.)
+        // reveal final word while hover
         origEl.textContent = finalText || origText;
       }, duration);
     }
@@ -52,12 +52,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     link.addEventListener('mouseleave', () => {
       clearTimers();
-      // ensure final text is shown on leave as required
-      origEl.textContent = finalText || origText;
+      // revert to roman numeral on mouse leave so animation can re-run next hover
+      origEl.textContent = origText;
     });
     link.addEventListener('blur', () => {
       clearTimers();
-      origEl.textContent = finalText || origText;
+      origEl.textContent = origText;
     });
   });
 });

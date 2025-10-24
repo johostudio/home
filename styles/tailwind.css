@@ -183,6 +183,8 @@ a:hover, a:focus {
   align-items: center;
   justify-content: center;
   text-align: center;
+  cursor: default;
+  user-select: none;
 }
 
 /* the element we overwrite during animation */
@@ -194,4 +196,16 @@ a:hover, a:focus {
   min-width: 0;
   box-sizing: content-box;
   vertical-align: middle;
+}
+
+/* project title links (film/minifilm/autumn) — hover color change */
+.project-title-link {
+  color: var(--text);
+  transition: color .18s ease, opacity .12s ease;
+  opacity: 0.95;
+}
+.project-title-link:hover,
+.project-title-link:focus {
+  color: #e9d7ff; /* brighter purple on hover */
+  opacity: 1;
 }
