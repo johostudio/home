@@ -1,0 +1,9 @@
+/* Global font and small overrides (Helvetical/Helvetica as requested) */
+:root { --bg: #071021; --card: #0b1220; --accent: #38bdf8; --muted: #9aa4b2; }
+html, body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+
+/* Ensure link color consistent if not using utility classes */
+a { color: #d1d5db; text-decoration: none; }
+
+/* Optional small tweaks */
+.hero { /* reserved if needed for custom tweaks */ }

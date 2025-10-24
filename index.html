@@ -6,127 +6,85 @@
   <title>joho's studio</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
-  <style>
-    :root{--bg:#0f1724;--card:#0b1220;--accent:#38bdf8;--muted:#9aa4b2;--radius:10px}
-    /* inherit font everywhere and set Helvetica at the root */
-    *{box-sizing:border-box;font-family:inherit}
-    html{font-family:"Helvetica Neue", Helvetica, Arial, sans-serif}
-    body{margin:0;font-family:inherit;background:linear-gradient(180deg,#071021 0%,#0b1220 100%);color:#e6eef6;min-height:100vh}
 
-    /* layout: main column + social column */
-    .wrap{max-width:960px;margin:3rem auto;padding:1.5rem;display:grid;grid-template-columns:1fr 220px;gap:1.25rem}
-    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;grid-column:1/-1}
-    header h1{font-size:1.25rem;margin:0}
-    nav a{color:var(--muted);text-decoration:none;margin-left:1rem;font-size:0.95rem}
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles/tailwind.css">
 
-    .hero{text-align:center;padding:3rem 1rem;border-radius:var(--radius);background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);margin-bottom:1.5rem}
-    .hero h2{margin:0 0 .5rem 0;font-size:1.75rem}
-    .hero p{margin:0 0 1rem 0;color:var(--muted)}
-    .buttons a{display:inline-block;margin:0 .35rem;padding:.5rem .9rem;border-radius:8px;text-decoration:none;color:#071022;background:var(--accent);font-weight:600}
-
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem}
-    .card{background:var(--card);padding:1rem;border-radius:10px}
-    .card h4{margin:.1rem 0 .5rem 0}
-
-    /* sidebar / social column */
-    .sidebar{background:var(--card);padding:1rem;border-radius:var(--radius);height:fit-content}
-    .sidebar h3{margin:.25rem 0 .75rem 0}
-    .socials{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.5rem}
-    .socials li{color:var(--muted);font-size:.95rem}
-    .socials a{text-decoration:none;color:var(--accent);font-weight:600}
-
-    footer{margin-top:2rem;color:var(--muted);font-size:.9rem;text-align:center;grid-column:1/-1}
-
-    @media (max-width:900px){
-      .wrap{grid-template-columns:1fr}
-      header{align-items:flex-start}
-    }
-    @media (max-width:520px){
-      header{flex-direction:column;align-items:flex-start}
-      nav{margin-top:.5rem}
-    }
-  </style>
 </head>
-<body>
-  <div class="wrap">
-    <header>
-      <h1>johostudio</h1>
-      <nav>
-        <a href="#projects">WORK</a>
-        <a href="#about">ABOUT</a>
-        <a href="#contact">CONTACT</a>
+<body class="min-h-screen bg-[#071021] text-[#e6eef6] font-sans">
+  <div class="max-w-4xl mx-auto my-12 px-6">
+    <header class="w-full text-center mb-8">
+      <h1 class="text-2xl font-bold">johostudio</h1>
+      <nav class="mt-3">
+        <a class="text-gray-300 mx-3" href="#projects">WORK</a>
+        <a class="text-gray-300 mx-3" href="#about">ABOUT</a>
+        <a class="text-gray-300 mx-3" href="#contact">CONTACT</a>
       </nav>
     </header>
 
-    <!-- social column -->
-    <aside class="sidebar" aria-label="where to find me:">
-      <h3>Social</h3>
-      <ul class="socials">
-        <li><a href="https://ko-fi.com/johostudio" target="_blank" rel="noopener">ko-fi</a></li>
-        <li><a href="https://www.buymeacoffee.com/johostudio" target="_blank" rel="noopener">buy me a matcha tea </a></li>
-        <li><a href="https://github.com/johostudio" target="_blank" rel="noopener">github</a></li>
-        <li><a href="https://www.youtube.com/channel/UCm9AkiBCwALnpblVcV7E65g" target="_blank" rel="noopener">youtube</a></li>
-        <li><a href="https://instagram.com/96joho" target="_blank" rel="noopener">ig: personal</a></li>
-        <li><a href="https://instagram.com/hosh.autumn" target="_blank" rel="noopener">ig: photography</a></li>
-        <li><a href="https://instagram.com/joho.studio" target="_blank" rel="noopener">ig: creative projects</a></li>
-        <li><a href=" https://www.tiktok.com/@lifeofjoho" target="_blank" rel="noopener">tok</a></li>
-        <li><a href="https://linktr.ee/dusktodvwn" target="_blank" rel="noopener">2026 q1 project: hoshii</a></li>
+    <main class="flex flex-col md:flex-row items-center md:items-start gap-6">
+      <!-- main column -->
+      <section class="flex-1 text-center md:text-left">
+        <div class="hero bg-[#0b1220] rounded-xl p-10">
+          <h2 class="text-3xl font-bold mb-2">home</h2>
+          <p class="text-gray-300 mb-6">a temporary portfolio / website</p>
 
-      </ul>
-    </aside>
+          <!-- buttons: light purple, spaced, drop down a little -->
+          <div class="flex justify-center md:justify-start gap-4 mt-6">
+            <a href="tbd.html" class="inline-block px-4 py-2 rounded-md bg-purple-300 text-[#071022] font-semibold">GALLERY</a>
+            <a href="tbd.html" class="inline-block px-4 py-2 rounded-md bg-purple-300 text-[#071022] font-semibold">RESUME</a>
+            <a href="nextjs/pages/animations.html" class="hidden">Animations (next)</a>
+          </div>
+        </div>
 
-    <!-- main column (existing content) -->
-    <section class="hero" id="top">
-      <h2>home</h2>
-      <p>a temporary portfolio / website </p>
-      <p class="buttons">
-        <a href="#projects">GALLERY</a>
-        <a href="resume.pdf" target="_blank" rel="noopener">RESUME</a>
-      </p>
-    </section>
+        <section id="projects" class="mt-8">
+          <h3 class="text-xl font-bold mb-3">Projects</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <article class="bg-[#0b1220] rounded-lg p-4">
+              <h4 class="font-bold">I</h4>
+              <p class="text-gray-300">tba</p>
+            </article>
 
-    <section id="projects">
-      <h3>Projects</h3>
-      <div class="grid" role="list">
-        <article class="card" role="listitem">
-          <h4>I</h4>
-          <p class="muted">tba</p>
-          <p><a href="#" style="color:var(--accent)"></a></p>tba
-        </article>
+            <article class="bg-[#0b1220] rounded-lg p-4">
+              <h4 class="font-bold">II</h4>
+              <p class="text-gray-300">tba</p>
+            </article>
+          </div>
+        </section>
 
-        <article class="card" role="listitem">
-          <h4>II</h4>
-          <p class="muted">tba</p>
-          <p><a href="#" style="color:var(--accent)">tba</a></p>
-        </article>
-      </div>
-    </section>
+        <section id="about" class="mt-8">
+          <h3 class="text-xl font-bold mb-2">about</h3>
+          <p class="text-gray-300">i create, sometimes.<br>full site 2025 q4</p>
+        </section>
 
-    <section id="about" style="margin-top:1.25rem">
-      <h3>About</h3>
-      <p style="color:var(--muted)">i create, sometimes. full site 2025 q4</p>
-    </section>
+        <section id="contact" class="mt-8">
+          <h3 class="text-xl font-bold mb-2">contact</h3>
+          <p class="text-gray-300">email: <a class="text-gray-300" href="mailto:96joho@gmail.com">96joho@gmail.com</a></p>
+        </section>
+      </section>
 
-    <section id="contact" style="margin-top:1rem">
-      <h3>Contact</h3>
-      <p style="color:var(--muted)">email: <a href="mailto:96joho@gmail.com" style="color:var(--accent)">96@gmail.com</a></p>
-    </section>
+      <!-- social column -->
+      <aside class="w-full md:w-56 bg-[#0b1220] p-4 rounded-lg">
+        <h3 class="text-lg font-bold mb-3 text-center md:text-left">Social</h3>
+        <ul class="flex flex-col gap-2">
+          <li><a class="text-gray-300" href="https://ko-fi.com/johostudio" target="_blank" rel="noopener">ko-fi</a></li>
+          <li><a class="text-gray-300" href="https://www.buymeacoffee.com/johostudio" target="_blank" rel="noopener">buy me a matcha tea</a></li>
+          <li><a class="text-gray-300" href="https://github.com/johostudio" target="_blank" rel="noopener">github</a></li>
+          <li><a class="text-gray-300" href="https://www.youtube.com/channel/UCm9AkiBCwALnpblVcV7E65g" target="_blank" rel="noopener">youtube</a></li>
+          <li><a class="text-gray-300" href="https://instagram.com/96joho" target="_blank" rel="noopener">ig: personal</a></li>
+          <li><a class="text-gray-300" href="https://instagram.com/hosh.autumn" target="_blank" rel="noopener">ig: photography</a></li>
+          <li><a class="text-gray-300" href="https://instagram.com/joho.studio" target="_blank" rel="noopener">ig: creative projects</a></li>
+          <li><a class="text-gray-300" href="https://www.tiktok.com/@lifeofjoho" target="_blank" rel="noopener">tok</a></li>
+          <li><a class="text-gray-300" href="https://linktr.ee/dusktodvwn" target="_blank" rel="noopener">2026 q1 project: hoshii</a></li>
+        </ul>
+      </aside>
+    </main>
 
-
-
-
-
-
-
-
-
-
-
+    <footer class="text-center mt-12 text-gray-400">
+      <small>© <span id="year"></span> home.</small>
+    </footer>
   </div>
-
-  <footer>
-    <small>© <span id="year"></span> home.</small>
-  </footer>
 
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
