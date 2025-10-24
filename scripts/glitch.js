@@ -11,6 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const finalText = (link.dataset.final || (link.querySelector('.final') && link.querySelector('.final').textContent) || '').trim();
     const origText = origEl.textContent.trim();
 
+    // store original (roman) so we can reuse it
+    origEl.dataset.orig = origText;
+
     // set a stable width based on the longest text (use ch unit)
     const maxLen = Math.max(origText.length, finalText.length || 1);
     origEl.style.minWidth = `${maxLen}ch`;
@@ -47,17 +50,18 @@ document.addEventListener('DOMContentLoaded', () => {
       if (timeoutId) { clearTimeout(timeoutId); timeoutId = null; }
     }
 
+    // on hover / focus → animate (even if already showing final)
     link.addEventListener('mouseenter', start);
     link.addEventListener('focus', start);
 
+    // on leave/blur → stop timers and KEEP finalText (so it stays until next hover)
     link.addEventListener('mouseleave', () => {
       clearTimers();
-      // revert to roman numeral on mouse leave so animation can re-run next hover
-      origEl.textContent = origText;
+      origEl.textContent = finalText || origText;
     });
     link.addEventListener('blur', () => {
       clearTimers();
-      origEl.textContent = origText;
+      origEl.textContent = finalText || origText;
     });
   });
 });
