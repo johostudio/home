@@ -16,8 +16,13 @@
   <div class="max-w-4xl mx-auto px-6 flex flex-col items-center">
     <header class="w-full text-center my-8">
       <h1 class="text-3xl inline-flex items-center justify-center">
-        <!-- page icon sized to match the h1 text height -->
-        <img src="favicon-32x32.png" alt="joho icon" class="inline-block h-[1em] w-auto mr-3" />
+        <!-- resilient icon: try PNG, fallback to favicon.ico, visible size -->
+        <img
+          src="favicon-32x32.png"
+          alt="joho icon"
+          class="inline-block h-6 w-auto mr-3"
+          onerror="this.onerror=null; this.src='favicon.ico'; this.classList.remove('h-6'); this.style.height='1em';"
+        />
         johostudio
       </h1>
 
