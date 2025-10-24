@@ -18,13 +18,13 @@ html, body {
   font-family: "Verona-Serial-Medium", "Helvetica Neue", Helvetica, Arial, sans-serif;
   background: var(--bg);
   color: var(--text);
-  letter-spacing: -0.1rem; /* all text above set to -0.1rem */
+  letter-spacing: -0.05rem; /* updated: basic text spacing */
 }
 
-/* Header title: bold + tightened spacing (-0.15rem) */
+/* Header title: bold + tightened spacing */
 header h1 {
   font-weight: 700;
-  letter-spacing: -0.3rem; /* latest requested */
+  letter-spacing: -0.15rem; /* restored to -0.15rem */
 }
 
 /* Small titles (gallery/resume) opacity handled in index.html via utility class */
