@@ -1,9 +1,20 @@
 /* Global font and small overrides (Helvetical/Helvetica as requested) */
 :root { --bg: #071021; --card: #0b1220; --accent: #38bdf8; --muted: #9aa4b2; }
-html, body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
 
-/* Ensure link color consistent if not using utility classes */
-a { color: #d1d5db; text-decoration: none; }
+/* set Verona Serial Medium as the global font (fallbacks provided) */
+html, body { font-family: "verona-serial-medium", "Helvetica Neue", Helvetica, Arial, sans-serif; }
 
-/* Optional small tweaks */
-.hero { /* reserved if needed for custom tweaks */ }
+/* link base color and smooth purple highlight on hover/focus */
+a {
+  color: #d1d5db;               /* light gray */
+  text-decoration: none;
+  transition: color .18s ease, opacity .18s ease, transform .18s ease;
+}
+a:hover,
+a:focus {
+  color: #c084fc !important;    /* light purple on hover */
+  outline: none;
+}
+
+/* Optional small tweaks retained */
+.hero { --hero-reserved: 0; 
