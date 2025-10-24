@@ -1,5 +1,5 @@
 /* Global font and small overrides (Helvetical/Helvetica as requested) */
-:root { --bg: #071021; --card: #0b1220; --accent: #38bdf8; --muted: #9aa4b2; }
+:root { --bg: #0a0a0c; --card: #0b1220; --accent: #38bdf8; --muted: #9aa4b2; --text: #c084fc; }
 
 /* font-face / global font rules (existing) */
 @font-face {
@@ -11,8 +11,8 @@
 }
 html, body {
   font-family: "Verona-Serial-Medium", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  background: var(--bg);
-  color: #e6eef6;
+  background: var(--bg);     /* dark, not fully black */
+  color: var(--text);       /* all text -> light purple */
 }
 
 /* Header title: bold + tightened spacing (-0.15rem) */
@@ -28,14 +28,15 @@ header h1 {
   letter-spacing: -0.1rem;
 }
 
-/* Links: light gray by default, purple on hover */
+/* Links: inherit the purple text color; hover slightly brighter */
 a {
-  color: #d1d5db;
+  color: var(--text);
   text-decoration: none;
   transition: color .18s ease, transform .18s ease;
 }
-a:hover, a:focus {
-  color: #c084fc !important;
+a:hover,
+a:focus {
+  color: #e9d7ff !important;
   outline: none;
 }
 
