@@ -16,6 +16,12 @@
   <div class="max-w-4xl mx-auto px-6 flex flex-col items-center">
     <header class="w-full text-center my-8">
       <h1 class="text-3xl">johostudio</h1>
+
+      <!-- small titles (gallery / resume) below the main title, 70% opacity -->
+      <div class="mt-2 flex gap-6 justify-center opacity-70">
+        <a href="gallery.html" class="text-sm">GALLERY</a>
+        <a href="resume.html" class="text-sm">RESUME</a>
+      </div>
     </header>
 
     <main class="w-full flex flex-col items-center">
@@ -36,18 +42,26 @@
         </ul>
       </section>
 
-      <!-- Projects centered below socials -->
+      <!-- Projects centered below socials; each project is clickable and has a hover glitch -> final text (tbd) -->
       <section id="projects" class="w-full text-center mt-12 mb-8">
         <h2 class="text-2xl mb-4">projects</h2>
         <div class="grid grid-cols-1 gap-4 place-items-center">
           <article class="bg-[#0b1220] rounded-lg p-6 w-full max-w-md">
-            <h3 class="text-lg mb-2">ii</h3>
-            <p class="text-gray-300">tbd.</p>
+            <a class="project-link inline-block text-lg font-semibold" href="gallery.html" aria-label="Project One">
+              <span class="orig">ii</span>
+              <span class="glitch" data-text="ii" aria-hidden="true"></span>
+              <span class="final">tbd</span>
+            </a>
+            <p class="text-gray-300 mt-3">tbd.</p>
           </article>
 
           <article class="bg-[#0b1220] rounded-lg p-6 w-full max-w-md">
-            <h3 class="text-lg mb-2">ii</h3>
-            <p class="text-gray-300">tbd.</p>
+            <a class="project-link inline-block text-lg font-semibold" href="gallery.html" aria-label="Project Two">
+              <span class="orig">ii</span>
+              <span class="glitch" data-text="ii" aria-hidden="true"></span>
+              <span class="final">tbd</span>
+            </a>
+            <p class="text-gray-300 mt-3">tbd.</p>
           </article>
         </div>
       </section>
@@ -55,7 +69,7 @@
       <!-- Contact centered -->
       <section id="contact" class="w-full text-center mb-16">
         <h2 class="text-2xl mb-4">find me @</h2>
-        <p class="text-gray-300">email > 96joho@gmail.com <a class="text-gray-300" href="mailto:96joho@gmail.com">96joho@gmail.com</a></p>
+        <p class="text-gray-300">email > <a class="text-gray-300" href="mailto:96joho@gmail.com">96joho@gmail.com</a></p>
       </section>
     </main>
 

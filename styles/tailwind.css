@@ -1,8 +1,7 @@
 /* Global font and small overrides (Helvetical/Helvetica as requested) */
 :root { --bg: #071021; --card: #0b1220; --accent: #38bdf8; --muted: #9aa4b2; }
 
-/* Ensure the system-installed Verona font is used when available.
-   The local() sources attempt common name variations. */
+/* font-face / global font rules (existing) */
 @font-face {
   font-family: "Verona-Serial-Medium";
   src: local("verona-serial-medium"), local("Verona Serial Medium"), local("VeronaSerial-Medium");
@@ -10,19 +9,26 @@
   font-style: normal;
   font-display: swap;
 }
-
-/* Global font: use Verona if available, otherwise fall back */
 html, body {
   font-family: "Verona-Serial-Medium", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: #e6eef6;
 }
 
-/* Make headings bold and keep them centered visuals consistent */
-h1, h2, h3, h4 {
+/* Header title: bold + tightened spacing (-0.15rem) */
+header h1 {
   font-weight: 700;
-  text-align: center;
+  letter-spacing: -0.15rem;
 }
 
-/* Links: light gray by default, purple on hover with smooth transition */
+/* Small titles (gallery/resume) opacity handled in index.html via utility class */
+/* Socials letter-spacing */
+.socials li a,
+.socials a {
+  letter-spacing: -0.1rem;
+}
+
+/* Links: light gray by default, purple on hover */
 a {
   color: #d1d5db;
   text-decoration: none;
@@ -33,22 +39,112 @@ a:hover, a:focus {
   outline: none;
 }
 
-/* Social list spacing and centered layout */
-.socials {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+/* Project link glitch effect */
+.project-link {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  color: inherit;
+  overflow: visible;
 }
 
-/* Ensure project cards are centered within their column */
-article {
-  text-align: center;
+/* base layers */
+.project-link .orig,
+.project-link .final,
+.project-link .glitch::before,
+.project-link .glitch::after {
+  display: inline-block;
+  position: relative;
+  white-space: nowrap;
 }
 
-/* preserve any existing reserved rules */
-.hero { --hero-reserved: 0; }
+/* final result (hidden until animation end) */
+.project-link .final {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  pointer-events: none;
+}
 
-/* Title-specific tight letter-spacing (reduces spacing for the main site title) */
-header h1 {
-  letter-spacing: -0.3rem;
+/* glitch pseudo layers */
+.project-link .glitch {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+}
+.project-link .glitch::before,
+.project-link .glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  color: inherit;
+  background: transparent;
+  mix-blend-mode: screen;
+  clip-path: inset(0 0 0 0);
+}
+
+/* hover triggers animation */
+.project-link:hover .glitch {
+  opacity: 1;
+  animation: glitch-show 1.6s linear forwards;
+}
+.project-link:hover .glitch::before {
+  animation: glitch-top 1.6s linear forwards;
+}
+.project-link:hover .glitch::after {
+  animation: glitch-bottom 1.6s linear forwards;
+}
+/* fade out original near end and reveal final after glitch */
+.project-link:hover .orig {
+  animation: orig-fade 1.6s linear forwards;
+}
+.project-link:hover .final {
+  animation: final-show 1.6s linear forwards;
+}
+
+/* keyframes */
+@keyframes glitch-top {
+  0% { transform: translate(0,0); clip-path: inset(0 0 80% 0); opacity:1; }
+  10% { transform: translate(-6px,-4px); clip-path: inset(0 0 60% 0); }
+  25% { transform: translate(8px,-2px); clip-path: inset(0 0 40% 0); }
+  40% { transform: translate(-4px,2px); clip-path: inset(0 0 30% 0); }
+  60% { transform: translate(3px,-1px); clip-path: inset(0 0 50% 0); opacity:.9; }
+  80% { transform: translate(-2px,0); clip-path: inset(0 0 70% 0); opacity:.6; }
+  100% { transform: translate(0); clip-path: inset(0 0 100% 0); opacity:0; }
+}
+
+@keyframes glitch-bottom {
+  0% { transform: translate(0,0); clip-path: inset(60% 0 0 0); opacity:1; }
+  10% { transform: translate(6px,4px); clip-path: inset(40% 0 0 0); }
+  25% { transform: translate(-8px,2px); clip-path: inset(30% 0 0 0); }
+  40% { transform: translate(4px,-2px); clip-path: inset(50% 0 0 0); }
+  60% { transform: translate(-3px,1px); clip-path: inset(20% 0 0 0); opacity:.9; }
+  80% { transform: translate(2px,0); clip-path: inset(40% 0 0 0); opacity:.6; }
+  100% { transform: translate(0); clip-path: inset(100% 0 0 0); opacity:0; }
+}
+
+@keyframes orig-fade {
+  0% { opacity:1; transform: none; }
+  85% { opacity:0.2; transform: translateY(0); }
+  100% { opacity:0; transform: translateY(-2px); }
+}
+
+@keyframes final-show {
+  0% { opacity:0; transform: translateY(2px); }
+  85% { opacity:0; }
+  100% { opacity:1; transform: translateY(0); }
+}
+
+/* small accessibility / layout tweaks */
+.project-link .orig,
+.project-link .final {
+  display:inline-block;
+  min-width:1ch;
 }
