@@ -1,20 +1,49 @@
 /* Global font and small overrides (Helvetical/Helvetica as requested) */
 :root { --bg: #071021; --card: #0b1220; --accent: #38bdf8; --muted: #9aa4b2; }
 
-/* set Verona Serial Medium as the global font (fallbacks provided) */
-html, body { font-family: "verona-serial-medium", "Helvetica Neue", Helvetica, Arial, sans-serif; }
-
-/* link base color and smooth purple highlight on hover/focus */
-a {
-  color: #d1d5db;               /* light gray */
-  text-decoration: none;
-  transition: color .18s ease, opacity .18s ease, transform .18s ease;
+/* Ensure the system-installed Verona font is used when available.
+   The local() sources attempt common name variations. */
+@font-face {
+  font-family: "Verona-Serial-Medium";
+  src: local("verona-serial-medium"), local("Verona Serial Medium"), local("VeronaSerial-Medium");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
 }
-a:hover,
-a:focus {
-  color: #c084fc !important;    /* light purple on hover */
+
+/* Global font: use Verona if available, otherwise fall back */
+html, body {
+  font-family: "Verona-Serial-Medium", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* Make headings bold and keep them centered visuals consistent */
+h1, h2, h3, h4 {
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Links: light gray by default, purple on hover with smooth transition */
+a {
+  color: #d1d5db;
+  text-decoration: none;
+  transition: color .18s ease, transform .18s ease;
+}
+a:hover, a:focus {
+  color: #c084fc !important;
   outline: none;
 }
 
-/* Optional small tweaks retained */
-.hero { --hero-reserved: 0; 
+/* Social list spacing and centered layout */
+.socials {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Ensure project cards are centered within their column */
+article {
+  text-align: center;
+}
+
+/* preserve any existing reserved rules */
+.hero { --hero-reserved: 0; }
