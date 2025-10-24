@@ -1,5 +1,5 @@
-// quick JS-based "random chars then show final word" hover effect
-(function () {
+// Wait for DOM before attaching handlers
+document.addEventListener('DOMContentLoaded', () => {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()[]{}<>/\\|';
   const links = document.querySelectorAll('.project-link');
 
@@ -18,41 +18,33 @@
     }
 
     function start() {
-      clear();
+      clearTimers();
       const len = Math.max(1, finalText.length);
       intervalId = setInterval(() => {
-        // show quickly-changing random chars of same length as final
         origEl.textContent = randomString(len);
       }, step);
 
       timeoutId = setTimeout(() => {
-        clearInterval(intervalId);
-        intervalId = null;
-        // final reveal: show the final word
+        clearTimers();
         origEl.textContent = finalText;
       }, duration);
     }
 
-    function clear() {
+    function clearTimers() {
       if (intervalId) { clearInterval(intervalId); intervalId = null; }
       if (timeoutId) { clearTimeout(timeoutId); timeoutId = null; }
     }
 
     link.addEventListener('mouseenter', start);
-    link.addEventListener('focus', start); // keyboard accessibility
+    link.addEventListener('focus', start);
 
     link.addEventListener('mouseleave', () => {
-      // if animation still running, stop and set final immediately
-      if (intervalId || timeoutId) {
-        clear();
-        origEl.textContent = finalText;
-      }
+      clearTimers();
+      origEl.textContent = finalText;
     });
     link.addEventListener('blur', () => {
-      if (intervalId || timeoutId) {
-        clear();
-        origEl.textContent = finalText;
-      }
+      clearTimers();
+      origEl.textContent = finalText;
     });
   });
-})();
+});
