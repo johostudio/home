@@ -18,6 +18,7 @@ html, body {
   font-family: "Verona-Serial-Medium", "Helvetica Neue", Helvetica, Arial, sans-serif;
   background: var(--bg);
   color: var(--text);
+  letter-spacing: -0.1rem; /* all text above set to -0.1rem */
 }
 
 /* Header title: bold + tightened spacing (-0.15rem) */
@@ -50,6 +51,8 @@ a:hover, a:focus {
   cursor: pointer;
   color: inherit;
   overflow: visible;
+  font-size: 0.95rem;
+  padding: 0.2rem 0.5rem;
 }
 
 /* base layers */
