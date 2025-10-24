@@ -18,7 +18,7 @@ html, body {
 /* Header title: bold + tightened spacing (-0.15rem) */
 header h1 {
   font-weight: 700;
-  letter-spacing: -0.15rem;
+  letter-spacing: -0.2rem;
 }
 
 /* Small titles (gallery/resume) opacity handled in index.html via utility class */
@@ -147,4 +147,19 @@ a:hover, a:focus {
 .project-link .final {
   display:inline-block;
   min-width:1ch;
+}
+
+/* remove any visible border/outline from project cards/headers */
+#projects article,
+#projects article * {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* make gallery / resume small titles slightly spaced (0.1rem) */
+header .mt-2 a,
+header .mt-2 a:link,
+header .mt-2 a:visited {
+  letter-spacing: 0.1rem;
 }
