@@ -47,3 +47,9 @@ article {
 
 /* preserve any existing reserved rules */
 .hero { --hero-reserved: 0; }
+
+/* Title-specific tight letter-spacing (reduces spacing for the main site title) */
+header h1 {
+  /* large negative spacing requested: approx -120 units -> use -1.2rem */
+  letter-spacing: -1.2rem;
+}
