@@ -164,4 +164,34 @@ a:hover, a:focus {
   opacity: 0.85;
 }
 
-/* ensure glitch reads the data-text set on the .glitch element (no change needed if already present) */
+/* Disable old CSS-based glitch animations and ensure centered behavior */
+.project-link,
+.project-link * {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* hide previous .glitch/.final layers so JS controls the text */
+.project-link .glitch,
+.project-link .final {
+  display: none !important;
+}
+
+/* ensure the visible element is centered and stable width */
+.project-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* the element we overwrite during animation */
+.project-link .orig {
+  display: inline-block;
+  white-space: nowrap;
+  text-align: center;
+  /* width will be set by JS to avoid layout shift */
+  min-width: 0;
+  box-sizing: content-box;
+  vertical-align: middle;
+}
