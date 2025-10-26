@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>About — joho's studio</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles/tailwind.css">
+</head>
+<body class="min-h-screen bg-[#071021] text-[#e6eef6]">
+
+  <a href="index.html" class="back-btn">← back</a>
+
+  <main class="min-h-screen flex items-start justify-center pt-28 px-6">
+    <section class="max-w-3xl w-full">
+      <h1 class="text-2xl font-bold mb-4 text-center">about</h1>
+
+      <!-- Editable area: edit the text directly here -->
+      <div
+        id="about-edit"
+        contenteditable="true"
+        spellcheck="true"
+        class="prose max-w-none p-6 rounded-md bg-[#0b1220] text-[#c084fc] focus:outline-none"
+        aria-label="About me editor"
+      >
+        <!-- Replace this placeholder text with your about content. -->
+        <p>tbd — edit this text to write your about me content.</p>
+      </div>
+
+      <!-- optional save to localStorage (keeps edits in browser) -->
+      <div class="mt-4 flex gap-3 justify-center">
+        <button id="saveAbout" class="px-4 py-2 rounded bg-purple-300 text-[#071022]">Save (local)</button>
+        <button id="resetAbout" class="px-4 py-2 rounded bg-gray-700 text-[#c084fc]">Reset</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // simple local save so edits persist in your browser
+    const editor = document.getElementById('about-edit');
+    const saveBtn = document.getElementById('saveAbout');
+    const resetBtn = document.getElementById('resetAbout');
+    const storageKey = 'joho_about_content';
+
+    // load saved content
+    const saved = localStorage.getItem(storageKey);
+    if (saved) editor.innerHTML = saved;
+
+    saveBtn.addEventListener('click', () => {
+      localStorage.setItem(storageKey, editor.innerHTML);
+      saveBtn.textContent = 'Saved';
+      setTimeout(() => saveBtn.textContent = 'Save (local)', 1200);
+    });
+
+    resetBtn.addEventListener('click', () => {
+      localStorage.removeItem(storageKey);
+      editor.innerHTML = '<p>tbd — edit this text to write your about me content.</p>';
+    });
+  </script>
+</body>
+</html>
