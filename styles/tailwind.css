@@ -198,14 +198,24 @@ a:hover, a:focus {
   vertical-align: middle;
 }
 
-/* project title links (film/minifilm/autumn) — hover color change */
+/* project title link colours */
 .project-title-link {
-  color: var(--text);
+  text-decoration: none;
   transition: color .18s ease, opacity .12s ease;
-  opacity: 0.95;
 }
-.project-title-link:hover,
-.project-title-link:focus {
-  color: #e9d7ff; /* brighter purple on hover */
-  opacity: 1;
+.project-title-link.purple {
+  color: var(--text); /* existing purple variable */
 }
+.project-title-link.purple:hover,
+.project-title-link.purple:focus {
+  color: #e9d7ff;
+}
+.project-title-link.white {
+  color: #ffffff;
+}
+.project-title-link.white:hover,
+.project-title-link.white:focus {
+  color: #ffffffcc;
+}
+/* ensure number header remains non-clickable but interactive for glitch script */
+.project-link { cursor: pointer; }
