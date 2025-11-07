@@ -4,6 +4,8 @@
   --card: #0b1220;
   --text: #c084fc;     /* light purple for all text */
   --muted: #9aa4b2;
+  --page-transition: 340ms;
+  --page-ease: cubic-bezier(.2,.9,.3,1);
 }
 
 /* font-face / global font rules (existing) */
@@ -219,3 +221,37 @@ a:hover, a:focus {
 }
 /* ensure number header remains non-clickable but interactive for glitch script */
 .project-link { cursor: pointer; }
+
+/* page entrance (on load) */
+body.page-enter {
+  opacity: 0;
+  transform: translateY(6px) scale(0.999);
+}
+body.page-enter.page-enter-active {
+  transition: opacity var(--page-transition) var(--page-ease), transform var(--page-transition) var(--page-ease);
+  opacity: 1;
+  transform: none;
+}
+
+/* page exit (on link click) */
+body.page-exit {
+  opacity: 1;
+  transform: none;
+}
+body.page-exit.page-exit-active {
+  transition: opacity var(--page-transition) var(--page-ease), transform var(--page-transition) var(--page-ease);
+  opacity: 0;
+  transform: translateY(-6px) scale(0.998);
+}
+
+/* reduce motion for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  body.page-enter,
+  body.page-enter.page-enter-active,
+  body.page-exit,
+  body.page-exit.page-exit-active {
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
