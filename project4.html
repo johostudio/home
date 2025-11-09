@@ -15,6 +15,60 @@
     <p class="mb-4 text-white">stories,colours,emotions.</p>
     <a class="project-title-link purple" href="https://www.youtube.com/watch?v=5nAU2YZQn8I&list=PL0M8V3X91reFqUyjuABldKP-G9F4fj0BY&pp=gAQB" target="_blank" rel="noopener">youtube</a>
   </main>
+  <!-- APPEND BELOW: postcards gallery (one view at a time, scroll-snap) -->
+  <section class="postcards-wrap bg-[#0b1220] rounded-lg p-4 mt-6">
+    <h2 class="text-xl font-semibold mb-4 text-center text-white">postcards</h2>
+
+    <div class="postcards-container" tabindex="0" aria-label="Postcards video gallery">
+      <!-- Postcard A -->
+      <article class="postcard">
+        <div class="postcard-inner">
+          <iframe
+            src="https://www.youtube.com/embed/5nAU2YZQn8I?rel=0"
+            title="minifilm — video 1"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+            loading="lazy"
+          ></iframe>
+          <div class="postcard-caption mt-4 text-white text-center">minifilm — Watch on YouTube</div>
+        </div>
+      </article>
+
+      <!-- Postcard B (replace VIDEO_ID_B) -->
+      <article class="postcard">
+        <div class="postcard-inner">
+          <iframe
+            src="https://www.youtube.com/embed/VIDEO_ID_B?rel=0"
+            title="postcard — video 2"
+            frameborder="0"
+            allow="encrypted-media"
+            allowfullscreen
+            loading="lazy"
+          ></iframe>
+          <div class="postcard-caption mt-4 text-white text-center">postcard — replace with actual video</div>
+        </div>
+      </article>
+
+      <!-- Postcard C (replace VIDEO_ID_C) -->
+      <article class="postcard">
+        <div class="postcard-inner">
+          <iframe
+            src="https://www.youtube.com/embed/VIDEO_ID_C?rel=0"
+            title="postcard — video 3"
+            frameborder="0"
+            allow="encrypted-media"
+            allowfullscreen
+            loading="lazy"
+          ></iframe>
+          <div class="postcard-caption mt-4 text-white text-center">postcard — replace with actual video</div>
+        </div>
+      </article>
+
+      <!-- Add more postcards as needed -->
+    </div>
+  </section>
+  <!-- end append -->
   <script src="scripts/page-transitions.js"></script>
 </body>
 </html>
