@@ -515,8 +515,36 @@ main, .back-btn { position: relative; z-index: 2; }
   display: none !important;
 }
 
-/* keep a subtle drag blur but reduced intensity */
-#postcards-carousel.dragging .pc-frame-wrap iframe {
-  filter: blur(2px) contrast(0.98);
-  transition: filter 80ms linear;
+/* Ensure preview is hidden immediately and player shows with no ghost */
+.pc-preview[hidden] { display: none !important; }
+.pc-player { display: block !important; opacity: 1 !important; transform: none !important; transition: none !important; pointer-events: auto !important; }
+
+/* Prevent any CSS rule from making iframe semi-transparent */
+.pc-frame-wrap iframe,
+.pc-next img,
+.pc-preview img { opacity: 1 !important; }
+
+/* make the card compact / horizontally narrow (phone-first) */
+.postcards-wrap { max-width: 420px; margin: 0.5rem auto; align-self: center; }
+.pc-frame-wrap iframe {
+  width: 100%;
+  max-width: 420px;    /* compact width */
+  height: 220px;       /* adjust height to match compact width */
+  border-radius: 8px;
+  display: block;
+  background: #000;
 }
+
+/* slightly larger on wider screens */
+@media(min-width:640px) {
+  .postcards-wrap { max-width: 560px; }
+  .pc-frame-wrap iframe { max-width: 560px; height: 260px; }
+}
+@media(min-width:1024px) {
+  .postcards-wrap { max-width: 720px; }
+  .pc-frame-wrap iframe { max-width: 720px; height: 320px; }
+}
+
+/* keep next-preview overlap but ensure it does not cover header */
+.pc-next { margin-top: -22px; pointer-events: none; z-index: 1; }
+main, .back-btn { position: relative; z-index: 3; } /* keep header/back above gallery */

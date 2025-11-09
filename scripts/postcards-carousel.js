@@ -30,22 +30,19 @@
 
   // show player with CSS animation
   function showPlayer(startAutoplay = false) {
-    // hide preview immediately and show player immediately to avoid ghost/fade
+    // show player immediately to avoid any ghost/opacity artifacts
     previewBtn.hidden = true;
     playerWrap.hidden = false;
-    root.classList.add('pc-active');
-    // set iframe src immediately (no delayed assignment)
     iframe.src = ytEmbed(videoIds[idx], startAutoplay ? 1 : 0);
     iframe.focus?.();
   }
 
   // revert to preview with animation
   function showPreview() {
-    // revert immediately: clear iframe and show preview without delay
+    // revert immediately
     iframe.src = '';
     playerWrap.hidden = true;
     previewBtn.hidden = false;
-    root.classList.remove('pc-active');
     updatePreviewImages();
   }
 
