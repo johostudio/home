@@ -15,88 +15,43 @@
     <p class="mb-4 text-white">stories,colours,emotions.</p>
     <a class="project-title-link purple" href="https://www.youtube.com/watch?v=5nAU2YZQn8I&list=PL0M8V3X91reFqUyjuABldKP-G9F4fj0BY&pp=gAQB" target="_blank" rel="noopener">youtube</a>
   </main>
-    <!-- postcards gallery - placed directly below your existing headers (no header text changed) -->
-    <section class="postcards-wrap bg-[#0b1220] rounded-lg p-3 mt-4" aria-labelledby="postcards-heading">
-      <h2 id="postcards-heading" class="text-lg font-medium sr-only">postcards</h2>
 
-      <div class="postcards-container" tabindex="0" aria-label="Postcards video gallery">
-        <!-- 001 -->
-        <article class="postcard">
-          <div class="postcard-inner">
-            <iframe
-              src="https://www.youtube.com/embed/m25fHW8T_Xg"
-              title="pacific waves"
-              frameborder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen
-              loading="lazy"
-            ></iframe>
-            <div class="postcard-caption mt-3 text-white text-center">something about waves</div>
-          </div>
-        </article>
+  <!-- ADD: postcards carousel (placed directly below your header; header text unchanged) -->
+  <section id="postcards-carousel" class="postcards-wrap w-full max-w-3xl mt-6">
+    <h2 class="text-lg font-medium mb-3 sr-only">postcards</h2>
 
-        <!-- 002 -->
-        <article class="postcard">
-          <div class="postcard-inner">
-            <iframe
-              src="https://www.youtube.com/embed/ycI3Kf99oBw"
-              title="hoonah"
-              frameborder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen
-              loading="lazy"
-            ></iframe>
-            <div class="postcard-caption mt-3 text-white text-center">trip in hoonah</div>
-          </div>
-        </article>
+    <div class="pc-root bg-[#0b1220] rounded p-4">
+      <!-- Preview rectangle (visible by default) -->
+      <button id="pc-preview" class="pc-preview w-full rounded overflow-hidden focus:outline-none" aria-label="Open postcards gallery">
+        <img id="pc-preview-img" src="https://img.youtube.com/vi/m25fHW8T_Xg/hqdefault.jpg" alt="postcard preview" class="w-full h-36 object-cover md:h-44" />
+      </button>
 
-        <!-- 003 -->
-        <article class="postcard">
-          <div class="postcard-inner">
-            <iframe
-              src="https://www.youtube.com/embed/F9rYDgfECxA"
-              title="juneau"
-              frameborder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen
-              loading="lazy"
-            ></iframe>
-            <div class="postcard-caption mt-3 text-white text-center">a walk in juneau</div>
-          </div>
-        </article>
+      <!-- Player area (hidden until preview is activated) -->
+      <div id="pc-player" class="pc-player mt-3" hidden>
+        <div class="pc-frame-wrap relative">
+          <iframe id="pc-iframe"
+            src=""
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+            title="postcard player"
+            class="w-full h-36 md:h-44 rounded bg-black"></iframe>
+        </div>
 
-        <!-- 004 -->
-        <article class="postcard">
-          <div class="postcard-inner">
-            <iframe
-              src="https://www.youtube.com/embed/5nAU2YZQn8I"
-              title="yeonseul"
-              frameborder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen
-              loading="lazy"
-            ></iframe>
-            <div class="postcard-caption mt-3 text-white text-center">this one is about lights</div>
-          </div>
-        </article>
-
-        <!-- 005 -->
-        <article class="postcard">
-          <div class="postcard-inner">
-            <iframe
-              src="https://www.youtube.com/embed/Ue9InrCvprk"
-              title="day trip"
-              frameborder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen
-              loading="lazy"
-            ></iframe>
-            <div class="postcard-caption mt-3 text-white text-center">ocean views</div>
-          </div>
-        </article>
+        <!-- faint overlapped preview of next item -->
+        <div id="pc-next-preview" class="pc-next mt-[-28px] pointer-events-none flex justify-center">
+          <img id="pc-next-img" src="https://img.youtube.com/vi/ycI3Kf99oBw/hqdefault.jpg" alt="next preview" class="w-11/12 max-w-sm opacity-50 rounded shadow-lg" />
+        </div>
       </div>
-    </section>
-  <!-- end append -->
+
+      <!-- Slider control: drag to change video (mobile + desktop) -->
+      <div class="pc-slider mt-3 flex justify-center items-center">
+        <input id="pc-range" type="range" min="0" max="4" value="0" step="1" aria-label="Postcards slider" class="w-64 md:w-80">
+      </div>
+    </div>
+  </section>
+
+  <script src="scripts/postcards-carousel.js"></script>
   <script src="scripts/page-transitions.js"></script>
 </body>
 </html>

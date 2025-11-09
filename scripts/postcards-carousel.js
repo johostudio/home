@@ -14,6 +14,7 @@
   const iframe = document.getElementById('pc-iframe');
   const nextImg = document.getElementById('pc-next-img');
   const root = document.getElementById('postcards-carousel');
+  const range = document.getElementById('pc-range');
 
   function ytEmbed(id, autoplay = 0) {
     return `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&showinfo=0&autoplay=${autoplay}`;
@@ -24,6 +25,7 @@
     const nextId = videoIds[(idx + 1) % videoIds.length];
     nextImg.src = `https://img.youtube.com/vi/${nextId}/hqdefault.jpg`;
     nextImg.alt = 'next preview';
+    if (range) range.value = idx;
   }
 
   // show player with CSS animation
@@ -32,11 +34,11 @@
     root.classList.add('pc-active');
     // ensure player exists and will be visible after transition
     playerWrap.hidden = false;
-    // after a short delay (match CSS transition ~280ms), set iframe src and hide the preview element
+    // set iframe after small delay for nicer transition
     setTimeout(() => {
       iframe.src = ytEmbed(videoIds[idx], startAutoplay ? 1 : 0);
       previewBtn.hidden = true;
-    }, 300);
+    }, 180);
   }
 
   // revert to preview with animation
@@ -49,13 +51,13 @@
     setTimeout(() => {
       iframe.src = '';
       playerWrap.hidden = true;
-    }, 300);
+    }, 200);
     updatePreviewImages();
   }
 
-  function advance(n = 1) {
-    idx = (idx + n + videoIds.length) % videoIds.length;
-    // if player is active, update iframe immediately; else update preview image
+  // change index via slider
+  function setIndex(n) {
+    idx = (n + videoIds.length) % videoIds.length;
     if (root.classList.contains('pc-active')) {
       iframe.src = ytEmbed(videoIds[idx], 0);
     } else {
@@ -68,21 +70,32 @@
     showPlayer(true);
   });
 
-  playerWrap.addEventListener('click', () => advance(1));
+  // range input change -> update card; dragging adds blur class
+  if (range) {
+    range.max = videoIds.length - 1;
+    range.addEventListener('input', (e) => {
+      const v = parseInt(e.target.value, 10) || 0;
+      setIndex(v);
+    });
 
-  root.addEventListener('wheel', (e) => {
-    if (Math.abs(e.deltaY) < 10) return;
-    e.preventDefault();
-    if (e.deltaY > 0) advance(1);
-    else advance(-1);
-  }, { passive: false });
+    let dragging = false;
+    const startDrag = () => { dragging = true; root.classList.add('dragging'); };
+    const endDrag = () => { dragging = false; root.classList.remove('dragging'); };
 
+    range.addEventListener('pointerdown', startDrag, { passive: true });
+    window.addEventListener('pointerup', endDrag);
+    range.addEventListener('touchstart', startDrag, { passive: true });
+    window.addEventListener('touchend', endDrag);
+  }
+
+  // keyboard navigation still works
   root.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') { advance(1); e.preventDefault(); }
-    if (e.key === 'ArrowLeft') { advance(-1); e.preventDefault(); }
+    if (e.key === 'ArrowRight') { setIndex(idx + 1); e.preventDefault(); }
+    if (e.key === 'ArrowLeft') { setIndex(idx - 1); e.preventDefault(); }
     if (e.key === 'Escape') { showPreview(); }
   });
 
+  // small swipe to change when player active
   let touchStartY = null;
   root.addEventListener('touchstart', (e) => {
     if (e.touches && e.touches[0]) touchStartY = e.touches[0].clientY;
@@ -93,14 +106,15 @@
     if (endY == null) { touchStartY = null; return; }
     const dy = touchStartY - endY;
     if (Math.abs(dy) > 40) {
-      if (dy > 0) advance(1);
-      else advance(-1);
+      if (dy > 0) setIndex(idx + 1);
+      else setIndex(idx - 1);
     }
     touchStartY = null;
   }, { passive: true });
 
   // init
   updatePreviewImages();
-  // expose small API for debugging if needed
-  window._pc = { showPlayer, showPreview, advance };
+  if (range) range.value = idx;
+
+  window._pc = { showPlayer, showPreview, setIndex };
 })();
