@@ -30,28 +30,22 @@
 
   // show player with CSS animation
   function showPlayer(startAutoplay = false) {
-    // add active class to trigger CSS transitions
-    root.classList.add('pc-active');
-    // ensure player exists and will be visible after transition
+    // hide preview immediately and show player immediately to avoid ghost/fade
+    previewBtn.hidden = true;
     playerWrap.hidden = false;
-    // set iframe after small delay for nicer transition
-    setTimeout(() => {
-      iframe.src = ytEmbed(videoIds[idx], startAutoplay ? 1 : 0);
-      previewBtn.hidden = true;
-    }, 180);
+    root.classList.add('pc-active');
+    // set iframe src immediately (no delayed assignment)
+    iframe.src = ytEmbed(videoIds[idx], startAutoplay ? 1 : 0);
+    iframe.focus?.();
   }
 
   // revert to preview with animation
   function showPreview() {
-    // un-hide preview for transition
+    // revert immediately: clear iframe and show preview without delay
+    iframe.src = '';
+    playerWrap.hidden = true;
     previewBtn.hidden = false;
-    // remove active class to animate back
     root.classList.remove('pc-active');
-    // clear iframe after transition completes
-    setTimeout(() => {
-      iframe.src = '';
-      playerWrap.hidden = true;
-    }, 200);
     updatePreviewImages();
   }
 
