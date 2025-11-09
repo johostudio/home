@@ -346,11 +346,117 @@ body.page-exit.page-exit-active {
 .postcards-wrap:hover .postcards-container::after,
 .postcards-wrap:focus-within .postcards-container::after { opacity: 0; }
 
+/* Postcards carousel: compact preview -> player on hover/tap; single visible video + overlapped next preview */
+.postcards-wrap { align-self: center; }
+
+.pc-root { width:100%; max-width:960px; margin:0 auto; }
+
+/* preview button rectangle */
+.pc-preview { display:block; background:#000; cursor:pointer; }
+.pc-preview img { display:block; }
+
+/* player area */
+.pc-player { position:relative; }
+
+/* iframe sizing responsive and compact (phone-first) */
+.pc-frame-wrap iframe { width:100%; height:180px; border-radius:8px; display:block; }
+@media(min-width:640px){ .pc-frame-wrap iframe{ height:260px; } }
+@media(min-width:1024px){ .pc-frame-wrap iframe{ height:360px; } }
+
+/* next preview: slightly overlapping bottom of player, low opacity */
+.pc-next { margin-top:-44px; display:flex; justify-content:center; pointer-events:none; }
+.pc-next img { opacity:0.48; transform:translateY(8px); border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.4); }
+
+/* collapsed state: preview shown, player hidden (controlled by JS) */
+
+/* focus/hover affordance: when preview active (keyboard) show hover state */
+.pc-preview:focus { outline:2px solid rgba(192,132,252,0.6); }
+
+/* small animation */
+.pc-frame-wrap, .pc-next img, .pc-preview img { transition: transform .28s cubic-bezier(.2,.9,.3,1), opacity .22s; }
+
 /* reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .postcards-container,
-  .postcard iframe { transition: none !important; scroll-behavior: auto; }
+  .pc-frame-wrap, .pc-next img, .pc-preview img { transition: none !important; }
 }
 
-/* ensure the main area stays centered above the gallery (no HTML changes required) */
-main.max-w-3xl { align-self: center; }
+/* postcards: ensure header visible, small preview on phones, animated transitions */
+#postcards-carousel h2.sr-only {
+  /* reveal the postcards header without changing its text */
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 0 0.5rem 0;
+  clip: auto !important;
+  clip-path: none !important;
+  overflow: visible !important;
+  white-space: normal !important;
+  opacity: 1;
+  color: #c084fc;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* container spacing so gallery sits directly below your main header */
+.postcards-wrap {
+  display: block !important;
+  width: 100%;
+  max-width: 640px; /* keep narrow for phones */
+  margin: 0.5rem auto 0;
+  clear: both;
+  align-self: center;
+  z-index: 0;
+}
+
+/* root wrapper */
+.pc-root { position: relative; width:100%; }
+
+/* preview rectangle: small on phones */
+.pc-preview { display:block; background:#000; cursor:pointer; border-radius:8px; overflow:hidden; }
+.pc-preview img {
+  display:block;
+  width:100%;
+  height:110px;            /* compact mobile preview */
+  object-fit:cover;
+  transition: transform .28s cubic-bezier(.2,.9,.3,1), opacity .28s;
+}
+@media(min-width:640px) {
+  .postcards-wrap { max-width: 820px; }
+  .pc-preview img { height:160px; }
+}
+@media(min-width:1024px) {
+  .postcards-wrap { max-width: 960px; }
+  .pc-preview img { height:220px; }
+}
+
+/* player: hidden until active; starts slightly translated and transparent */
+.pc-player { opacity:0; transform: translateY(6px); transition: opacity .28s, transform .28s; pointer-events:none; }
+.pc-frame-wrap iframe { width:100%; height:180px; border-radius:8px; display:block; }
+@media(min-width:640px){ .pc-frame-wrap iframe{ height:260px; } }
+@media(min-width:1024px){ .pc-frame-wrap iframe{ height:360px; } }
+
+/* next preview: overlap under the player, low opacity, smaller on phone */
+.pc-next { margin-top:-28px; display:flex; justify-content:center; pointer-events:none; }
+.pc-next img {
+  opacity:0.44;
+  transform: translateY(8px);
+  border-radius:8px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.35);
+  width:92%;
+  max-width:420px;
+}
+
+/* ACTIVE state: preview fades out and player fades in */
+#postcards-carousel.pc-active .pc-preview img { opacity:0; transform: scale(0.98) translateY(-6px); }
+#postcards-carousel.pc-active .pc-player { opacity:1; transform:none; pointer-events:auto; }
+#postcards-carousel.pc-active .pc-next img { opacity:0.5; transform: translateY(2px) scale(0.995); }
+
+/* ensure overlap does not cover the main header: give gallery top margin and non-negative stacking */
+main, .back-btn { position: relative; z-index: 2; } /* keep header/top elements above gallery overlap */
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .pc-preview img,
+  .pc-player,
+  .pc-next img { transition: none !important; transform: none !important; }
+}
