@@ -257,22 +257,34 @@ body.page-exit.page-exit-active {
 }
 
 /* Postcards gallery: vertical scroll-snap showing one item at a time */
-.postcards-wrap { overflow: visible; }
+.postcards-wrap {
+  /* force full-row in a flex row layout and appear after main */
+  flex-basis: 100%;
+  order: 99;
+  align-self: stretch;
+  width: 100%;
+  clear: both;
+  margin-top: 1.5rem;
+}
 
 .postcards-container {
-  height: calc(100vh - 220px); /* adjust if header/back-btn sizes differ */
+  display: flex;
+  flex-direction: column; /* stack children vertically */
+  gap: 1rem;
+  height: calc(100vh - 220px);
   max-height: 80vh;
   overflow-y: auto;
   scroll-snap-type: y mandatory;
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
-  display: block;
   padding: 8px 6px;
+  box-sizing: border-box;
 }
 
-/* each postcard takes a viewport-like height so only one is visible */
+/* each postcard fills the container width and snaps vertically */
 .postcard {
   scroll-snap-align: start;
+  width: 100%;
   min-height: calc(100vh - 300px);
   display: flex;
   align-items: center;
@@ -310,3 +322,6 @@ body.page-exit.page-exit-active {
 @media (prefers-reduced-motion: reduce) {
   .postcards-container { scroll-behavior: auto; }
 }
+
+/* ensure the main area stays centered above the gallery (no HTML changes required) */
+main.max-w-3xl { align-self: center; }
