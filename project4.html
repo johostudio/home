@@ -21,9 +21,10 @@
     <h2 class="text-lg font-medium mb-3 sr-only">postcards</h2>
 
     <div class="pc-root bg-[#0b1220] rounded p-4">
-      <!-- Compact preview (uses small/centered thumbnail) -->
+      <!-- Compact preview (replaced: show banner-style preview instead of tiny compact card) -->
       <button id="pc-preview" class="pc-preview w-full rounded overflow-hidden focus:outline-none" aria-label="Open postcards gallery">
-        <img id="pc-preview-img" src="https://img.youtube.com/vi/m25fHW8T_Xg/hqdefault.jpg" alt="postcard preview" class="pc-compact-img mx-auto rounded shadow-lg" />
+        <!-- banner-style preview (larger, full-width within the gallery container) -->
+        <img id="pc-preview-img" src="https://img.youtube.com/vi/m25fHW8T_Xg/maxresdefault.jpg" alt="postcard banner preview" class="pc-banner-img w-full rounded shadow-lg object-cover" />
       </button>
 
       <!-- Player area (hidden until preview is activated) — constrained to same compact size -->
