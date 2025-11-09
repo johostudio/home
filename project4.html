@@ -16,40 +16,41 @@
     <a class="project-title-link purple" href="https://www.youtube.com/watch?v=5nAU2YZQn8I&list=PL0M8V3X91reFqUyjuABldKP-G9F4fj0BY&pp=gAQB" target="_blank" rel="noopener">youtube</a>
   </main>
 
-  <!-- ADD: postcards carousel (placed directly below your header; header text unchanged) -->
+  <!-- postcards carousel: compact preview (bottom-track style) -> replaces with compact iframe on click -->
   <section id="postcards-carousel" class="postcards-wrap w-full max-w-3xl mt-6">
     <h2 class="text-lg font-medium mb-3 sr-only">postcards</h2>
 
     <div class="pc-root bg-[#0b1220] rounded p-4">
-      <!-- Preview rectangle (visible by default) -->
+      <!-- Compact preview (uses small/centered thumbnail) -->
       <button id="pc-preview" class="pc-preview w-full rounded overflow-hidden focus:outline-none" aria-label="Open postcards gallery">
-        <img id="pc-preview-img" src="https://img.youtube.com/vi/m25fHW8T_Xg/hqdefault.jpg" alt="postcard preview" class="w-full h-36 object-cover md:h-44" />
+        <img id="pc-preview-img" src="https://img.youtube.com/vi/m25fHW8T_Xg/hqdefault.jpg" alt="postcard preview" class="pc-compact-img mx-auto rounded shadow-lg" />
       </button>
 
-      <!-- Player area (hidden until preview is activated) -->
+      <!-- Player area (hidden until preview is activated) — constrained to same compact size -->
       <div id="pc-player" class="pc-player mt-3" hidden>
-        <div class="pc-frame-wrap relative">
+        <div class="pc-frame-wrap relative mx-auto">
           <iframe id="pc-iframe"
             src=""
             frameborder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowfullscreen
             title="postcard player"
-            class="w-full h-36 md:h-44 rounded bg-black"></iframe>
+            class="pc-iframe rounded bg-black"></iframe>
         </div>
 
-        <!-- faint overlapped preview of next item -->
-        <div id="pc-next-preview" class="pc-next mt-[-28px] pointer-events-none flex justify-center">
-          <img id="pc-next-img" src="https://img.youtube.com/vi/ycI3Kf99oBw/hqdefault.jpg" alt="next preview" class="w-11/12 max-w-sm opacity-50 rounded shadow-lg" />
+        <!-- small overlapped next-preview under the active card -->
+        <div id="pc-next-preview" class="pc-next mt-[-20px] pointer-events-none flex justify-center">
+          <img id="pc-next-img" src="https://img.youtube.com/vi/ycI3Kf99oBw/hqdefault.jpg" alt="next preview" class="w-4/5 max-w-sm opacity-60 rounded shadow-lg" />
         </div>
       </div>
 
-      <!-- Slider control: drag to change video (mobile + desktop) -->
+      <!-- small slider to pick video -->
       <div class="pc-slider mt-3 flex justify-center items-center">
-        <input id="pc-range" type="range" min="0" max="4" value="0" step="1" aria-label="Postcards slider" class="w-64 md:w-80">
+        <input id="pc-range" type="range" min="0" max="4" value="0" step="1" aria-label="Postcards slider" class="w-56 md:w-64">
       </div>
     </div>
   </section>
+  <!-- end postcards -->
 
   <script src="scripts/postcards-carousel.js"></script>
   <script src="scripts/page-transitions.js"></script>

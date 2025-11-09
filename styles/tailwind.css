@@ -548,3 +548,55 @@ main, .back-btn { position: relative; z-index: 2; }
 /* keep next-preview overlap but ensure it does not cover header */
 .pc-next { margin-top: -22px; pointer-events: none; z-index: 1; }
 main, .back-btn { position: relative; z-index: 3; } /* keep header/back above gallery */
+
+/* Compact preview look (bottom-track style) and matching iframe size; remove opacity ghosts */
+.postcards-wrap { max-width: 420px; margin: 0.6rem auto; align-self: center; }
+
+/* compact preview image */
+.pc-compact-img {
+  width: 92%;
+  max-width: 400px;
+  height: 120px;
+  object-fit: cover;
+  display: block;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(1,6,12,0.6);
+  transition: transform .16s ease;
+}
+
+/* iframe constrained to exact same compact rectangle */
+.pc-frame-wrap { width: 92%; max-width: 400px; margin: 0 auto; }
+.pc-iframe {
+  width: 100%;
+  height: 120px;
+  border-radius: 12px;
+  display: block;
+  background: #000;
+}
+
+/* slightly taller on medium/desktop */
+@media(min-width:640px){
+  .pc-compact-img, .pc-iframe { height: 160px; max-width: 560px; }
+  .postcards-wrap { max-width: 560px; }
+}
+@media(min-width:1024px){
+  .pc-compact-img, .pc-iframe { height: 220px; max-width: 720px; }
+  .postcards-wrap { max-width: 720px; }
+}
+
+/* ensure preview hides entirely when hidden (no ghost) */
+.pc-preview[hidden] { display: none !important; }
+#pc-player[hidden] { display: none !important; }
+
+/* next-preview visual overlap */
+.pc-next { margin-top: -18px; pointer-events: none; z-index: 1; }
+.pc-next img { width:84%; border-radius:10px; opacity:0.62; transform:translateY(6px); }
+
+/* make postcards header visible and white */
+#postcards-carousel h2.sr-only { position: static !important; clip: auto !important; overflow: visible !important; opacity:1; color:#fff; text-align:center; margin-bottom:.5rem; }
+
+/* remove any site-wide iframe opacity rules (force fully opaque) */
+iframe { opacity: 1 !important; background: #000 !important; }
+
+/* ensure main/back remain above gallery overlap */
+main, .back-btn { position: relative; z-index: 3; }

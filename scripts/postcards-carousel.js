@@ -28,21 +28,37 @@
     if (range) range.value = idx;
   }
 
+  function hideOtherIframes() {
+    // hide any unrelated large iframe that may be present elsewhere on the page
+    document.querySelectorAll('iframe').forEach(f => {
+      if (f.id !== 'pc-iframe') {
+        f.style.display = 'none';
+      }
+    });
+  }
+
   // show player with CSS animation
   function showPlayer(startAutoplay = false) {
-    // show player immediately to avoid any ghost/opacity artifacts
+    // hide preview immediately and show compact player immediately (no ghost transparency)
     previewBtn.hidden = true;
     playerWrap.hidden = false;
+    // hide any other iframes that might be rendering as a banner
+    hideOtherIframes();
+    // set the compact iframe immediately
     iframe.src = ytEmbed(videoIds[idx], startAutoplay ? 1 : 0);
     iframe.focus?.();
   }
 
   // revert to preview with animation
   function showPreview() {
-    // revert immediately
+    // revert instantly to compact preview image
     iframe.src = '';
     playerWrap.hidden = true;
     previewBtn.hidden = false;
+    // restore any previously hidden iframes (optional — here we simply clear inline display)
+    document.querySelectorAll('iframe').forEach(f => {
+      if (f.id !== 'pc-iframe') f.style.removeProperty('display');
+    });
     updatePreviewImages();
   }
 
