@@ -151,20 +151,23 @@ a:hover, a:focus {
 
 /* Back button top-left (50% white) */
 .back-btn {
-  position: fixed;
-  top: 1rem;
-  left: 1rem;
-  color: #ffffff;
-  opacity: 0.5;
+  position: fixed !important;
+  top: 1rem !important;
+  left: 1rem !important;
+  z-index: 9999 !important;
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  background: rgba(10,12,16,0.6);
+  color: #c084fc;
+  border-radius: 6px;
   text-decoration: none;
-  font-size: 0.95rem;
-  z-index: 60;
-  transition: opacity .15s ease;
+  font-weight: 500;
+  backdrop-filter: blur(4px);
 }
-.back-btn:hover,
-.back-btn:focus {
-  opacity: 0.85;
-}
+
+/* small responsive tweak so back button doesn't overlap at very small widths */
+@media (max-width: 420px) {
+  .back-btn { top: 0.6rem; left: 0.6rem; padding: 0.2rem 0.5rem; font-size: 0.92rem; }
 
 /* Disable old CSS-based glitch animations and ensure centered behavior */
 .project-link,
