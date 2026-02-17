@@ -1,9 +1,24 @@
 import Image from "next/image";
+import DotGrid from "./components/DotGrid";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
+    <div className="flex min-h-screen items-center justify-center font-sans dark:bg-black relative overflow-hidden">
+      {/* Dot Grid Background */}
+      <div className="fixed inset-0 w-full h-full z-0 bg-black">
+        <DotGrid
+          dotSize={8}
+          gap={32}
+          baseColor="#ffffff"
+          activeColor="#a855f7"
+          proximity={100}
+          shockRadius={170}
+          shockStrength={3}
+          resistance={600}
+          returnDuration={0.3}
+        />
+      </div>
+      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white/95 dark:bg-black/40 backdrop-blur-sm sm:items-start relative z-10">
         <Image
           className="dark:invert"
           src="/next.svg"
