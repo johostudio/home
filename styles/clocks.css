@@ -1,8 +1,19 @@
-/* Dual Clocks - PST (right) & Nanchang (left) */
+/* Dual Clocks - Vancouver (right) & Nanchang (left) */
 .clock-container {
   position: fixed;
   top: 60px;
+  z-index: 40;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  user-select: none;
+}
+.clock-left {
   left: 180px;
+}
+.clock-right {
   right: 180px;
 }
 .clock-label {
