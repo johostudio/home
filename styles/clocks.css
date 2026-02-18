@@ -11,10 +11,10 @@
   user-select: none;
 }
 .clock-left {
-  left: 50px;
+  left: 100px;
 }
 .clock-right {
-  right: 50px;
+  right: 100px;
 }
 .clock-label {
   font-size: 9px;
