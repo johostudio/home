@@ -57,15 +57,37 @@
     var els = document.querySelectorAll(selectors);
     textRects = [];
     for (var i = 0; i < els.length; i++) {
-      var r = els[i].getBoundingClientRect();
-      if (r.width === 0 || r.height === 0) continue;
-      // Small padding around each text element
-      textRects.push({
-        left: r.left - 8,
-        top: r.top - 4,
-        right: r.right + 8,
-        bottom: r.bottom + 4
-      });
+      var el = els[i];
+      // Use getClientRects for tight per-line boxes; fall back to range for block elements
+      var rects = el.getClientRects();
+      if (rects.length === 0) {
+        var r = el.getBoundingClientRect();
+        if (r.width === 0 || r.height === 0) continue;
+        textRects.push({ left: r.left - 4, top: r.top - 2, right: r.right + 4, bottom: r.bottom + 2 });
+        continue;
+      }
+      // For block elements with text, try Range to get tight text bounds
+      if (rects.length === 1 && el.childNodes.length > 0 && el.tagName !== 'INPUT') {
+        try {
+          var range = document.createRange();
+          range.selectNodeContents(el);
+          var rangeRects = range.getClientRects();
+          if (rangeRects.length > 0) {
+            for (var j = 0; j < rangeRects.length; j++) {
+              var rr = rangeRects[j];
+              if (rr.width === 0 || rr.height === 0) continue;
+              textRects.push({ left: rr.left - 4, top: rr.top - 2, right: rr.right + 4, bottom: rr.bottom + 2 });
+            }
+            continue;
+          }
+        } catch (e) { /* fall through */ }
+      }
+      // Use individual client rects (tight per-line)
+      for (var k = 0; k < rects.length; k++) {
+        var cr = rects[k];
+        if (cr.width === 0 || cr.height === 0) continue;
+        textRects.push({ left: cr.left - 4, top: cr.top - 2, right: cr.right + 4, bottom: cr.bottom + 2 });
+      }
     }
   }
 
