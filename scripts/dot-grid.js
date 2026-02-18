@@ -18,7 +18,7 @@
 
   // Cached text element rects (viewport-relative, refreshed on resize/scroll)
   var textRects = [];
-  var textFadeRadius = 50;  // px radius around each text rect where dots dim
+  var textFadeRadius = 15;  // px radius around each text rect where dots dim
   var textDim = 0.25;       // opacity multiplier for dots right on top of text (0 = invisible, 1 = no change)
 
   var config = {

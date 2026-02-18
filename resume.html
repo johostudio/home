@@ -32,8 +32,8 @@
       padding: 10px 16px;
       color: #e6eef6;
       font-family: Helvetica, Arial, sans-serif;
-      font-size: 14px;
-      width: 260px;
+      font-size: 15px;
+      width: 280px;
       outline: none;
       transition: border-color 0.2s;
     }
@@ -45,7 +45,7 @@
     }
     #pw-error {
       color: #f87171;
-      font-size: 13px;
+      font-size: 14px;
       margin-top: 10px;
       opacity: 0;
       transition: opacity 0.2s;
@@ -73,7 +73,7 @@
     }
 
     .resume-section .section-title {
-      font-size: 15px;
+      font-size: 17px;
       font-weight: 700;
       color: #e6eef6;
       margin-bottom: 16px;
@@ -86,7 +86,7 @@
     }
 
     .resume-section .entry .entry-title {
-      font-size: 14px;
+      font-size: 15px;
       color: #e6eef6;
       font-weight: 400;
     }
@@ -99,13 +99,13 @@
     }
 
     .resume-section .entry .entry-meta {
-      font-size: 13px;
+      font-size: 14px;
       color: rgba(255,255,255,0.45);
       margin-top: 4px;
     }
 
     .resume-section .entry .entry-desc {
-      font-size: 13px;
+      font-size: 14px;
       color: rgba(255,255,255,0.5);
       font-style: italic;
       margin-top: 6px;
@@ -114,19 +114,19 @@
 
     /* Hero */
     .resume-hero h1 {
-      font-size: 32px;
+      font-size: 36px;
       font-weight: 700;
       color: #e6eef6;
       margin-bottom: 8px;
     }
     .resume-hero .meta {
-      font-size: 13px;
+      font-size: 14px;
       color: rgba(255,255,255,0.4);
     }
 
     /* About bio */
     .bio-text {
-      font-size: 14px;
+      font-size: 15px;
       color: rgba(255,255,255,0.7);
       line-height: 1.7;
       padding-left: 16px;
@@ -138,11 +138,11 @@
       margin-bottom: 12px;
     }
     .contact-row .label {
-      font-size: 14px;
+      font-size: 15px;
       color: #e6eef6;
     }
     .contact-row .value {
-      font-size: 13px;
+      font-size: 14px;
       color: rgba(255,255,255,0.45);
     }
     .contact-row .value a {
@@ -156,7 +156,7 @@
     /* Skills list */
     .skills-list {
       padding-left: 16px;
-      font-size: 14px;
+      font-size: 15px;
       color: rgba(255,255,255,0.7);
       line-height: 1.8;
     }
@@ -168,7 +168,7 @@
 
   <!-- Password Gate -->
   <div id="password-gate">
-    <p style="font-size:14px; color:rgba(255,255,255,0.5); margin-bottom:16px;">this page is password-protected</p>
+    <p style="font-size:15px; color:rgba(255,255,255,0.5); margin-bottom:16px;">this page is password-protected</p>
     <input type="password" id="pw-input" placeholder="enter password" autocomplete="off" />
     <p id="pw-error">incorrect password</p>
   </div>
@@ -323,16 +323,9 @@
       const error = document.getElementById('pw-error');
       const content = document.getElementById('resume-content');
 
-      // Check if already authenticated this session
-      if (sessionStorage.getItem('resume-auth') === '1') {
-        gate.classList.add('hidden');
-        content.classList.add('unlocked');
-      }
-
       input.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
           if (input.value === PASS) {
-            sessionStorage.setItem('resume-auth', '1');
             gate.classList.add('hidden');
             content.classList.add('unlocked');
           } else {
