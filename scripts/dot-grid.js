@@ -52,8 +52,8 @@
 
   /* ---- text element detection ---- */
   function refreshTextRects() {
-    // Query actual text-bearing elements inside content areas
-    var selectors = '.z-10 h1, .z-10 h2, .z-10 h3, .z-10 p, .z-10 li, .z-10 a, .z-10 small, .z-10 span, .z-10 div[contenteditable]';
+    // Query actual text-bearing elements inside content areas and password gate
+    var selectors = '.z-10 h1, .z-10 h2, .z-10 h3, .z-10 p, .z-10 li, .z-10 a, .z-10 small, .z-10 span, .z-10 div[contenteditable], #password-gate p, #password-gate input';
     var els = document.querySelectorAll(selectors);
     textRects = [];
     for (var i = 0; i < els.length; i++) {
