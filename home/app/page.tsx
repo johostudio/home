@@ -17,15 +17,17 @@ export default function Home() {
       <div className="fixed inset-0 w-full h-full z-0">
         <DotGrid
           dotSize={8}
-          gap={32}
+          gap={12}
           baseColor="#ffffff"
           activeColor="#a855f7"
-          proximity={100}
-          shockRadius={170}
-          shockStrength={3}
-          resistance={600}
-          returnDuration={0.3}
-          opacity={0.3}
+          proximity={140}
+          speedTrigger={30}
+          shockRadius={220}
+          shockStrength={2.5}
+          resistance={200}
+          returnDuration={0.5}
+          opacity={0.025}
+          throttleMs={16}
         />
       </div>
 
@@ -40,10 +42,10 @@ export default function Home() {
           </h1>
 
           <div className="mt-2 flex gap-6 justify-center opacity-70">
-            <a href="/gallery.html" className="text-sm" style={{ color: '#c084fc', letterSpacing: '-0.1rem' }}>GALLERY</a>
-            <a href="/about.html" className="text-sm" style={{ color: '#c084fc', letterSpacing: '-0.1rem' }}>ABOUT</a>
-            <a href="/projects/vancouver.html" className="text-sm" style={{ color: '#c084fc', letterSpacing: '-0.1rem' }}>VANCOUVER</a>
-            <a href="/hoshii.html" className="text-sm" style={{ color: '#c084fc', letterSpacing: '-0.1rem' }}>hsoh</a>
+            <a href="/gallery.html" className="text-sm" style={{ color: '#e6eef6', letterSpacing: '-0.1rem' }}>GALLERY</a>
+            <a href="/about.html" className="text-sm" style={{ color: '#e6eef6', letterSpacing: '-0.1rem' }}>ABOUT</a>
+            <a href="/projects/vancouver.html" className="text-sm" style={{ color: '#e6eef6', letterSpacing: '-0.1rem' }}>VANCOUVER</a>
+            <a href="/hoshii.html" className="text-sm" style={{ color: '#e6eef6', letterSpacing: '-0.1rem' }}>hsoh</a>
           </div>
         </header>
 

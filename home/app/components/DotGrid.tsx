@@ -1,6 +1,6 @@
 'use client';
-import { useRef, useEffect, useCallback, useMemo } from 'react';
-import { gsap } from '@/app/lib/gsap';
+import { useRef, useEffect, useCallback, useMemo, useState } from 'react';
+import { gsap, initGsapPlugins } from '@/app/lib/gsap';
 
 const throttle = (func: (...args: any[]) => void, limit: number) => {
   let lastCall = 0;
@@ -36,6 +36,7 @@ interface DotGridProps {
   resistance?: number;
   returnDuration?: number;
   opacity?: number;
+  throttleMs?: number;
   className?: string;
   style?: React.CSSProperties;
 }
@@ -53,6 +54,7 @@ const DotGrid = ({
   resistance = 750,
   returnDuration = 1.5,
   opacity = 1,
+  throttleMs = 50,
   className = '',
   style
 }: DotGridProps) => {
@@ -66,6 +68,13 @@ const DotGrid = ({
 
   const baseRgb = useMemo(() => hexToRgb(baseColor), [baseColor]);
   const activeRgb = useMemo(() => hexToRgb(activeColor), [activeColor]);
+
+  // Register GSAP plugins on client mount
+  const [pluginsReady, setPluginsReady] = useState(false);
+  useEffect(() => {
+    initGsapPlugins();
+    setPluginsReady(true);
+  }, []);
 
   const circlePath = useMemo(() => {
     if (typeof window === 'undefined' || !window.Path2D) return null;
@@ -186,6 +195,8 @@ const DotGrid = ({
 
   // Mouse / click interaction with InertiaPlugin
   useEffect(() => {
+    if (!pluginsReady) return;
+
     const onMove = (e: MouseEvent) => {
       const now = performance.now();
       const pr = pointerRef.current;
@@ -218,8 +229,8 @@ const DotGrid = ({
         if (speed > speedTrigger && dist < proximity && !dot._inertiaApplied) {
           dot._inertiaApplied = true;
           gsap.killTweensOf(dot);
-          const pushX = dot.cx - pr.x + vx * 0.005;
-          const pushY = dot.cy - pr.y + vy * 0.005;
+          const pushX = dot.cx - pr.x + vx * 0.002;
+          const pushY = dot.cy - pr.y + vy * 0.002;
           gsap.to(dot, {
             inertia: { xOffset: pushX, yOffset: pushY, resistance },
             onComplete: () => {
@@ -227,7 +238,7 @@ const DotGrid = ({
                 xOffset: 0,
                 yOffset: 0,
                 duration: returnDuration,
-                ease: 'elastic.out(1,0.75)'
+                ease: 'power3.out'
               });
               dot._inertiaApplied = false;
             }
@@ -257,7 +268,7 @@ const DotGrid = ({
                 xOffset: 0,
                 yOffset: 0,
                 duration: returnDuration,
-                ease: 'elastic.out(1,0.75)'
+                ease: 'power3.out'
               });
               dot._inertiaApplied = false;
             }
@@ -266,7 +277,7 @@ const DotGrid = ({
       }
     };
 
-    const throttledMove = throttle(onMove, 50);
+    const throttledMove = throttle(onMove, throttleMs);
     window.addEventListener('mousemove', throttledMove, { passive: true });
     window.addEventListener('click', onClick);
 
@@ -274,7 +285,7 @@ const DotGrid = ({
       window.removeEventListener('mousemove', throttledMove);
       window.removeEventListener('click', onClick);
     };
-  }, [maxSpeed, speedTrigger, proximity, resistance, returnDuration, shockRadius, shockStrength]);
+  }, [pluginsReady, maxSpeed, speedTrigger, proximity, resistance, returnDuration, shockRadius, shockStrength, throttleMs]);
 
   return (
     <section

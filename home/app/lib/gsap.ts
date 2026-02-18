@@ -1,5 +1,8 @@
 // Centralized GSAP setup — imports and registers all available plugins.
-// Usage: import { gsap, ScrollTrigger, SplitText, ... } from '@/app/lib/gsap';
+// Usage: import { gsap, initGsapPlugins } from '@/app/lib/gsap';
+// Call initGsapPlugins() once from a useEffect to register on the client.
+
+'use client';
 
 import { gsap } from 'gsap';
 
@@ -30,38 +33,43 @@ import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import { SplitText } from 'gsap/SplitText';
 
-// Register everything once
-gsap.registerPlugin(
-  // Free
-  CSSPlugin,
-  CSSRulePlugin,
-  CustomEase,
-  Draggable,
-  EasePack,
-  Flip,
-  MotionPathPlugin,
-  Observer,
-  ScrollToPlugin,
-  ScrollTrigger,
-  TextPlugin,
-  // Club
-  CustomBounce,
-  CustomWiggle,
-  DrawSVGPlugin,
-  GSDevTools,
-  InertiaPlugin,
-  MorphSVGPlugin,
-  MotionPathHelper,
-  Physics2DPlugin,
-  PhysicsPropsPlugin,
-  ScrambleTextPlugin,
-  ScrollSmoother,
-  SplitText,
-);
+let _registered = false;
+
+/** Call once from a client-side useEffect to register all plugins. */
+function initGsapPlugins() {
+  if (_registered) return;
+  _registered = true;
+  gsap.registerPlugin(
+    CSSPlugin,
+    CSSRulePlugin,
+    CustomEase,
+    Draggable,
+    EasePack,
+    Flip,
+    MotionPathPlugin,
+    Observer,
+    ScrollToPlugin,
+    ScrollTrigger,
+    TextPlugin,
+    CustomBounce,
+    CustomWiggle,
+    DrawSVGPlugin,
+    GSDevTools,
+    InertiaPlugin,
+    MorphSVGPlugin,
+    MotionPathHelper,
+    Physics2DPlugin,
+    PhysicsPropsPlugin,
+    ScrambleTextPlugin,
+    ScrollSmoother,
+    SplitText,
+  );
+}
 
 // Re-export everything for convenient imports
 export {
   gsap,
+  initGsapPlugins,
   // Free
   CSSPlugin,
   CSSRulePlugin,
