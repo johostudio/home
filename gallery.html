@@ -7,19 +7,24 @@
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles/tailwind.css">
+  <link rel="stylesheet" href="styles/dot-grid.css">
 </head>
 <body class="min-h-screen bg-black flex flex-col items-center justify-center gap-6">
-  <a href="index.html" class="back-btn">← back</a>
+  <!-- Dot Grid Background -->
+  <div class="dot-grid-wrapper"></div>
 
-  <div class="text-white text-3xl font-bold font-sans">tbd</div>
+  <a href="index.html" class="back-btn relative z-10">← back</a>
+
+  <div class="text-white text-3xl font-bold font-sans relative z-10">tbd</div>
 
   <!-- new smaller link below the tbd text -->
-  <div>
+  <div class="relative z-10">
     <a href="https://www.instagram.com/hosh.autumn" target="_blank" rel="noopener" class="text-sm opacity-90">
       hosh's autumn.
     </a>
   </div>
 
   <script src="scripts/page-transitions.js"></script>
+  <script src="scripts/dot-grid.js"></script>
 </body>
 </html>

@@ -7,14 +7,19 @@
   <link rel="icon" href="favicon.ico" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles/tailwind.css">
+  <link rel="stylesheet" href="styles/dot-grid.css">
 </head>
 <body class="min-h-screen bg-[#071021] text-[#c084fc] flex items-center justify-center">
-  <a href="index.html" class="back-btn">← back</a>
-  <main class="max-w-3xl text-center p-8 bg-[#0b1220] rounded">
+  <!-- Dot Grid Background -->
+  <div class="dot-grid-wrapper"></div>
+
+  <a href="index.html" class="back-btn relative z-10">← back</a>
+  <main class="max-w-3xl text-center p-8 bg-[#0b1220] rounded relative z-10">
     <h1 class="text-2xl font-bold mb-4 text-white">autumn</h1>
     <p class="mb-4 text-white">postcards,nostalgia,fujifilm.</p>
     <a class="project-title-link purple" href="https://www.instagram.com/hosh.autumn" target="_blank" rel="noopener">instagram</a>
   </main>
   <script src="scripts/page-transitions.js"></script>
+  <script src="scripts/dot-grid.js"></script>
 </body>
 </html>
