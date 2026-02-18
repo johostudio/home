@@ -22,3 +22,12 @@
   opacity: 0.6;
   margin-bottom: 1px;
 }
+.clock-time {
+  font-size: 12px;
+  font-weight: 500;
+}
+.clock-date {
+  font-size: 9px;
+  opacity: 0.5;
+  margin-top: 1px;
+}

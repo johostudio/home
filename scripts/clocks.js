@@ -25,15 +25,26 @@
     var timeEl = document.createElement('div');
     timeEl.className = 'clock-time';
 
+    var dateEl = document.createElement('div');
+    dateEl.className = 'clock-date';
+
     container.appendChild(labelEl);
     container.appendChild(timeEl);
+    container.appendChild(dateEl);
     document.body.appendChild(container);
 
-    return timeEl;
+    return { time: timeEl, date: dateEl };
   }
 
   var nanchangEl = createClock('left', 'Nanchang');
   var pstEl = createClock('right', 'Vancouver');
+
+  function formatDate(date) {
+    var m = date.getMonth() + 1;
+    var d = date.getDate();
+    var y = date.getFullYear();
+    return m + '/' + d + '/' + y;
+  }
 
   function tick() {
     var now = new Date();
@@ -42,7 +53,8 @@
     var nanchangOffset = 8 * 60; // minutes
     var utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
     var nanchangDate = new Date(utcMs + nanchangOffset * 60000);
-    nanchangEl.textContent = formatTime(nanchangDate);
+    nanchangEl.time.textContent = formatTime(nanchangDate);
+    nanchangEl.date.textContent = formatDate(nanchangDate);
 
     // PST: UTC-8 (standard) / PDT: UTC-7 (daylight)
     // Use America/Los_Angeles to handle DST automatically
@@ -54,12 +66,20 @@
         minute: '2-digit',
         second: '2-digit'
       });
-      pstEl.textContent = pstStr;
+      pstEl.time.textContent = pstStr;
+      var pstDateStr = now.toLocaleDateString('en-US', {
+        timeZone: 'America/Los_Angeles',
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric'
+      });
+      pstEl.date.textContent = pstDateStr;
     } catch (e) {
       // Fallback: assume PST (UTC-8)
       var pstOffset = -8 * 60;
       var pstDate = new Date(utcMs + pstOffset * 60000);
-      pstEl.textContent = formatTime(pstDate);
+      pstEl.time.textContent = formatTime(pstDate);
+      pstEl.date.textContent = formatDate(pstDate);
     }
   }
 
