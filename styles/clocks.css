@@ -1,7 +1,7 @@
 /* Dual Clocks - PST (right) & Nanchang (left) */
 .clock-container {
   position: fixed;
-  top: 40px;
+  top: 120px;
   left: 140px;
   right: 140px;
 }
