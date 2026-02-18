@@ -8,13 +8,345 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles/tailwind.css">
   <link rel="stylesheet" href="styles/dot-grid.css">
+  <style>
+    /* Resume-specific styles */
+    body { font-family: Helvetica, Arial, sans-serif; }
+
+    /* Password gate */
+    #password-gate {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #0a0a0c;
+    }
+    #password-gate.hidden { display: none; }
+
+    #password-gate input {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 6px;
+      padding: 10px 16px;
+      color: #e6eef6;
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      width: 260px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #password-gate input:focus {
+      border-color: #c084fc;
+    }
+    #password-gate input::placeholder {
+      color: rgba(255,255,255,0.3);
+    }
+    #pw-error {
+      color: #f87171;
+      font-size: 13px;
+      margin-top: 10px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    #pw-error.visible { opacity: 1; }
+
+    /* Resume content */
+    #resume-content {
+      display: none;
+    }
+    #resume-content.unlocked {
+      display: block;
+    }
+
+    /* Section styles inspired by inwoo.ca, adapted to dark theme */
+    .resume-container {
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    .resume-section {
+      padding: 20px 0;
+    }
+
+    .resume-section .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #e6eef6;
+      margin-bottom: 16px;
+      letter-spacing: 0.02em;
+    }
+
+    .resume-section .entry {
+      margin-bottom: 20px;
+      padding-left: 16px;
+    }
+
+    .resume-section .entry .entry-title {
+      font-size: 14px;
+      color: #e6eef6;
+      font-weight: 400;
+    }
+    .resume-section .entry .entry-title a {
+      color: #c084fc;
+      text-decoration: none;
+    }
+    .resume-section .entry .entry-title a:hover {
+      text-decoration: underline;
+    }
+
+    .resume-section .entry .entry-meta {
+      font-size: 13px;
+      color: rgba(255,255,255,0.45);
+      margin-top: 4px;
+    }
+
+    .resume-section .entry .entry-desc {
+      font-size: 13px;
+      color: rgba(255,255,255,0.5);
+      font-style: italic;
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+
+    /* Hero */
+    .resume-hero h1 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #e6eef6;
+      margin-bottom: 8px;
+    }
+    .resume-hero .meta {
+      font-size: 13px;
+      color: rgba(255,255,255,0.4);
+    }
+
+    /* About bio */
+    .bio-text {
+      font-size: 14px;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.7;
+      padding-left: 16px;
+    }
+
+    /* Contact entries */
+    .contact-row {
+      padding-left: 16px;
+      margin-bottom: 12px;
+    }
+    .contact-row .label {
+      font-size: 14px;
+      color: #e6eef6;
+    }
+    .contact-row .value {
+      font-size: 13px;
+      color: rgba(255,255,255,0.45);
+    }
+    .contact-row .value a {
+      color: #c084fc;
+      text-decoration: none;
+    }
+    .contact-row .value a:hover {
+      text-decoration: underline;
+    }
+
+    /* Skills list */
+    .skills-list {
+      padding-left: 16px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.8;
+    }
+  </style>
 </head>
-<body class="min-h-screen bg-black flex items-center justify-center">
+<body class="min-h-screen bg-[#0a0a0c] text-[#e6eef6]">
   <!-- Dot Grid Background -->
   <div class="dot-grid-wrapper"></div>
 
-  <a href="index.html" class="back-btn relative z-10">← back</a>
-  <div class="text-white text-3xl font-bold font-sans relative z-10">tbd</div>
+  <!-- Password Gate -->
+  <div id="password-gate">
+    <p style="font-size:14px; color:rgba(255,255,255,0.5); margin-bottom:16px;">this page is password-protected</p>
+    <input type="password" id="pw-input" placeholder="enter password" autocomplete="off" />
+    <p id="pw-error">incorrect password</p>
+  </div>
+
+  <!-- Back button (always visible above gate) -->
+  <a href="index.html" class="back-btn relative z-10" style="z-index:60;">&#8592; back</a>
+
+  <!-- Resume Content (hidden until password entered) -->
+  <div id="resume-content" class="relative z-10">
+    <div class="resume-container">
+
+      <!-- HERO -->
+      <section class="resume-section resume-hero">
+        <h1>John Ho</h1>
+        <p class="meta">last updated: 2026/02</p>
+      </section>
+
+      <!-- ABOUT -->
+      <section class="resume-section">
+        <p class="section-title">About</p>
+        <div class="bio-text">
+          <p>Creative developer, photographer, and filmmaker based in Vancouver. Passionate about blending art and technology to tell meaningful stories.</p>
+          <br>
+          <p>Currently building digital experiences and exploring the intersection of design, code, and visual media.</p>
+        </div>
+      </section>
+
+      <!-- CONTACT -->
+      <section class="resume-section">
+        <p class="section-title">Contact</p>
+        <div class="contact-row">
+          <p class="label">Email</p>
+          <p class="value"><a href="mailto:96joho@gmail.com">96joho@gmail.com</a></p>
+        </div>
+        <div class="contact-row">
+          <p class="label">Instagram</p>
+          <p class="value"><a href="https://instagram.com/96joho" target="_blank">96joho</a></p>
+        </div>
+        <div class="contact-row">
+          <p class="label">YouTube</p>
+          <p class="value"><a href="https://www.youtube.com/channel/UCm9AkiBCwALnpblVcV7E65g" target="_blank">johostudio</a></p>
+        </div>
+        <div class="contact-row">
+          <p class="label">Website</p>
+          <p class="value"><a href="index.html">johostudio</a></p>
+        </div>
+      </section>
+
+      <!-- SKILLS -->
+      <section class="resume-section">
+        <p class="section-title">Skills</p>
+        <div class="skills-list">
+          <p>Photography &middot; Videography &middot; Photo Editing</p>
+          <p>HTML / CSS / JavaScript &middot; React &middot; Tailwind CSS</p>
+          <p>Premiere Pro &middot; Lightroom &middot; Photoshop &middot; After Effects</p>
+          <p>Creative Direction &middot; Visual Storytelling</p>
+        </div>
+      </section>
+
+      <!-- WORK EXPERIENCE -->
+      <section class="resume-section">
+        <p class="section-title">Work Experience</p>
+
+        <div class="entry">
+          <p class="entry-title">Role at <a href="#" target="_blank">Company Name</a></p>
+          <p class="entry-meta">2025 – present</p>
+          <p class="entry-desc">Brief description of responsibilities and achievements.</p>
+        </div>
+
+        <div class="entry">
+          <p class="entry-title">Role at <a href="#" target="_blank">Company Name</a></p>
+          <p class="entry-meta">2024 – 2025</p>
+          <p class="entry-desc">Brief description of responsibilities and achievements.</p>
+        </div>
+
+        <div class="entry">
+          <p class="entry-title">Role at <a href="#" target="_blank">Company Name</a></p>
+          <p class="entry-meta">2023 – 2024</p>
+          <p class="entry-desc">Brief description of responsibilities and achievements.</p>
+        </div>
+      </section>
+
+      <!-- EDUCATION -->
+      <section class="resume-section">
+        <p class="section-title">Education</p>
+
+        <div class="entry">
+          <p class="entry-title">Degree / Program</p>
+          <p class="entry-meta">University Name &middot; 2020 – 2024</p>
+          <p class="entry-desc">Relevant coursework, achievements, or focus areas.</p>
+        </div>
+      </section>
+
+      <!-- PROJECTS -->
+      <section class="resume-section">
+        <p class="section-title">Projects</p>
+
+        <div class="entry">
+          <p class="entry-title"><a href="projects/vancouver.html">Vancouver Project</a></p>
+          <p class="entry-meta">2025</p>
+          <p class="entry-desc">A visual love letter to Vancouver — photography and design.</p>
+        </div>
+
+        <div class="entry">
+          <p class="entry-title"><a href="hoshii.html">hoshii.wav</a></p>
+          <p class="entry-meta">2026 Q1</p>
+          <p class="entry-desc">Creative audio/visual project.</p>
+        </div>
+
+        <div class="entry">
+          <p class="entry-title"><a href="index.html">johostudio portfolio</a></p>
+          <p class="entry-meta">2025 – present</p>
+          <p class="entry-desc">Personal portfolio site built with HTML, Tailwind CSS, and vanilla JS.</p>
+        </div>
+      </section>
+
+      <!-- FILM -->
+      <section class="resume-section">
+        <p class="section-title">Film &amp; Video</p>
+
+        <div class="entry">
+          <p class="entry-title">Film Title</p>
+          <p class="entry-meta">2025</p>
+          <p class="entry-desc">Short description of the film project.</p>
+        </div>
+
+        <div class="entry">
+          <p class="entry-title">Film Title</p>
+          <p class="entry-meta">2024</p>
+          <p class="entry-desc">Short description of the film project.</p>
+        </div>
+      </section>
+
+      <!-- FOOTER -->
+      <footer style="text-align:center; margin-top:48px; padding-bottom:24px;">
+        <small style="color:rgba(255,255,255,0.3);">&copy; <span id="year"></span> joho's studio</small>
+      </footer>
+
+    </div>
+  </div>
+
+  <script>
+    // Year
+    const yearEl = document.getElementById('year');
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+    // Password gate
+    (function() {
+      const PASS = 'johostudio';
+      const gate = document.getElementById('password-gate');
+      const input = document.getElementById('pw-input');
+      const error = document.getElementById('pw-error');
+      const content = document.getElementById('resume-content');
+
+      // Check if already authenticated this session
+      if (sessionStorage.getItem('resume-auth') === '1') {
+        gate.classList.add('hidden');
+        content.classList.add('unlocked');
+      }
+
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          if (input.value === PASS) {
+            sessionStorage.setItem('resume-auth', '1');
+            gate.classList.add('hidden');
+            content.classList.add('unlocked');
+          } else {
+            error.classList.add('visible');
+            input.value = '';
+            setTimeout(function() { error.classList.remove('visible'); }, 2000);
+          }
+        }
+      });
+
+      // Auto-focus password input
+      setTimeout(function() { input.focus(); }, 100);
+    })();
+  </script>
   <script src="scripts/page-transitions.js"></script>
   <script src="scripts/dot-grid.js"></script>
 </body>

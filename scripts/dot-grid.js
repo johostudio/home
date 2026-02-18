@@ -16,26 +16,25 @@
   var logicalW = 0, logicalH = 0;
   var dpr = 1, circleR = 4, rafId = 0;
 
-  // Cached content rects (viewport-relative) — refreshed on resize/scroll
-  var contentRects = [];
-  var contentPadding = 40; // extra px around content areas for soft fade
-  var contentFadeRange = 60; // distance over which dots fade from full to dimmed
+  // Cached text element rects (viewport-relative, refreshed on resize/scroll)
+  var textRects = [];
+  var textFadeRadius = 50;  // px radius around each text rect where dots dim
+  var textDim = 0.25;       // opacity multiplier for dots right on top of text (0 = invisible, 1 = no change)
 
   var config = {
     dotSize: 8,
     gap: 32,
     baseColor: '#ffffff',
     activeColor: '#a855f7',
-    baseAlpha: 0.15,       // lowered — more transparent overall
-    activeAlpha: 0.7,
+    baseAlpha: 0.12,        // subtle base opacity
+    activeAlpha: 0.6,
     proximity: 150,
     speedTrigger: 50,
     shockRadius: 170,
     shockStrength: 3,
     maxSpeed: 5000,
     maxDots: 2000,
-    overflow: 60,           // px the grid extends past viewport edges
-    contentDim: 0.15,       // opacity multiplier for dots inside content areas (0 = invisible, 1 = no change)
+    overflow: 60,           // dots start this far outside viewport (clipped, gives edge bleed)
     spring: 70,
     damping: 16
   };
@@ -51,46 +50,44 @@
 
   function clamp01(x) { return x < 0 ? 0 : x > 1 ? 1 : x; }
 
-  /* ---- content-area detection ---- */
-  function refreshContentRects() {
-    var els = document.querySelectorAll('.z-10');
-    contentRects = [];
+  /* ---- text element detection ---- */
+  function refreshTextRects() {
+    // Query actual text-bearing elements inside content areas
+    var selectors = '.z-10 h1, .z-10 h2, .z-10 h3, .z-10 p, .z-10 li, .z-10 a, .z-10 small, .z-10 span, .z-10 div[contenteditable]';
+    var els = document.querySelectorAll(selectors);
+    textRects = [];
     for (var i = 0; i < els.length; i++) {
       var r = els[i].getBoundingClientRect();
       if (r.width === 0 || r.height === 0) continue;
-      contentRects.push({
-        left: r.left - contentPadding,
-        top: r.top - contentPadding,
-        right: r.right + contentPadding,
-        bottom: r.bottom + contentPadding
+      // Small padding around each text element
+      textRects.push({
+        left: r.left - 8,
+        top: r.top - 4,
+        right: r.right + 8,
+        bottom: r.bottom + 4
       });
     }
   }
 
-  // Returns a 0-1 multiplier: 0 = fully inside content area, 1 = fully outside
-  function contentFade(x, y) {
-    if (contentRects.length === 0) return 1;
-    var minDist = Infinity;
-    for (var i = 0; i < contentRects.length; i++) {
-      var cr = contentRects[i];
-      // signed distance to rect interior (negative = inside)
+  // Returns 0-1: textDim when inside text, 1 when far from text, smooth fade between
+  function textFade(x, y) {
+    if (textRects.length === 0) return 1;
+    var closest = Infinity;
+    for (var i = 0; i < textRects.length; i++) {
+      var cr = textRects[i];
       var dx = Math.max(cr.left - x, 0, x - cr.right);
       var dy = Math.max(cr.top - y, 0, y - cr.bottom);
       if (dx === 0 && dy === 0) {
-        // inside the rect — compute distance to nearest edge (negative)
-        var toEdge = Math.min(x - cr.left, cr.right - x, y - cr.top, cr.bottom - y);
-        minDist = Math.min(minDist, -toEdge);
-      } else {
-        var dist = Math.sqrt(dx * dx + dy * dy);
-        minDist = Math.min(minDist, dist);
+        // inside rect — return textDim immediately
+        return textDim;
       }
+      var dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < closest) closest = dist;
     }
-    // minDist < 0 means inside a rect
-    if (minDist <= 0) return config.contentDim;
-    if (minDist >= contentFadeRange) return 1;
-    // smooth fade from contentDim to 1
-    var t = minDist / contentFadeRange;
-    return config.contentDim + (1 - config.contentDim) * t;
+    if (closest >= textFadeRadius) return 1;
+    // smooth fade
+    var t = closest / textFadeRadius;
+    return textDim + (1 - textDim) * t;
   }
 
   /* ---- sizing & grid build ---- */
@@ -100,43 +97,35 @@
     if (w === 0 || h === 0) return;
     if (w === logicalW && h === logicalH && ctx) return;
 
-    var ov = config.overflow;
     dpr = Math.min(2, window.devicePixelRatio || 1);
     logicalW = w;
     logicalH = h;
-
-    // Canvas is larger than viewport by overflow on each side
-    var cw = w + ov * 2;
-    var ch = h + ov * 2;
-    canvas.width = cw * dpr;
-    canvas.height = ch * dpr;
-    canvas.style.width = cw + 'px';
-    canvas.style.height = ch + 'px';
-    // Offset canvas so it extends past the wrapper on all sides
-    canvas.style.position = 'absolute';
-    canvas.style.left = -ov + 'px';
-    canvas.style.top = -ov + 'px';
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
     ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    // Dot coordinates are in canvas-local space (0,0 = top-left of canvas, which is -ov,-ov in viewport)
+    var ov = config.overflow;
     var baseCell = config.dotSize + config.gap;
-    var cols = Math.max(1, Math.floor(cw / baseCell));
-    var rows = Math.max(1, Math.floor(ch / baseCell));
-    var total = cols * rows;
+    // Grid extends past viewport on all sides (dots outside get clipped = edge bleed)
+    var totalW = w + ov * 2;
+    var totalH = h + ov * 2;
+    var cols = Math.max(1, Math.floor(totalW / baseCell));
+    var rows = Math.max(1, Math.floor(totalH / baseCell));
     var cell = baseCell;
 
-    if (total > config.maxDots) {
-      cell = Math.max(baseCell, Math.sqrt((cw * ch) / config.maxDots));
-      cols = Math.max(1, Math.floor(cw / cell));
-      rows = Math.max(1, Math.floor(ch / cell));
+    if (cols * rows > config.maxDots) {
+      cell = Math.max(baseCell, Math.sqrt((totalW * totalH) / config.maxDots));
+      cols = Math.max(1, Math.floor(totalW / cell));
+      rows = Math.max(1, Math.floor(totalH / cell));
     }
 
     var usedW = cell * cols;
     var usedH = cell * rows;
-    var startX = (cw - usedW) / 2 + cell / 2;
-    var startY = (ch - usedH) / 2 + cell / 2;
+    // Start grid offset so it's centered but extends past edges
+    var startX = -ov + (totalW - usedW) / 2 + cell / 2;
+    var startY = -ov + (totalH - usedH) / 2 + cell / 2;
     circleR = config.dotSize / 2;
 
     dots = [];
@@ -150,7 +139,7 @@
       }
     }
 
-    refreshContentRects();
+    refreshTextRects();
   }
 
   /* ---- render loop ---- */
@@ -158,18 +147,14 @@
     rafId = requestAnimationFrame(frame);
     if (!ctx || dots.length === 0) return;
 
-    var ov = config.overflow;
     var dt = Math.min(0.033, (now - (lastFrame || now)) / 1000);
     lastFrame = now;
 
-    var cw = logicalW + ov * 2;
-    var ch = logicalH + ov * 2;
-    ctx.clearRect(0, 0, cw, ch);
+    ctx.clearRect(0, 0, logicalW, logicalH);
 
     var proxSq = config.proximity * config.proximity;
-    // pointer is in viewport space; dot coords are in canvas space (offset by ov)
-    var px = pointer.x + ov;
-    var py = pointer.y + ov;
+    var px = pointer.x;
+    var py = pointer.y;
     var k = config.spring;
     var c = config.damping;
 
@@ -189,27 +174,32 @@
         dot.x = 0; dot.y = 0; dot.vx = 0; dot.vy = 0;
       }
 
+      var drawX = dot.cx + dot.x;
+      var drawY = dot.cy + dot.y;
+
+      // skip dots entirely outside canvas (from overflow)
+      if (drawX < -circleR || drawX > logicalW + circleR ||
+          drawY < -circleR || drawY > logicalH + circleR) continue;
+
       // proximity glow
       var dx = dot.cx - px;
       var dy = dot.cy - py;
       var dsq = dx * dx + dy * dy;
       var t = dsq <= proxSq ? clamp01(1 - Math.sqrt(dsq) / config.proximity) : 0;
 
-      // content-area fade — convert dot canvas coords to viewport coords for comparison
-      var viewX = (dot.cx + dot.x) - ov;
-      var viewY = (dot.cy + dot.y) - ov;
-      var cFade = contentFade(viewX, viewY);
+      // text-area fade — small radius around text elements
+      var tFade = textFade(drawX, drawY);
 
       var r = (baseRgb.r + (activeRgb.r - baseRgb.r) * t) | 0;
       var g = (baseRgb.g + (activeRgb.g - baseRgb.g) * t) | 0;
       var b = (baseRgb.b + (activeRgb.b - baseRgb.b) * t) | 0;
-      var a = (config.baseAlpha + (config.activeAlpha - config.baseAlpha) * t) * cFade;
+      var a = (config.baseAlpha + (config.activeAlpha - config.baseAlpha) * t) * tFade;
 
       if (a < 0.003) continue;
 
       ctx.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
       ctx.beginPath();
-      ctx.arc(dot.cx + dot.x, dot.cy + dot.y, circleR, 0, 6.2832);
+      ctx.arc(drawX, drawY, circleR, 0, 6.2832);
       ctx.fill();
     }
   }
@@ -236,18 +226,15 @@
     pointer.vy = vy;
     pointer.speed = speed;
 
-    // Store pointer in viewport space (frame() converts to canvas space)
     var rect = wrapper.getBoundingClientRect();
     pointer.x = e.clientX - rect.left;
     pointer.y = e.clientY - rect.top;
 
     if (speed < config.speedTrigger) return;
 
-    // For push physics, convert pointer to canvas space
-    var ov = config.overflow;
     var proxSq = config.proximity * config.proximity;
-    var px = pointer.x + ov;
-    var py = pointer.y + ov;
+    var px = pointer.x;
+    var py = pointer.y;
 
     for (var i = 0, len = dots.length; i < len; i++) {
       var dot = dots[i];
@@ -264,9 +251,8 @@
 
   function onClick(e) {
     var rect = wrapper.getBoundingClientRect();
-    var ov = config.overflow;
-    var cx = e.clientX - rect.left + ov;
-    var cy = e.clientY - rect.top + ov;
+    var cx = e.clientX - rect.left;
+    var cy = e.clientY - rect.top;
     var rSq = config.shockRadius * config.shockRadius;
 
     for (var i = 0, len = dots.length; i < len; i++) {
@@ -291,8 +277,8 @@
     sizeCanvas();
   });
 
-  // Refresh content rects on scroll (content positions change)
-  window.addEventListener('scroll', refreshContentRects, { passive: true });
+  // Refresh text rects on scroll (positions shift)
+  window.addEventListener('scroll', refreshTextRects, { passive: true });
 
   document.addEventListener('mousemove', onMove, { passive: true });
   document.addEventListener('click', onClick);
