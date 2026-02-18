@@ -7,7 +7,7 @@ gsap.registerPlugin(InertiaPlugin);
 
 const throttle = (func: (...args: any[]) => void, limit: number) => {
   let lastCall = 0;
-  return function (...args: any[]) {
+  return function (this: any, ...args: any[]) {
     const now = performance.now();
     if (now - lastCall >= limit) {
       lastCall = now;
@@ -38,6 +38,7 @@ interface DotGridProps {
   maxSpeed?: number;
   resistance?: number;
   returnDuration?: number;
+  opacity?: number;
   className?: string;
   style?: React.CSSProperties;
 }
@@ -54,30 +55,16 @@ const DotGrid = ({
   maxSpeed = 5000,
   resistance = 750,
   returnDuration = 1.5,
+  opacity = 1,
   className = '',
   style
 }: DotGridProps) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const dotsRef = useRef<Array<{ cx: number; cy: number; xOffset: number; yOffset: number; _inertiaApplied: boolean }>>([]);
-  const pointerRef = useRef<{
-    x: number;
-    y: number;
-    vx: number;
-    vy: number;
-    speed: number;
-    lastTime: number;
-    lastX: number;
-    lastY: number;
-  }>({
-    x: 0,
-    y: 0,
-    vx: 0,
-    vy: 0,
-    speed: 0,
-    lastTime: 0,
-    lastX: 0,
-    lastY: 0
+  const pointerRef = useRef({
+    x: 0, y: 0, vx: 0, vy: 0, speed: 0,
+    lastTime: 0, lastX: 0, lastY: 0
   });
 
   const baseRgb = useMemo(() => hexToRgb(baseColor), [baseColor]);
@@ -85,7 +72,6 @@ const DotGrid = ({
 
   const circlePath = useMemo(() => {
     if (typeof window === 'undefined' || !window.Path2D) return null;
-
     const p = new Path2D();
     p.arc(0, 0, dotSize / 2, 0, Math.PI * 2);
     return p;
@@ -98,7 +84,6 @@ const DotGrid = ({
 
     const { width, height } = wrap.getBoundingClientRect();
     if (width === 0 || height === 0) {
-      // Retry after a short delay if dimensions aren't ready
       setTimeout(buildGrid, 100);
       return;
     }
@@ -135,6 +120,7 @@ const DotGrid = ({
     dotsRef.current = dots;
   }, [dotSize, gap]);
 
+  // Draw loop
   useEffect(() => {
     if (!circlePath) return;
 
@@ -143,7 +129,7 @@ const DotGrid = ({
 
     const draw = () => {
       const canvas = canvasRef.current;
-      if (!canvas || canvas.width === 0 || canvas.height === 0) {
+      if (!canvas) {
         rafId = requestAnimationFrame(draw);
         return;
       }
@@ -163,19 +149,20 @@ const DotGrid = ({
         const dy = dot.cy - py;
         const dsq = dx * dx + dy * dy;
 
-        let style = baseColor;
+        let r = baseRgb.r, g = baseRgb.g, b = baseRgb.b;
+        let a = opacity;
         if (dsq <= proxSq) {
           const dist = Math.sqrt(dsq);
           const t = 1 - dist / proximity;
-          const r = Math.round(baseRgb.r + (activeRgb.r - baseRgb.r) * t);
-          const g = Math.round(baseRgb.g + (activeRgb.g - baseRgb.g) * t);
-          const b = Math.round(baseRgb.b + (activeRgb.b - baseRgb.b) * t);
-          style = `rgb(${r},${g},${b})`;
+          r = Math.round(baseRgb.r + (activeRgb.r - baseRgb.r) * t);
+          g = Math.round(baseRgb.g + (activeRgb.g - baseRgb.g) * t);
+          b = Math.round(baseRgb.b + (activeRgb.b - baseRgb.b) * t);
+          a = opacity + (1 - opacity) * t;
         }
 
         ctx.save();
         ctx.translate(ox, oy);
-        ctx.fillStyle = style;
+        ctx.fillStyle = `rgba(${r},${g},${b},${a})`;
         ctx.fill(circlePath);
         ctx.restore();
       }
@@ -185,23 +172,22 @@ const DotGrid = ({
 
     draw();
     return () => cancelAnimationFrame(rafId);
-  }, [proximity, baseColor, activeRgb, baseRgb, circlePath]);
+  }, [proximity, baseColor, activeRgb, baseRgb, circlePath, opacity]);
 
+  // Resize handling
   useEffect(() => {
     buildGrid();
-    let ro: ResizeObserver | null = null;
-    if ('ResizeObserver' in window) {
-      ro = new ResizeObserver(buildGrid);
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(buildGrid);
       if (wrapperRef.current) ro.observe(wrapperRef.current);
+      return () => ro.disconnect();
     } else {
       window.addEventListener('resize', buildGrid);
+      return () => window.removeEventListener('resize', buildGrid);
     }
-    return () => {
-      if (ro) ro.disconnect();
-      else window.removeEventListener('resize', buildGrid);
-    };
   }, [buildGrid]);
 
+  // Mouse / click interaction with InertiaPlugin
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
       const now = performance.now();
@@ -258,6 +244,7 @@ const DotGrid = ({
       if (!rect) return;
       const cx = e.clientX - rect.left;
       const cy = e.clientY - rect.top;
+
       for (const dot of dotsRef.current) {
         const dist = Math.hypot(dot.cx - cx, dot.cy - cy);
         if (dist < shockRadius && !dot._inertiaApplied) {
@@ -293,9 +280,29 @@ const DotGrid = ({
   }, [maxSpeed, speedTrigger, proximity, resistance, returnDuration, shockRadius, shockStrength]);
 
   return (
-    <section className={`absolute inset-0 w-full h-full pointer-events-none ${className}`} style={style}>
-      <div ref={wrapperRef} className="absolute inset-0 w-full h-full">
-        <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
+    <section
+      className={`dot-grid ${className}`}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100%',
+        width: '100%',
+        position: 'relative',
+        ...style
+      }}
+    >
+      <div ref={wrapperRef} style={{ width: '100%', height: '100%', position: 'relative' }}>
+        <canvas
+          ref={canvasRef}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            pointerEvents: 'none'
+          }}
+        />
       </div>
     </section>
   );

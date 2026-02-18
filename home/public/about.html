@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>About — joho's studio</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles/tailwind.css">
+</head>
+<body class="min-h-screen bg-[#071021] text-[#e6eef6]">
+
+  <a href="index.html" class="back-btn">← back</a>
+
+  <main class="min-h-screen flex items-start justify-center pt-28 px-6">
+    <section class="max-w-3xl w-full">
+      <h1 class="text-2xl font-bold mb-4 text-center">about</h1>
+
+      <!-- Editable area: edit the text directly here -->
+      <div
+        id="about-edit"
+        contenteditable="true"
+        spellcheck="true"
+        class="prose max-w-none p-6 rounded-md bg-[#0b1220] text-white focus:outline-none text-center"
+        aria-label="About me editor"
+      >
+        <!-- Replace this placeholder text with your about content. -->
+        <p>part-time engineering / interactive design student, part-time multimedia creative, but a full-time napper.
+            <br>all js for fun :> </p>
+      </div>
+    </section>
+  </main>
+  <script src="scripts/page-transitions.js"></script>
+</body>
+</html>

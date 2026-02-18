@@ -1,11 +1,20 @@
-import Image from "next/image";
 import DotGrid from "./components/DotGrid";
 
 export default function Home() {
+  const year = new Date().getFullYear();
+
   return (
-    <div className="flex min-h-screen items-center justify-center font-sans dark:bg-black relative overflow-hidden">
+    <div
+      className="min-h-screen relative overflow-hidden"
+      style={{
+        background: '#071021',
+        color: '#e6eef6',
+        fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
+        letterSpacing: '-0.05rem',
+      }}
+    >
       {/* Dot Grid Background */}
-      <div className="fixed inset-0 w-full h-full z-0 bg-black">
+      <div className="fixed inset-0 w-full h-full z-0">
         <DotGrid
           dotSize={8}
           gap={32}
@@ -16,65 +25,55 @@ export default function Home() {
           shockStrength={3}
           resistance={600}
           returnDuration={0.3}
+          opacity={0.3}
         />
       </div>
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white/95 dark:bg-black/40 backdrop-blur-sm sm:items-start relative z-10">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+
+      {/* Content */}
+      <div className="max-w-4xl mx-auto px-6 flex flex-col items-center relative z-10">
+        <header className="w-full text-center my-8">
+          <h1
+            className="text-3xl inline-flex items-center justify-center"
+            style={{ fontWeight: 700, letterSpacing: '-0.15rem' }}
+          >
+            johostudio
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+
+          <div className="mt-2 flex gap-6 justify-center opacity-70">
+            <a href="/gallery.html" className="text-sm" style={{ color: '#c084fc', letterSpacing: '-0.1rem' }}>GALLERY</a>
+            <a href="/about.html" className="text-sm" style={{ color: '#c084fc', letterSpacing: '-0.1rem' }}>ABOUT</a>
+            <a href="/projects/vancouver.html" className="text-sm" style={{ color: '#c084fc', letterSpacing: '-0.1rem' }}>VANCOUVER</a>
+            <a href="/hoshii.html" className="text-sm" style={{ color: '#c084fc', letterSpacing: '-0.1rem' }}>hsoh</a>
+          </div>
+        </header>
+
+        <main className="w-full flex flex-col items-center">
+          {/* Socials */}
+          <section className="w-full flex flex-col items-center justify-center py-20">
+            <ul className="flex flex-col items-center gap-6" style={{ letterSpacing: '-0.1rem' }}>
+              <li><a className="text-lg" style={{ color: '#c084fc' }} href="https://www.youtube.com/channel/UCm9AkiBCwALnpblVcV7E65g" target="_blank" rel="noopener noreferrer">youtube</a></li>
+              <li><a className="text-lg" style={{ color: '#c084fc' }} href="https://www.tiktok.com/@lifeofjoho" target="_blank" rel="noopener noreferrer">tiktok</a></li>
+              <li><a className="text-lg" style={{ color: '#c084fc' }} href="https://instagram.com/96joho" target="_blank" rel="noopener noreferrer">ig: personal</a></li>
+              <li><a className="text-lg" style={{ color: '#c084fc' }} href="https://instagram.com/hosh.autumn">ig: photography</a></li>
+              <li><a className="text-lg" style={{ color: '#c084fc' }} href="https://instagram.com/joho.studio">ig: creative archive</a></li>
+              <li><a className="text-lg" style={{ color: '#c084fc' }} href="https://ko-fi.com/johostudio">ko-fi / tba shop</a></li>
+              <li><a className="text-lg" style={{ color: '#c084fc' }} href="https://www.buymeacoffee.com/johostudio">buy me a matcha tea</a></li>
+              <li><a className="text-lg" style={{ color: '#c084fc' }} href="https://linktr.ee/dusktodvwn">&quot;hoshii.wav&quot; / &apos;26 q1</a></li>
+            </ul>
+          </section>
+
+          {/* Contact */}
+          <section className="w-full text-center mb-16">
+            <h2 className="text-2xl mb-4">find me :</h2>
+            <p><a style={{ color: '#c084fc' }} href="mailto:96joho@gmail.com">96joho@gmail.com</a></p>
+          </section>
+        </main>
+
+        <footer className="text-center mt-6 w-full mb-10">
+          <small>&copy; {year} joho&apos;s studio &#26124;&#26959;</small>
+          <div className="text-sm mt-2">ALL RIGHTS RESERVED. &reg;</div>
+        </footer>
+      </div>
     </div>
   );
 }
