@@ -34,13 +34,20 @@
     '  flex-direction: column;',
     '  align-items: center;',
     '  padding-top: 40px;',
-    '  padding-bottom: 2rem;',
+    '  padding-bottom: 1.5rem;',
     '  pointer-events: none;',
-    '  background: rgba(7, 16, 33, 0.4);',
+    '  transition: background 0.3s ease, backdrop-filter 0.3s ease;',
+    '}',
+    '',
+    '.jh-header.jh-scrolled {',
+    '  pointer-events: none;',
+    '  background: rgba(7, 16, 33, 0.45);',
     '  backdrop-filter: blur(12px);',
     '  -webkit-backdrop-filter: blur(12px);',
+    '  mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);',
+    '  -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);',
     '}',
-
+    '',
     '.jh-logo {',
     '  pointer-events: auto;',
     '  text-decoration: none;',
@@ -53,21 +60,21 @@
     '  color: #e6eef6;',
     '  line-height: 1;',
     '}',
-
+    '',
     '.jh-logo img {',
     '  height: 1.4em;',
     '  width: auto;',
     '  display: inline-block;',
     '  image-rendering: auto;',
     '}',
-
+    '',
     '.jh-nav {',
     '  margin-top: 0.4rem;',
     '  display: flex;',
     '  gap: 1.2rem;',
     '  pointer-events: auto;',
     '}',
-
+    '',
     '.jh-nav a {',
     '  font-size: 0.7rem;',
     '  font-weight: 500;',
@@ -76,7 +83,7 @@
     '  text-decoration: none;',
     '  transition: color 0.18s;',
     '}',
-
+    '',
     '.jh-nav a:hover { color: #e6eef6; }',
     '.jh-nav a.jh-cur { color: #e6eef6; }'
   ].join('\n');
@@ -111,11 +118,22 @@
     '</a>' +
     '<nav class="jh-nav">' + navLinks + '</nav>';
 
+  /* ── 6. Scroll Listener ── */
+  function updateScroll() {
+    if (window.scrollY > 15) {
+      header.classList.add('jh-scrolled');
+    } else {
+      header.classList.remove('jh-scrolled');
+    }
+  }
+
+  window.addEventListener('scroll', updateScroll, { passive: true });
+  updateScroll(); // Initial check
+
   /* Insert as very first child of <body> */
   if (document.body) {
     document.body.insertBefore(header, document.body.firstChild);
   } else {
-    /* Fallback: listen for DOMContentLoaded (should never hit for synchronous placement) */
     document.addEventListener('DOMContentLoaded', function () {
       document.body.insertBefore(header, document.body.firstChild);
     });
