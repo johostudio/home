@@ -81,13 +81,14 @@
 
   /* ── 4. Build nav HTML ── */
   var items = [
-    { key: 'gallery', label: 'GALLERY', href: base + 'gallery.html' },
-    { key: 'about', label: 'ABOUT', href: base + 'about.html' },
-    { key: 'vancouver', label: 'VANCOUVER', href: base + 'projects/vancouver.html' },
-    { key: 'hoshii', label: 'HSOH', href: base + 'hoshii.html' },
-    { key: 'resume', label: 'RESUME', href: base + 'resume.html' },
-    { key: 'archives', label: 'ARCHIVES', href: base + 'archives.html' },
-    { key: 'darkroom', label: 'DARKROOM', href: base + 'darkroom.html' }
+    { key: 'gallery', label: 'GALLERY', href: base + 'gallery' },
+    { key: 'about', label: 'ABOUT', href: base + 'about' },
+    { key: 'vancouver', label: 'VANCOUVER', href: base + 'projects/vancouver' },
+    { key: 'hoshii', label: 'HSOH', href: base + 'hoshii' },
+    { key: 'resume', label: 'RESUME', href: base + 'resume' },
+    { key: 'archives', label: 'ARCHIVES', href: base + 'archives' },
+    { key: 'darkroom', label: 'DARKROOM', href: base + 'darkroom' }
+
   ];
 
   var navLinks = items.map(function (item) {
@@ -99,7 +100,7 @@
   var header = document.createElement('header');
   header.className = 'jh-header';
   header.innerHTML =
-    '<a class="jh-logo" href="' + base + 'index.html">' +
+    '<a class="jh-logo" href="' + base + '.">' +
     '<img src="' + base + 'favicon.ico" alt="" ' +
     'onerror="this.style.display=\'none\'">' +
     'johostudio' +
