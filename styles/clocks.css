@@ -1,31 +1,37 @@
 /* Dual Clocks - Vancouver (right) & Nanchang (left) */
 .clock-container {
   position: fixed;
-  top: 60px;
+  top: 110px;
   z-index: 40;
   font-family: Helvetica, Arial, sans-serif;
   font-size: 11px;
-  color: rgba(255,255,255,0.4);
+  color: rgba(255, 255, 255, 0.4);
   letter-spacing: 0.04em;
   pointer-events: none;
   user-select: none;
 }
+
 .clock-left {
   left: 180px;
 }
+
 .clock-right {
   right: 180px;
+  text-align: right;
 }
+
 .clock-label {
   font-size: 9px;
   text-transform: uppercase;
   opacity: 0.6;
   margin-bottom: 1px;
 }
+
 .clock-time {
   font-size: 12px;
   font-weight: 500;
 }
+
 .clock-date {
   font-size: 11px;
   opacity: 0.5;

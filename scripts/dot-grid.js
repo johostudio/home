@@ -192,7 +192,7 @@
       dot.y += dot.vy * dt;
 
       if (Math.abs(dot.x) < 0.01 && Math.abs(dot.y) < 0.01 &&
-          Math.abs(dot.vx) < 0.01 && Math.abs(dot.vy) < 0.01) {
+        Math.abs(dot.vx) < 0.01 && Math.abs(dot.vy) < 0.01) {
         dot.x = 0; dot.y = 0; dot.vx = 0; dot.vy = 0;
       }
 
@@ -201,7 +201,7 @@
 
       // skip dots entirely outside canvas (from overflow)
       if (drawX < -circleR || drawX > logicalW + circleR ||
-          drawY < -circleR || drawY > logicalH + circleR) continue;
+        drawY < -circleR || drawY > logicalH + circleR) continue;
 
       // proximity glow
       var dx = dot.cx - px;
@@ -211,6 +211,17 @@
 
       // text-area fade — small radius around text elements
       var tFade = textFade(drawX, drawY);
+
+      // Special case: Archives page radial mask (keep center clean for sphere)
+      if (window.location.pathname.indexOf('archives') !== -1) {
+        var cx = logicalW / 2, cy = logicalH / 2;
+        var dx = drawX - cx, dy = drawY - cy;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        var maskR = Math.min(logicalW, logicalH) * 0.8; // Expanded to 80%
+        if (dist < maskR) {
+          tFade *= (dist / maskR); // linear fade out
+        }
+      }
 
       var r = (baseRgb.r + (activeRgb.r - baseRgb.r) * t) | 0;
       var g = (baseRgb.g + (activeRgb.g - baseRgb.g) * t) | 0;

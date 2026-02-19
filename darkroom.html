@@ -1,0 +1,1612 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Darkroom — joho's studio</title>
+    <meta name="description" content="Vintage digital photobooth — capture, filter, and download your photo strip." />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <!-- Site font stack from tailwind.css -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles/tailwind.css">
+    <!-- Supabase CDN (for worldwide gallery) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* ── Darkroom palette ── */
+        :root {
+            --dr-bg: #0d0a08;
+            --dr-surface: #1a130e;
+            --dr-amber: #c8a96e;
+            --dr-amber2: #e6c98a;
+            --dr-muted: rgba(200, 169, 110, 0.45);
+            --dr-red: #c0392b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--dr-bg);
+            /* Use site font — Verona-Serial-Medium / Helvetica (from tailwind.css) */
+            color: var(--dr-amber);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* tighten letter-spacing to match site */
+        body {
+            letter-spacing: -0.04rem;
+        }
+
+        /* Film grain */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.05;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 200px 200px;
+            animation: grain 0.5s steps(1) infinite;
+        }
+
+        @keyframes grain {
+            0% {
+                transform: translate(0, 0)
+            }
+
+            20% {
+                transform: translate(3%, 2%)
+            }
+
+            40% {
+                transform: translate(-2%, 4%)
+            }
+
+            60% {
+                transform: translate(4%, -3%)
+            }
+
+            80% {
+                transform: translate(-3%, 1%)
+            }
+
+            100% {
+                transform: translate(0, 0)
+            }
+        }
+
+        /* Vignette */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.7) 100%);
+        }
+
+        /* Back btn */
+        .back-btn {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 9999;
+            padding: 0.25rem 0.6rem;
+            background: rgba(13, 10, 8, 0.75);
+            color: var(--dr-amber);
+            border: 1px solid rgba(200, 169, 110, 0.2);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            backdrop-filter: blur(4px);
+            text-decoration: none;
+            transition: border-color .2s, color .2s;
+        }
+
+        .back-btn:hover {
+            color: var(--dr-amber2);
+            border-color: var(--dr-amber);
+        }
+
+        /* Nav */
+        .dr-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 1.1rem;
+            pointer-events: none;
+        }
+
+        .dr-nav h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: -0.12em;
+            color: var(--dr-amber2);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            pointer-events: auto;
+        }
+
+        .dr-nav h1 img {
+            height: 1em;
+            width: auto;
+        }
+
+        .dr-nav .nav-links {
+            margin-top: 0.4rem;
+            display: flex;
+            gap: 1.2rem;
+            opacity: 0.55;
+            pointer-events: auto;
+        }
+
+        .dr-nav .nav-links a {
+            font-size: 0.72rem;
+            color: var(--dr-amber);
+            text-decoration: none;
+            letter-spacing: 0.04em;
+            transition: opacity .18s;
+        }
+
+        .dr-nav .nav-links a:hover {
+            opacity: 1;
+            color: var(--dr-amber2);
+        }
+
+        .dr-nav .nav-links a.active {
+            opacity: 1;
+            color: var(--dr-amber2);
+        }
+
+        /* Steps */
+        .step {
+            display: none;
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 5.5rem 1.5rem 3rem;
+        }
+
+        .step.active {
+            display: flex;
+        }
+
+        /* Card */
+        .dr-card {
+            background: var(--dr-surface);
+            border: 1px solid rgba(200, 169, 110, 0.16);
+            border-radius: 4px;
+            padding: 2rem 2.2rem;
+            max-width: 540px;
+            width: 100%;
+            position: relative;
+        }
+
+        .dr-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 4px;
+            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.4);
+            pointer-events: none;
+        }
+
+        .step-label {
+            font-size: 0.68rem;
+            letter-spacing: .2em;
+            color: var(--dr-muted);
+            text-transform: uppercase;
+            margin-bottom: .4rem;
+        }
+
+        .step-heading {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dr-amber2);
+            line-height: 1.1;
+            margin-bottom: 1.4rem;
+            letter-spacing: -.06em;
+        }
+
+        .step-sub {
+            font-size: 0.82rem;
+            color: var(--dr-muted);
+            line-height: 1.6;
+            margin-bottom: 1.2rem;
+        }
+
+        /* Buttons */
+        .dr-btn {
+            display: inline-block;
+            padding: .65rem 1.8rem;
+            background: transparent;
+            border: 1px solid var(--dr-amber);
+            color: var(--dr-amber);
+            font-size: 0.8rem;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 2px;
+            transition: background .2s, color .2s, border-color .2s;
+            font-family: inherit;
+        }
+
+        .dr-btn:hover {
+            background: var(--dr-amber);
+            color: var(--dr-bg);
+        }
+
+        .dr-btn:disabled {
+            opacity: .3;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .dr-btn.primary {
+            background: var(--dr-amber);
+            color: var(--dr-bg);
+        }
+
+        .dr-btn.primary:hover {
+            background: var(--dr-amber2);
+            border-color: var(--dr-amber2);
+        }
+
+        .dr-btn.ghost {
+            border-color: rgba(200, 169, 110, 0.35);
+            color: rgba(200, 169, 110, 0.6);
+        }
+
+        .dr-btn.ghost:hover {
+            border-color: var(--dr-amber);
+            color: var(--dr-amber);
+        }
+
+        /* Progress dots */
+        .progress-dots {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            margin-bottom: 1.4rem;
+        }
+
+        .progress-dots .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(200, 169, 110, .18);
+            transition: background .2s;
+        }
+
+        .progress-dots .dot.done {
+            background: var(--dr-amber);
+        }
+
+        .progress-dots .dot.active {
+            background: var(--dr-amber2);
+        }
+
+        /* ── STEP 0: Landing ── */
+        #step-landing {
+            text-align: center;
+        }
+
+        .bigTitle {
+            font-size: clamp(3.5rem, 14vw, 8rem);
+            font-weight: 900;
+            letter-spacing: -0.13em;
+            color: var(--dr-amber2);
+            line-height: .9;
+            margin-bottom: .5rem;
+            text-shadow: 0 0 80px rgba(200, 169, 110, .18);
+        }
+
+        .subtitle {
+            font-size: .8rem;
+            letter-spacing: .22em;
+            color: var(--dr-muted);
+            margin-bottom: 2.8rem;
+            text-transform: uppercase;
+        }
+
+        .divider {
+            width: 60px;
+            height: 1px;
+            background: rgba(200, 169, 110, .28);
+            margin: 1rem auto;
+        }
+
+        .sprocket-row {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 2.2rem;
+            opacity: .35;
+        }
+
+        .sprocket {
+            width: 14px;
+            height: 14px;
+            border: 1.5px solid var(--dr-amber);
+            border-radius: 3px;
+        }
+
+        /* ── STEP 1: Frame select ── */
+        .frame-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: .9rem;
+            margin-bottom: 1.3rem;
+        }
+
+        .frame-opt {
+            border: 1.5px solid rgba(200, 169, 110, .22);
+            border-radius: 3px;
+            padding: .9rem .4rem;
+            cursor: pointer;
+            text-align: center;
+            transition: border-color .18s, background .18s;
+            background: transparent;
+            font-family: inherit;
+            color: var(--dr-amber);
+        }
+
+        .frame-opt:hover {
+            border-color: var(--dr-amber);
+            background: rgba(200, 169, 110, .06);
+        }
+
+        .frame-opt.selected {
+            border-color: var(--dr-amber2);
+            background: rgba(200, 169, 110, .11);
+        }
+
+        .frame-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            margin: 0 auto .55rem;
+            width: 36px;
+        }
+
+        .frame-icon .bar {
+            width: 100%;
+            background: rgba(200, 169, 110, .5);
+            border-radius: 1px;
+        }
+
+        .frame-label {
+            font-size: .68rem;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--dr-muted);
+        }
+
+        .border-options {
+            display: flex;
+            gap: .7rem;
+            margin-bottom: 1.3rem;
+            flex-wrap: wrap;
+        }
+
+        .border-opt {
+            border: 1.5px solid rgba(200, 169, 110, .22);
+            border-radius: 3px;
+            padding: .45rem .9rem;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: .7rem;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--dr-amber);
+            transition: border-color .18s, background .18s;
+            background: transparent;
+        }
+
+        .border-opt:hover {
+            border-color: var(--dr-amber);
+            background: rgba(200, 169, 110, .06);
+        }
+
+        .border-opt.selected {
+            border-color: var(--dr-amber2);
+            background: rgba(200, 169, 110, .11);
+        }
+
+        /* ── STEP 2: Filter select ── */
+        .filter-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: .7rem;
+            margin-bottom: 1.3rem;
+        }
+
+        .filter-opt {
+            border: 1.5px solid rgba(200, 169, 110, .18);
+            border-radius: 3px;
+            cursor: pointer;
+            overflow: hidden;
+            transition: border-color .18s;
+        }
+
+        .filter-opt:hover {
+            border-color: var(--dr-amber);
+        }
+
+        .filter-opt.selected {
+            border-color: var(--dr-amber2);
+        }
+
+        .filter-swatch {
+            width: 100%;
+            aspect-ratio: 3/2;
+            display: block;
+        }
+
+        .filter-name {
+            display: block;
+            text-align: center;
+            font-size: .64rem;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--dr-muted);
+            padding: .3rem 0;
+            background: var(--dr-surface);
+            font-family: inherit;
+        }
+
+        .filter-opt.selected .filter-name {
+            color: var(--dr-amber2);
+        }
+
+        /* ── STEP 3: Camera ── */
+        #camera-wrap {
+            position: relative;
+            width: 100%;
+            max-width: 460px;
+            margin: 0 auto .8rem;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        #camera-video {
+            width: 100%;
+            display: block;
+            border-radius: 2px;
+            background: #000;
+            aspect-ratio: 4/3;
+            object-fit: cover;
+        }
+
+        #camera-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        #countdown-display {
+            font-size: 5rem;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 2px 24px rgba(0, 0, 0, .9);
+            opacity: 0;
+            transition: opacity .15s;
+        }
+
+        #countdown-display.visible {
+            opacity: 1;
+        }
+
+        /* upload zone */
+        .upload-zone {
+            border: 1.5px dashed rgba(200, 169, 110, .3);
+            border-radius: 3px;
+            padding: 1.2rem 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color .2s, background .2s;
+            margin-bottom: .8rem;
+            position: relative;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--dr-amber);
+            background: rgba(200, 169, 110, .04);
+        }
+
+        .upload-zone input[type=file] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        .upload-zone p {
+            font-size: .78rem;
+            color: var(--dr-muted);
+            margin: 0;
+            pointer-events: none;
+        }
+
+        #camera-error {
+            display: none;
+            padding: .8rem 1rem;
+            background: rgba(192, 57, 43, .12);
+            border: 1px solid rgba(192, 57, 43, .35);
+            border-radius: 3px;
+            font-size: .78rem;
+            color: #e87b70;
+            text-align: center;
+            margin-bottom: .8rem;
+        }
+
+        /* thumbs */
+        #thumbs-row {
+            display: flex;
+            gap: .45rem;
+            justify-content: center;
+            margin-bottom: .8rem;
+            min-height: 50px;
+            flex-wrap: wrap;
+        }
+
+        .thumb-slot {
+            width: 50px;
+            height: 50px;
+            border: 1.5px solid rgba(200, 169, 110, .2);
+            border-radius: 2px;
+            background: #000;
+            overflow: hidden;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .thumb-slot img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .thumb-slot .del-btn {
+            position: absolute;
+            top: 1px;
+            right: 1px;
+            width: 14px;
+            height: 14px;
+            background: rgba(0, 0, 0, .7);
+            border: none;
+            cursor: pointer;
+            border-radius: 1px;
+            font-size: 9px;
+            color: rgba(200, 169, 110, .8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        #shot-info {
+            text-align: center;
+            font-size: .72rem;
+            letter-spacing: .1em;
+            color: var(--dr-muted);
+            text-transform: uppercase;
+            margin-bottom: .8rem;
+        }
+
+        /* Flash */
+        #flash {
+            position: fixed;
+            inset: 0;
+            z-index: 999;
+            background: #fff;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .05s;
+        }
+
+        #flash.on {
+            opacity: 1;
+        }
+
+        /* Cam/upload tabs */
+        .source-tabs {
+            display: flex;
+            gap: .5rem;
+            margin-bottom: .9rem;
+        }
+
+        .source-tab {
+            flex: 1;
+            padding: .5rem;
+            border: 1px solid rgba(200, 169, 110, .22);
+            background: transparent;
+            color: rgba(200, 169, 110, .55);
+            font-family: inherit;
+            font-size: .72rem;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 2px;
+            transition: all .18s;
+        }
+
+        .source-tab.active {
+            border-color: var(--dr-amber2);
+            color: var(--dr-amber2);
+            background: rgba(200, 169, 110, .08);
+        }
+
+        #upload-section {
+            display: none;
+        }
+
+        #upload-section.active {
+            display: block;
+        }
+
+        #camera-section {
+            display: none;
+        }
+
+        #camera-section.active {
+            display: block;
+        }
+
+        /* ── STEP 4: Strip ── */
+        #strip-canvas-wrap {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.4rem;
+        }
+
+        #strip-canvas {
+            border: 8px solid var(--dr-surface);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, .7), inset 0 0 0 1px rgba(200, 169, 110, .12);
+            border-radius: 2px;
+            max-width: 220px;
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .strip-actions {
+            display: flex;
+            gap: .6rem;
+            flex-wrap: wrap;
+        }
+
+        /* Gallery save row */
+        .gallery-save-row {
+            display: flex;
+            gap: .6rem;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(200, 169, 110, .12);
+        }
+
+        .gallery-save-row input[type=text] {
+            flex: 1;
+            min-width: 120px;
+            background: transparent;
+            border: 1px solid rgba(200, 169, 110, .2);
+            border-radius: 3px;
+            padding: .45rem .8rem;
+            color: var(--dr-amber);
+            font-family: inherit;
+            font-size: .78rem;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+        .gallery-save-row input[type=text]:focus {
+            border-color: var(--dr-amber);
+        }
+
+        .gallery-save-row input::placeholder {
+            color: rgba(200, 169, 110, .3);
+        }
+
+        #save-status {
+            font-size: .72rem;
+            color: var(--dr-muted);
+            margin-top: .4rem;
+            width: 100%;
+        }
+
+        /* ── Gallery modal ── */
+        #gallery-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(13, 10, 8, 0.96);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            flex-direction: column;
+            align-items: center;
+            padding: 8rem 1.5rem 2rem;
+            overflow-y: auto;
+            text-transform: lowercase;
+        }
+
+        #gallery-modal.open {
+            display: flex;
+        }
+
+        .gallery-modal-header {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 1.5rem;
+        }
+
+        .gallery-modal-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -.06em;
+            color: var(--dr-amber2);
+        }
+
+        .gallery-modal-header span {
+            font-size: .72rem;
+            letter-spacing: .12em;
+            color: var(--dr-muted);
+        }
+
+        #gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .gallery-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: .4rem;
+            cursor: pointer;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            border-radius: 2px;
+            display: block;
+            border: 1px solid rgba(200, 169, 110, .15);
+            transition: border-color .18s, transform .18s;
+        }
+
+        .gallery-item img:hover {
+            border-color: var(--dr-amber);
+            transform: scale(1.02);
+        }
+
+        .gallery-author {
+            font-size: .65rem;
+            letter-spacing: .06em;
+            color: var(--dr-muted);
+        }
+
+        a.gallery-author {
+            cursor: pointer;
+            text-decoration: underline;
+            text-decoration-thickness: 1px;
+            text-decoration-color: rgba(200, 169, 110, 0.3);
+            transition: color 0.2s, text-decoration-color 0.2s;
+        }
+
+        a.gallery-author:hover {
+            color: var(--dr-amber);
+            text-decoration-color: var(--dr-amber);
+        }
+
+        #gallery-empty {
+            font-size: .82rem;
+            color: var(--dr-muted);
+            text-align: center;
+            padding: 3rem 0;
+            width: 100%;
+        }
+
+        #gallery-loading {
+            font-size: .78rem;
+            color: var(--dr-muted);
+            text-align: center;
+            padding: 2rem 0;
+            width: 100%;
+        }
+
+        /* Lightbox */
+        #lb {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 300;
+            background: rgba(0, 0, 0, .92);
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        #lb.open {
+            display: flex;
+        }
+
+        #lb img {
+            max-height: 90vh;
+            max-width: 90vw;
+            border-radius: 2px;
+            box-shadow: 0 0 60px rgba(0, 0, 0, .8);
+        }
+
+        @media(max-width:480px) {
+            .dr-card {
+                padding: 1.4rem 1rem;
+            }
+
+            .frame-options {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .filter-options {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .step-heading {
+                font-size: 1.55rem;
+            }
+        }
+
+        /* ── Override injected site header to match darkroom amber theme ── */
+        .jh-logo,
+        .jh-logo img {
+            color: #c8a96e !important;
+        }
+
+        .jh-nav a {
+            color: rgba(200, 169, 110, 0.55) !important;
+        }
+
+        .jh-nav a:hover,
+        .jh-nav a.jh-cur {
+            color: #e6c98a !important;
+        }
+
+        /* ── Vintage film overlays ── */
+        .vintage-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            mix-blend-mode: screen;
+        }
+
+        .vintage-overlay.film-border {
+            background-image: url('gif/Super 8mm Film Border - 2.gif');
+            opacity: 0.12;
+        }
+
+        .vintage-overlay.film-burn {
+            background-image: url('gif/FILMBURN - 2.gif');
+            opacity: 0;
+            animation: filmburn-flicker 8s ease-in-out infinite;
+        }
+
+        @keyframes filmburn-flicker {
+            0% {
+                opacity: 0;
+            }
+
+            18% {
+                opacity: 0;
+            }
+
+            20% {
+                opacity: 0.12;
+            }
+
+            23% {
+                opacity: 0;
+            }
+
+            60% {
+                opacity: 0;
+            }
+
+            62% {
+                opacity: 0.08;
+            }
+
+            64% {
+                opacity: 0.15;
+            }
+
+            66% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Self-injecting site header -->
+    <script src="scripts/site-header.js"></script>
+
+    <!-- Vintage film overlays -->
+    <div class="vintage-overlay film-border"></div>
+    <div class="vintage-overlay film-burn"></div>
+
+    <div id="flash"></div>
+
+    <a href="index.html" class="back-btn">← back</a>
+
+    <!-- Gallery modal -->
+    <div id="gallery-modal" role="dialog" aria-modal="true" aria-label="Community Gallery">
+        <div class="gallery-modal-header">
+            <h2>community strips</h2>
+            <button class="dr-btn ghost" onclick="closeGallery()" style="font-size:.7rem;padding:.4rem .9rem;">✕
+                CLOSE</button>
+        </div>
+        <div id="gallery-loading">loading strips…</div>
+        <div id="gallery-grid"></div>
+        <div id="gallery-empty" style="display:none;">no strips yet — be the first!</div>
+    </div>
+
+    <!-- Lightbox -->
+    <div id="lb" onclick="closeLb()"><img id="lb-img" src="" alt="strip"></div>
+
+    <!-- ══ STEP 0: Landing ══ -->
+    <div class="step active" id="step-landing">
+        <div style="text-align:center;position:relative;z-index:10;">
+            <div class="sprocket-row">
+                <div class="sprocket"></div>
+                <div class="sprocket"></div>
+                <div class="sprocket"></div>
+                <div class="sprocket"></div>
+                <div class="sprocket"></div>
+                <div class="sprocket"></div>
+                <div class="sprocket"></div>
+            </div>
+            <div class="bigTitle">DARKROOM</div>
+            <div class="subtitle">vintage digital photobooth</div>
+            <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;">
+                <button class="dr-btn primary" onclick="goStep(1)">ENTER THE DARKROOM</button>
+                <button class="dr-btn" onclick="openGallery()">VIEW GALLERY</button>
+            </div>
+            <div class="sprocket-row" style="margin-top:2rem;margin-bottom:0;">
+                <div class="sprocket"></div>
+                <div class="sprocket"></div>
+                <div class="sprocket"></div>
+                <div class="sprocket"></div>
+                <div class="sprocket"></div>
+                <div class="sprocket"></div>
+                <div class="sprocket"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ STEP 1: Frame select ══ -->
+    <div class="step" id="step-frame">
+        <div class="dr-card">
+            <div class="progress-dots">
+                <div class="dot done"></div>
+                <div class="dot active"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+            <div class="step-label">Step 1 of 3</div>
+            <div class="step-heading">Choose your strip</div>
+            <p class="step-sub">Pick how many shots and a border style.</p>
+
+            <p
+                style="font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--dr-muted);margin-bottom:.7rem;">
+                Shots</p>
+            <div class="frame-options" id="frame-opts">
+                <button class="frame-opt selected" data-shots="2" onclick="selectFrame(this)">
+                    <div class="frame-icon">
+                        <div class="bar" style="height:18px;"></div>
+                        <div class="bar" style="height:18px;"></div>
+                    </div>
+                    <span class="frame-label">2 shots</span>
+                </button>
+                <button class="frame-opt" data-shots="3" onclick="selectFrame(this)">
+                    <div class="frame-icon">
+                        <div class="bar" style="height:12px;"></div>
+                        <div class="bar" style="height:12px;"></div>
+                        <div class="bar" style="height:12px;"></div>
+                    </div>
+                    <span class="frame-label">3 shots</span>
+                </button>
+                <button class="frame-opt" data-shots="4" onclick="selectFrame(this)">
+                    <div class="frame-icon">
+                        <div class="bar" style="height:9px;"></div>
+                        <div class="bar" style="height:9px;"></div>
+                        <div class="bar" style="height:9px;"></div>
+                        <div class="bar" style="height:9px;"></div>
+                    </div>
+                    <span class="frame-label">4 shots</span>
+                </button>
+            </div>
+
+            <p
+                style="font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--dr-muted);margin-bottom:.7rem;">
+                Border</p>
+            <div class="border-options" id="border-opts">
+                <button class="border-opt selected" data-border="black" onclick="selectBorder(this)">Classic
+                    Black</button>
+                <button class="border-opt" data-border="white" onclick="selectBorder(this)">Vintage White</button>
+                <button class="border-opt" data-border="none" onclick="selectBorder(this)">No Border</button>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;">
+                <button class="dr-btn primary" onclick="goStep(2)">NEXT →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ STEP 2: Filter select ══ -->
+    <div class="step" id="step-filter">
+        <div class="dr-card">
+            <div class="progress-dots">
+                <div class="dot done"></div>
+                <div class="dot done"></div>
+                <div class="dot active"></div>
+                <div class="dot"></div>
+            </div>
+            <div class="step-label">Step 2 of 3</div>
+            <div class="step-heading">Pick a filter</div>
+            <p class="step-sub">Applied live to your camera and baked into the final strip.</p>
+            <div class="filter-options" id="filter-opts"></div>
+            <div style="display:flex;justify-content:space-between;">
+                <button class="dr-btn" onclick="goStep(1)">← BACK</button>
+                <button class="dr-btn primary" onclick="goStep(3)">NEXT →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ STEP 3: Camera / Upload ══ -->
+    <div class="step" id="step-camera">
+        <div class="dr-card" style="max-width:520px;">
+            <div class="progress-dots">
+                <div class="dot done"></div>
+                <div class="dot done"></div>
+                <div class="dot done"></div>
+                <div class="dot active"></div>
+            </div>
+            <div class="step-label">Step 3 of 3</div>
+            <div class="step-heading">Add your photos</div>
+
+            <!-- Source tabs -->
+            <div class="source-tabs">
+                <button class="source-tab active" id="tab-cam" onclick="switchTab('cam')">📷 CAMERA</button>
+                <button class="source-tab" id="tab-upload" onclick="switchTab('upload')">↑ UPLOAD</button>
+            </div>
+
+            <!-- Camera section -->
+            <div id="camera-section" class="active">
+                <div id="camera-error">
+                    Camera unavailable. Allow camera access and try again, or switch to Upload.
+                </div>
+                <div id="camera-wrap">
+                    <video id="camera-video" autoplay muted playsinline></video>
+                    <div id="camera-overlay">
+                        <div id="countdown-display"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload section -->
+            <div id="upload-section">
+                <div class="upload-zone" id="upload-zone">
+                    <input type="file" id="file-input" accept="image/*" multiple onchange="handleUpload(this.files)">
+                    <p>click or drag photos here<br><span style="font-size:.65rem;opacity:.6;">select up to <span
+                                id="upload-slots-label">2</span> images</span></p>
+                </div>
+            </div>
+
+            <div id="shot-info">ready · <span id="shots-taken">0</span> / <span id="shots-total">2</span> added</div>
+            <div id="thumbs-row"></div>
+
+            <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:.5rem;align-items:center;">
+                <button class="dr-btn" onclick="goStep(2)">← BACK</button>
+                <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+                    <button class="dr-btn" id="btn-shoot" onclick="startCountdown()">TAKE PHOTO</button>
+                    <button class="dr-btn primary" id="btn-develop" onclick="develop()" disabled>DEVELOP →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ STEP 4: Strip preview ══ -->
+    <div class="step" id="step-strip">
+        <div class="dr-card" style="max-width:440px;">
+            <div class="progress-dots">
+                <div class="dot done"></div>
+                <div class="dot done"></div>
+                <div class="dot done"></div>
+                <div class="dot done"></div>
+            </div>
+            <div class="step-label">Developed</div>
+            <div class="step-heading">Your strip</div>
+
+            <div id="strip-canvas-wrap">
+                <canvas id="strip-canvas"></canvas>
+            </div>
+
+            <div class="strip-actions">
+                <button class="dr-btn primary" onclick="downloadStrip()">↓ DOWNLOAD</button>
+                <button class="dr-btn" onclick="retake()">RETAKE</button>
+                <button class="dr-btn ghost" onclick="goStep(0)">NEW SESSION</button>
+            </div>
+
+            <!-- Save to community gallery -->
+            <div class="gallery-save-row">
+                <input type="text" id="author-name" placeholder="your instagram @ (optional)" maxlength="30">
+                <button class="dr-btn" id="btn-save-gallery" onclick="saveToGallery()">SAVE TO GALLERY</button>
+            </div>
+            <div id="save-status"></div>
+        </div>
+    </div>
+
+    <!-- Hidden capture canvas -->
+    <canvas id="capture-canvas" style="display:none;"></canvas>
+
+    <script>
+        /* ════════════════════════════════════════════
+           SUPABASE CONFIG
+           ── Setup instructions ──
+           1. Go to https://supabase.com → create a free project
+           2. In the SQL editor, run:
+              create table public.strips (
+                id uuid default gen_random_uuid() primary key,
+                image_url text not null,
+                author text default 'anonymous',
+                created_at timestamptz default now()
+              );
+              create policy "public read"  on strips for select to anon using (true);
+              create policy "public write" on strips for insert to anon with check (true);
+              alter table strips enable row level security;
+           3. In Storage → create a bucket named "darkroom" (set to PUBLIC)
+           4. In Storage → Policies → create these policies on the darkroom bucket:
+              • SELECT for anon: allow read
+              • INSERT for anon: allow upload
+              Or run this SQL:
+              create policy "anon can upload" on storage.objects
+                for insert to anon with check (bucket_id = 'darkroom');
+              create policy "anon can read" on storage.objects
+                for select to anon using (bucket_id = 'darkroom');
+           5. Replace the two values below with your Project URL and anon key
+        ════════════════════════════════════════════ */
+        const SUPABASE_URL = 'https://hhogbehqsjzxkicbrkid.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhob2diZWhxc2p6eGtpY2Jya2lkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0NjY4NzUsImV4cCI6MjA4NzA0Mjg3NX0.4lHYGs15PpULCf0gD1_yI-QGkJOmZ-Ui3whsuxJecv0';
+
+        const _supabaseReady = SUPABASE_URL.includes('supabase.co') && !SUPABASE_URL.includes('YOUR_PROJECT');
+        const db = _supabaseReady
+            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+            : null;
+
+        /* ── State ── */
+        const state = {
+            shots: 2, border: 'black', filter: 'normal',
+            photos: [], stream: null, shooting: false, activeTab: 'cam'
+        };
+
+        const FILTERS = [
+            { id: 'normal', label: 'Normal', css: 'none' },
+            { id: 'bw', label: 'B&W', css: 'grayscale(1) contrast(1.1)' },
+            { id: 'sepia', label: 'Sepia', css: 'sepia(0.9) contrast(1.05) brightness(0.95)' },
+            { id: 'lofi', label: 'Lo-Fi', css: 'saturate(1.6) contrast(1.3) brightness(0.88)' },
+            { id: 'fade', label: 'Fade', css: 'contrast(0.82) brightness(1.12) saturate(0.65)' },
+            { id: 'vintage', label: 'Vintage', css: 'sepia(0.45) contrast(0.9) brightness(1.05) saturate(0.8)' },
+        ];
+
+        /* ── Step nav ── */
+        function goStep(n) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            const ids = ['step-landing', 'step-frame', 'step-filter', 'step-camera', 'step-strip'];
+            document.getElementById(ids[n]).classList.add('active');
+            if (n === 0) { stopCamera(); state.photos = []; }
+            if (n === 1) { stopCamera(); }
+            if (n === 2) { buildFilterSwatches(); }
+            if (n === 3) {
+                document.getElementById('shots-total').textContent = state.shots;
+                document.getElementById('upload-slots-label').textContent = state.shots;
+                rebuildThumbs(); updateBtn();
+                if (state.activeTab === 'cam') initCamera();
+            }
+            if (n === 4) { stopCamera(); }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Convenience: develop goes to step 4 and renders strip
+        function develop() {
+            if (state.photos.length === 0) return;
+            goStep(4);
+            // render happens after DOM update
+            setTimeout(renderStrip, 50);
+        }
+
+        /* ── Frame / border ── */
+        function selectFrame(btn) {
+            document.querySelectorAll('#frame-opts .frame-opt').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            state.shots = parseInt(btn.dataset.shots, 10);
+        }
+        function selectBorder(btn) {
+            document.querySelectorAll('#border-opts .border-opt').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            state.border = btn.dataset.border;
+        }
+
+        /* ── Tabs ── */
+        function switchTab(tab) {
+            state.activeTab = tab;
+            document.getElementById('tab-cam').classList.toggle('active', tab === 'cam');
+            document.getElementById('tab-upload').classList.toggle('active', tab === 'upload');
+            document.getElementById('camera-section').classList.toggle('active', tab === 'cam');
+            document.getElementById('upload-section').classList.toggle('active', tab === 'upload');
+            document.getElementById('btn-shoot').style.display = tab === 'cam' ? '' : 'none';
+            if (tab === 'cam') initCamera();
+            else stopCamera();
+        }
+
+        /* ── Filter swatches ── */
+        function buildFilterSwatches() {
+            const wrap = document.getElementById('filter-opts');
+            if (wrap.children.length) return;
+            FILTERS.forEach(f => {
+                const opt = document.createElement('button');
+                opt.className = 'filter-opt' + (f.id === state.filter ? ' selected' : '');
+                const cv = document.createElement('canvas');
+                cv.className = 'filter-swatch'; cv.width = 90; cv.height = 60;
+                const ctx = cv.getContext('2d');
+                ctx.filter = f.css;
+                const g = ctx.createLinearGradient(0, 0, 90, 60);
+                g.addColorStop(0, '#c8a96e'); g.addColorStop(0.5, '#8b5e3c'); g.addColorStop(1, '#1a130e');
+                ctx.fillStyle = g; ctx.fillRect(0, 0, 90, 60);
+                const lbl = document.createElement('span'); lbl.className = 'filter-name'; lbl.textContent = f.label;
+                opt.appendChild(cv); opt.appendChild(lbl);
+                opt.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-opt').forEach(o => o.classList.remove('selected'));
+                    opt.classList.add('selected'); state.filter = f.id; applyVideoFilter();
+                });
+                wrap.appendChild(opt);
+            });
+        }
+
+        /* ── Camera ── */
+        async function initCamera() {
+            const video = document.getElementById('camera-video');
+            const err = document.getElementById('camera-error');
+            err.style.display = 'none';
+            applyVideoFilter();
+            if (state.stream) { video.srcObject = state.stream; return; }
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 960 } }, audio: false
+                });
+                state.stream = stream;
+                video.srcObject = stream;
+            } catch (e) {
+                err.style.display = 'block';
+                document.getElementById('btn-shoot').disabled = true;
+            }
+        }
+        function stopCamera() {
+            if (state.stream) { state.stream.getTracks().forEach(t => t.stop()); state.stream = null; }
+            const v = document.getElementById('camera-video');
+            if (v) v.srcObject = null;
+        }
+        function applyVideoFilter() {
+            const v = document.getElementById('camera-video');
+            if (!v) return;
+            const f = FILTERS.find(x => x.id === state.filter);
+            v.style.filter = f ? f.css : 'none';
+        }
+
+        /* ── Countdown + Capture ── */
+        function startCountdown() {
+            if (state.shooting) return;
+            if (state.photos.length >= state.shots) return;
+            state.shooting = true;
+            document.getElementById('btn-shoot').disabled = true;
+            const disp = document.getElementById('countdown-display');
+            let c = 3; disp.textContent = c; disp.classList.add('visible');
+            const t = setInterval(() => {
+                c--;
+                if (c > 0) { disp.textContent = c; }
+                else {
+                    clearInterval(t);
+                    disp.classList.remove('visible');
+                    capturePhoto();
+                }
+            }, 1000);
+        }
+
+        function capturePhoto() {
+            const video = document.getElementById('camera-video');
+            const cap = document.getElementById('capture-canvas');
+            const vw = video.videoWidth || 640;
+            const vh = video.videoHeight || 480;
+            cap.width = vw; cap.height = vh;
+            const ctx = cap.getContext('2d');
+            ctx.save(); ctx.scale(-1, 1); ctx.drawImage(video, -vw, 0, vw, vh); ctx.restore();
+            applyCanvasFilter(ctx, vw, vh);
+            state.photos.push(cap.toDataURL('image/jpeg', 0.92));
+            doFlash(); state.shooting = false;
+            rebuildThumbs(); updateBtn(); updateShotInfo();
+        }
+
+        /* ── Upload handler ── */
+        function handleUpload(files) {
+            const remaining = state.shots - state.photos.length;
+            const toLoad = Math.min(files.length, remaining);
+            let loaded = 0;
+            for (let i = 0; i < toLoad; i++) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    // apply canvas filter to uploaded image
+                    const img = new Image();
+                    img.onload = () => {
+                        const cap = document.getElementById('capture-canvas');
+                        cap.width = img.width; cap.height = img.height;
+                        const ctx = cap.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        applyCanvasFilter(ctx, img.width, img.height);
+                        state.photos.push(cap.toDataURL('image/jpeg', 0.92));
+                        loaded++;
+                        if (loaded === toLoad) { rebuildThumbs(); updateBtn(); updateShotInfo(); }
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(files[i]);
+            }
+            // reset input so same file can be picked again
+            document.getElementById('file-input').value = '';
+        }
+
+        function applyCanvasFilter(ctx, w, h) {
+            const id = state.filter;
+            if (id === 'normal') return;
+            const img = ctx.getImageData(0, 0, w, h); const d = img.data;
+            for (let i = 0; i < d.length; i += 4) {
+                let r = d[i], g = d[i + 1], b = d[i + 2];
+                if (id === 'bw') { const l = 0.299 * r + 0.587 * g + 0.114 * b; r = g = b = l; }
+                else if (id === 'sepia') { r = Math.min(255, r * .393 + g * .769 + b * .189); g = Math.min(255, d[i] * .349 + d[i + 1] * .686 + d[i + 2] * .168); b = Math.min(255, d[i] * .272 + d[i + 1] * .534 + d[i + 2] * .131); }
+                else if (id === 'lofi') { r = Math.min(255, r * 1.3); g = Math.min(255, g * 1.1); b = Math.min(255, b * .85); }
+                else if (id === 'fade') { r = r * .82 + 30; g = g * .82 + 25; b = b * .82 + 20; }
+                else if (id === 'vintage') {
+                    const or = d[i], og = d[i + 1], ob = d[i + 2];
+                    r = Math.min(255, or * .55 + og * .45 + ob * .08 + 10);
+                    g = Math.min(255, or * .18 + og * .82 + ob * .04 + 5);
+                    b = Math.min(255, or * .05 + og * .12 + ob * .72);
+                }
+                d[i] = r; d[i + 1] = g; d[i + 2] = b;
+            }
+            ctx.putImageData(img, 0, 0);
+        }
+
+        function doFlash() {
+            const f = document.getElementById('flash');
+            f.classList.add('on'); setTimeout(() => f.classList.remove('on'), 110);
+        }
+
+        function rebuildThumbs() {
+            const row = document.getElementById('thumbs-row');
+            row.innerHTML = '';
+            for (let i = 0; i < state.shots; i++) {
+                const slot = document.createElement('div'); slot.className = 'thumb-slot';
+                if (state.photos[i]) {
+                    const img = document.createElement('img'); img.src = state.photos[i]; slot.appendChild(img);
+                    // delete button
+                    const del = document.createElement('button'); del.className = 'del-btn'; del.textContent = '✕';
+                    const idx = i;
+                    del.onclick = () => { state.photos.splice(idx, 1); rebuildThumbs(); updateBtn(); updateShotInfo(); };
+                    slot.appendChild(del);
+                }
+                row.appendChild(slot);
+            }
+        }
+
+        function updateBtn() {
+            const shoot = document.getElementById('btn-shoot');
+            const dev = document.getElementById('btn-develop');
+            const done = state.photos.length >= state.shots;
+            const hasAny = state.photos.length > 0;
+            if (shoot) {
+                shoot.disabled = state.shooting || done;
+                shoot.textContent = done ? 'ALL DONE' : 'TAKE PHOTO';
+            }
+            // Allow developing if we have ANY photos (not just when all slots are full)
+            if (dev) dev.disabled = !hasAny;
+        }
+
+        function updateShotInfo() {
+            const el = document.getElementById('shot-info');
+            const taken = state.photos.length;
+            const total = state.shots;
+            if (!el) return;
+            el.textContent = taken >= total
+                ? `all ${total} shots taken · ready to develop`
+                : `${taken} / ${total} added · ${total - taken} remaining`;
+            document.getElementById('shots-taken').textContent = taken;
+            document.getElementById('shots-total').textContent = total;
+        }
+
+        /* ── Strip rendering ── */
+        function renderStrip() {
+            const canvas = document.getElementById('strip-canvas');
+            const photos = state.photos.length > 0 ? state.photos : [];
+            const count = photos.length;
+            if (count === 0) return;
+
+            const PW = 400;
+            const PH = 300;
+            const PAD = state.border === 'none' ? 0 : 18;
+            const GAP = state.border === 'none' ? 2 : 8;
+            const BLBL = state.border === 'none' ? 0 : 38;
+            const W = PW + PAD * 2;
+            const H = PAD + (PH + GAP) * count - GAP + PAD + BLBL;
+            canvas.width = W; canvas.height = H;
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = state.border === 'white' ? '#f5edd6' : (state.border === 'black' ? '#0d0a08' : '#000');
+            ctx.fillRect(0, 0, W, H);
+
+            const promises = photos.map((url, i) => new Promise(resolve => {
+                const img = new Image();
+                img.onload = () => {
+                    // object-fit: cover — crop to fill slot without stretching
+                    const slotW = PW, slotH = PH;
+                    const iW = img.naturalWidth, iH = img.naturalHeight;
+                    const scale = Math.max(slotW / iW, slotH / iH);
+                    const srcW = slotW / scale, srcH = slotH / scale;
+                    const sx = (iW - srcW) / 2, sy = (iH - srcH) / 2;
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.rect(PAD, PAD + i * (PH + GAP), slotW, slotH);
+                    ctx.clip();
+                    ctx.drawImage(img, sx, sy, srcW, srcH, PAD, PAD + i * (PH + GAP), slotW, slotH);
+                    ctx.restore();
+                    resolve();
+                };
+                img.onerror = resolve;
+                img.src = url;
+            }));
+
+            Promise.all(promises).then(() => {
+                addGrain(ctx, W, H, 0.04);
+                if (state.border !== 'none') {
+                    const lc = state.border === 'white' ? 'rgba(90,60,30,.55)' : 'rgba(200,169,110,.42)';
+                    ctx.fillStyle = lc;
+                    ctx.font = 'bold 10px "Courier New",monospace';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('DARKROOM · JOHOSTUDIO · ' + new Date().getFullYear(), W / 2, H - BLBL + 20);
+                    ctx.font = '8px "Courier New",monospace';
+                    ctx.fillStyle = state.border === 'white' ? 'rgba(90,60,30,.3)' : 'rgba(200,169,110,.22)';
+                    ctx.fillText(new Date().toLocaleDateString('en-CA'), W / 2, H - BLBL + 32);
+                }
+            });
+        }
+
+        function addGrain(ctx, w, h, amt) {
+            const d = ctx.getImageData(0, 0, w, h); const p = d.data;
+            for (let i = 0; i < p.length; i += 4) {
+                const n = (Math.random() - .5) * 255 * amt;
+                p[i] = Math.min(255, Math.max(0, p[i] + n));
+                p[i + 1] = Math.min(255, Math.max(0, p[i + 1] + n));
+                p[i + 2] = Math.min(255, Math.max(0, p[i + 2] + n));
+            }
+            ctx.putImageData(d, 0, 0);
+        }
+
+        function downloadStrip() {
+            const canvas = document.getElementById('strip-canvas');
+            const a = document.createElement('a');
+            a.download = `darkroom-${Date.now()}.png`;
+            a.href = canvas.toDataURL('image/png');
+            a.click();
+        }
+
+        function retake() { state.photos = []; goStep(3); }
+
+        /* ── Community gallery ── */
+        async function saveToGallery() {
+            const status = document.getElementById('save-status');
+            if (!db) {
+                status.textContent = 'Gallery not configured yet — see SUPABASE_URL in the source.';
+                return;
+            }
+            const btn = document.getElementById('btn-save-gallery');
+            btn.disabled = true; btn.textContent = 'SAVING…';
+            status.textContent = '';
+
+            const canvas = document.getElementById('strip-canvas');
+            canvas.toBlob(async (blob) => {
+                const filename = `strip-${Date.now()}.png`;
+                const { error: upErr } = await db.storage
+                    .from('darkroom').upload(filename, blob, { contentType: 'image/png', upsert: false });
+                if (upErr) { status.textContent = 'Upload failed: ' + upErr.message; btn.disabled = false; btn.textContent = 'SAVE TO GALLERY'; return; }
+                const { data: { publicUrl } } = db.storage.from('darkroom').getPublicUrl(filename);
+                const author = (document.getElementById('author-name').value.trim() || 'anonymous').substring(0, 30);
+                const { error: dbErr } = await db.from('strips').insert({ image_url: publicUrl, author });
+                if (dbErr) { status.textContent = 'Save failed: ' + dbErr.message; btn.disabled = false; btn.textContent = 'SAVE TO GALLERY'; return; }
+                status.textContent = '✓ saved to the community gallery!';
+                btn.textContent = '✓ SAVED'; // leave disabled — already saved
+            }, 'image/png');
+        }
+
+        async function openGallery() {
+            document.getElementById('gallery-modal').classList.add('open');
+            document.getElementById('gallery-loading').style.display = 'block';
+            document.getElementById('gallery-empty').style.display = 'none';
+            document.getElementById('gallery-grid').innerHTML = '';
+            if (!db) {
+                document.getElementById('gallery-loading').style.display = 'none';
+                document.getElementById('gallery-empty').style.display = 'block';
+                document.getElementById('gallery-empty').textContent = 'Gallery not configured yet — fill in SUPABASE_URL in darkroom.html.';
+                return;
+            }
+            const { data, error } = await db.from('strips').select('*').order('created_at', { ascending: false }).limit(60);
+            document.getElementById('gallery-loading').style.display = 'none';
+            if (error || !data || data.length === 0) {
+                document.getElementById('gallery-empty').style.display = 'block';
+                return;
+            }
+            const grid = document.getElementById('gallery-grid');
+            data.forEach(row => {
+                const item = document.createElement('div'); item.className = 'gallery-item';
+                const rawAuthor = (row.author || 'anonymous').trim();
+                const isHandle = rawAuthor.startsWith('@');
+                const handle = isHandle ? rawAuthor.slice(1) : rawAuthor;
+                const authorHtml = isHandle
+                    ? `<a class="gallery-author" href="https://instagram.com/${encodeURIComponent(handle)}" target="_blank" rel="noopener">${rawAuthor}</a>`
+                    : `<span class="gallery-author">${rawAuthor}</span>`;
+                item.innerHTML = `<img src="${row.image_url}" alt="strip" loading="lazy">${authorHtml}`;
+                item.querySelector('img').addEventListener('click', () => openLb(row.image_url));
+                grid.appendChild(item);
+            });
+        }
+
+        function closeGallery() { document.getElementById('gallery-modal').classList.remove('open'); }
+        function openLb(src) { document.getElementById('lb-img').src = src; document.getElementById('lb').classList.add('open'); }
+        function closeLb() { document.getElementById('lb').classList.remove('open'); }
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeGallery(); closeLb(); } });
+
+    </script>
+</body>
+
+</html>

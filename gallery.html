@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -10,27 +11,27 @@
   <link rel="stylesheet" href="styles/dot-grid.css">
   <link rel="stylesheet" href="styles/clocks.css">
 </head>
-<body class="min-h-screen bg-[#071021] flex flex-col items-center justify-center gap-6">
-  <!-- Dot Grid Background -->
-  <div class="dot-grid-wrapper"></div>
+
+<body class="bg-[#000] text-white m-0 overflow-hidden h-screen w-screen relative">
+  <!-- Cables Patch -->
+  <iframe src="https://cables.gl/view/VKm0Fb"
+    style="position:absolute; top:0; left:0; width:100%; height:100%; border:0; outline:0;"
+    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"></iframe>
+
+  <!-- Self-injecting site header -->
+  <script src="scripts/site-header.js"></script>
 
   <a href="index.html" class="back-btn relative z-10">← back</a>
 
-  <div class="text-white text-3xl font-bold font-sans relative z-10">tbd</div>
-
-  <!-- new smaller link below the tbd text -->
-  <div class="relative z-10">
-    <a href="https://www.instagram.com/hosh.autumn" target="_blank" rel="noopener" class="text-sm opacity-90">
+  <!-- Link overlay (bottom right) -->
+  <div class="absolute bottom-6 right-6 z-10 text-right pointer-events-auto">
+    <a href="https://www.instagram.com/hosh.autumn" target="_blank" rel="noopener"
+      class="text-sm opacity-60 hover:opacity-100 transition-opacity">
       hosh's autumn.
     </a>
   </div>
 
-  </div>
-
-  <footer class="text-center mt-6 w-full mb-10">
-    <small>© <span id="year"></span> joho's studio 昌栢</small>
-    <div class="text-sm mt-2">ALL RIGHTS RESERVED. ®</div>
-  </footer>
+  <footer class="hidden"></footer>
 
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
@@ -39,4 +40,5 @@
   <script src="scripts/dot-grid.js"></script>
   <script src="scripts/clocks.js"></script>
 </body>
+
 </html>

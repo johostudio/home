@@ -1,59 +1,40 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>joho's studio</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
-
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles/tailwind.css">
   <link rel="stylesheet" href="styles/dot-grid.css">
   <link rel="stylesheet" href="styles/clocks.css">
 </head>
+
 <body class="min-h-screen bg-[#071021] text-[#e6eef6]">
   <!-- Dot Grid Background -->
   <div class="dot-grid-wrapper"></div>
+  <!-- Self-injecting site header -->
+  <script src="scripts/site-header.js"></script>
 
-  <div class="max-w-4xl mx-auto px-6 flex flex-col items-center relative z-10">
-    <header class="w-full text-center my-8">
-      <h1 class="text-3xl inline-flex items-center justify-center">
-        <!-- resilient icon: try PNG, fallback to favicon.ico, visible size -->
-        <img
-          src="favicon-32x32.png"
-          alt="joho icon"
-          class="inline-block h-6 w-auto mr-3"
-          onerror="this.onerror=null; this.src='favicon.ico'; this.classList.remove('h-6'); this.style.height='1em';"
-        />
-        johostudio
-      </h1>
-
-      <!-- small titles (gallery / about / vancouver / hsoh) below the main title, 70% opacity -->
-      <div class="mt-2 flex gap-6 justify-center opacity-70">
-        <a href="gallery.html" class="text-sm">GALLERY</a>
-        <a href="about.html" class="text-sm">ABOUT</a>
-        <a href="projects/vancouver.html" class="text-sm">VANCOUVER</a>
-        <a href="hoshii.html" class="text-sm">HSOH</a>
-        <a href="resume.html" class="text-sm">RESUME</a>
-        <a href="archives.html" class="text-sm">ARCHIVES</a>
-        <a href="darkroom.html" class="text-sm">DARKROOM</a>
-      </div>
-    </header>
-
+  <div class="max-w-4xl mx-auto px-6 flex flex-col items-center relative z-10 pt-28">
     <main class="w-full flex flex-col items-center">
       <!-- Socials centered in the middle, more spread out -->
       <section id="socials" class="w-full flex flex-col items-center justify-center py-20">
         <ul class="socials flex flex-col items-center gap-6">
-          <li><a class="text-lg" href="https://www.youtube.com/channel/UCm9AkiBCwALnpblVcV7E65g" target="_blank" rel="noopener">youtube</a></li>
-          <li><a class="text-lg" href="https://www.tiktok.com/@lifeofjoho" target="_blank" rel="noopener">tiktok</a></li>
-          <li><a class="text-lg" href="https://instagram.com/96joho" target="_blank" rel="noopener">ig: personal</a></li>
+          <li><a class="text-lg" href="https://www.youtube.com/channel/UCm9AkiBCwALnpblVcV7E65g" target="_blank"
+              rel="noopener">youtube</a></li>
+          <li><a class="text-lg" href="https://www.tiktok.com/@lifeofjoho" target="_blank" rel="noopener">tiktok</a>
+          </li>
+          <li><a class="text-lg" href="https://instagram.com/96joho" target="_blank" rel="noopener">ig: personal</a>
+          </li>
           <li><a class="text-lg" href="https://instagram.com/hosh.autumn">ig: photography</a></li>
           <li><a class="text-lg" href="https://instagram.com/joho.studio">ig: creative archive</a></li>
           <li><a class="text-lg" href="https://ko-fi.com/johostudio">ko-fi / tba shop</a></li>
           <li><a class="text-lg" href="https://www.buymeacoffee.com/johostudio">buy me a matcha tea</a></li>
-          <li><a class="text-lg" href="https://linktr.ee/dusktodvwn">"hoshii.wav" / '26 q1</a></li>
         </ul>
       </section>
 
@@ -79,4 +60,5 @@
   <script src="scripts/dot-grid.js"></script>
   <script src="scripts/clocks.js"></script>
 </body>
+
 </html>

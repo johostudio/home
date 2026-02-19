@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" style="background:#071021;">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -11,36 +12,35 @@
   <link rel="stylesheet" href="styles/dot-grid.css">
   <link rel="stylesheet" href="styles/clocks.css">
 </head>
+
 <body class="min-h-screen bg-[#071021] text-[#e6eef6]">
   <!-- Dot Grid Background -->
   <div class="dot-grid-wrapper"></div>
 
+  <!-- Self-injecting site header -->
+  <script src="scripts/site-header.js"></script>
 
   <a href="index.html" class="back-btn relative z-10">← back</a>
 
-  <main class="min-h-screen flex items-start justify-center pt-28 px-6 relative z-10">
-    <section class="max-w-3xl w-full">
+  <main class="min-h-screen flex flex-col items-center justify-center px-6 relative z-10">
+    <section class="max-w-3xl w-full flex flex-col items-center">
       <h1 class="text-2xl font-bold mb-4 text-center">about</h1>
 
       <!-- Editable area: edit the text directly here -->
-      <div
-        id="about-edit"
-        contenteditable="true"
-        spellcheck="true"
-        class="prose max-w-none p-6 text-white focus:outline-none text-center"
-        aria-label="About me editor"
-      >
+      <div id="about-edit" contenteditable="true" spellcheck="true"
+        class="prose max-w-none p-6 text-white focus:outline-none text-center" aria-label="About me editor">
         <!-- Replace this placeholder text with your about content. -->
         <p>part-time engineering / interactive design student, part-time multimedia creative, but a full-time napper.
-            <br>all js for fun :> </p>
+          <br>all js for fun :>
+        </p>
       </div>
+
+      <footer class="text-center mt-12 w-full">
+        <small>© <span id="year"></span> joho's studio 昌栢</small>
+        <div class="text-sm mt-2">ALL RIGHTS RESERVED. ®</div>
+      </footer>
     </section>
   </main>
-
-  <footer class="text-center mt-6 w-full mb-10">
-    <small>© <span id="year"></span> joho's studio 昌栢</small>
-    <div class="text-sm mt-2">ALL RIGHTS RESERVED. ®</div>
-  </footer>
 
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
@@ -49,4 +49,5 @@
   <script src="scripts/dot-grid.js"></script>
   <script src="scripts/clocks.js"></script>
 </body>
+
 </html>
