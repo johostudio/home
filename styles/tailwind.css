@@ -1010,23 +1010,7 @@ main,
   z-index: 3;
 }
 
-/* ── Shared site header (used on every page) ── */
-.site-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 200;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 1rem;
-  padding-bottom: 1.5rem;
-  pointer-events: none;
-  background: rgba(7, 16, 33, 0.4);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
+/* ── Shared site header (now handled by site-header.js) ── */
 
 .site-header a.site-logo {
   pointer-events: auto;
