@@ -82,12 +82,12 @@
   /* ── 4. Build nav HTML ── */
   var items = [
     { key: 'gallery', label: 'GALLERY', href: base + 'gallery' },
-    { key: 'about', label: 'ABOUT', href: base + 'about' },
-    { key: 'vancouver', label: 'VANCOUVER', href: base + 'projects/vancouver' },
-    { key: 'hoshii', label: 'HSOH', href: base + 'hoshii' },
-    { key: 'resume', label: 'RESUME', href: base + 'resume' },
     { key: 'archives', label: 'ARCHIVES', href: base + 'archives' },
-    { key: 'darkroom', label: 'DARKROOM', href: base + 'darkroom' }
+    { key: 'hoshii', label: 'HSOH', href: base + 'hoshii' },
+    { key: 'vancouver', label: 'VANCOUVER', href: base + 'projects/vancouver' },
+    { key: 'darkroom', label: 'DARKROOM', href: base + 'darkroom' },
+    { key: 'resume', label: 'RESUME', href: base + 'resume' },
+    { key: 'about', label: 'ABOUT', href: base + 'about' }
 
   ];
 
