@@ -124,13 +124,37 @@
     if (w === logicalW && h === logicalH && ctx) return;
 
     dpr = Math.min(2, window.devicePixelRatio || 1);
+
+    // CAPPING: Limit canvas dimensions to avoid GPU memory limits on high-res devices
+    // 4096px is a conservative safe limit for most modern and semi-older devices
+    var MAX_CANVAS = 4096;
+    var rawW = w * dpr;
+    var rawH = h * dpr;
+
+    if (rawW > MAX_CANVAS) {
+      dpr = MAX_CANVAS / w;
+      rawW = MAX_CANVAS;
+      rawH = h * dpr;
+    }
+    if (rawH > MAX_CANVAS) {
+      dpr = MAX_CANVAS / h;
+      rawH = MAX_CANVAS;
+      rawW = w * dpr;
+    }
+
     logicalW = w;
     logicalH = h;
-    canvas.width = w * dpr;
-    canvas.height = h * dpr;
-    ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    canvas.width = rawW;
+    canvas.height = rawH;
+
+    try {
+      ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Failed to get 2D context');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    } catch (err) {
+      console.error('Dot Grid Error:', err);
+      return;
+    }
 
     var ov = config.overflow;
     var baseCell = config.dotSize + config.gap;
@@ -168,6 +192,7 @@
     }
 
     refreshTextRects();
+    console.log('Dot Grid initialized successfully: ' + dots.length + ' dots');
   }
 
   /* ---- render loop ---- */
@@ -265,7 +290,8 @@
     var dy = clientY - pointer.lastY;
     var vx = (dx / dtMs) * 1000;
     var vy = (dy / dtMs) * 1000;
-    var speed = Math.hypot(vx, vy);
+    // Replace Math.hypot for ES5 compatibility
+    var speed = Math.sqrt(vx * vx + vy * vy);
 
     if (speed > config.maxSpeed) {
       var scale = config.maxSpeed / speed;
