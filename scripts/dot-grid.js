@@ -114,9 +114,13 @@
 
   /* ---- sizing & grid build ---- */
   function sizeCanvas() {
-    var w = wrapper.offsetWidth;
-    var h = wrapper.offsetHeight;
-    if (w === 0 || h === 0) return;
+    var w = wrapper.clientWidth || wrapper.offsetWidth || window.innerWidth;
+    var h = wrapper.clientHeight || wrapper.offsetHeight || window.innerHeight;
+    if (w === 0 || h === 0) {
+      // If still 0, try again shortly (handles race conditions with layout)
+      setTimeout(sizeCanvas, 50);
+      return;
+    }
     if (w === logicalW && h === logicalH && ctx) return;
 
     dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -156,7 +160,9 @@
         dots.push({
           cx: startX + col * cell,
           cy: startY + row * cell,
-          x: 0, y: 0, vx: 0, vy: 0
+          x: 0, y: 0, vx: 0, vy: 0,
+          drift: Math.random() * Math.PI * 2,
+          driftSpeed: 0.2 + Math.random() * 0.4
         });
       }
     }
@@ -179,9 +185,14 @@
     var py = pointer.y;
     var k = config.spring;
     var c = config.damping;
+    var time = now / 1000;
 
     for (var i = 0, len = dots.length; i < len; i++) {
       var dot = dots[i];
+
+      // ambient drift (circular movement around center)
+      var driftX = Math.cos(time * dot.driftSpeed + dot.drift) * 1.5;
+      var driftY = Math.sin(time * dot.driftSpeed + dot.drift) * 1.5;
 
       // spring physics
       var ax = -k * dot.x - c * dot.vx;
@@ -196,8 +207,8 @@
         dot.x = 0; dot.y = 0; dot.vx = 0; dot.vy = 0;
       }
 
-      var drawX = dot.cx + dot.x;
-      var drawY = dot.cy + dot.y;
+      var drawX = dot.cx + dot.x + driftX;
+      var drawY = dot.cy + dot.y + driftY;
 
       // skip dots entirely outside canvas (from overflow)
       if (drawX < -circleR || drawX > logicalW + circleR ||
@@ -214,9 +225,9 @@
 
       // Special case: Archives page radial mask (keep center clean for sphere)
       if (window.location.pathname.indexOf('archives') !== -1) {
-        var cx = logicalW / 2, cy = logicalH / 2;
-        var dx = drawX - cx, dy = drawY - cy;
-        var dist = Math.sqrt(dx * dx + dy * dy);
+        var arc_cx = logicalW / 2, arc_cy = logicalH / 2;
+        var arc_dx = drawX - arc_cx, arc_dy = drawY - arc_cy;
+        var dist = Math.sqrt(arc_dx * arc_dx + arc_dy * arc_dy);
         var maskR = Math.min(logicalW, logicalH) * 0.8; // Expanded to 80%
         if (dist < maskR) {
           tFade *= (dist / maskR); // linear fade out
@@ -239,10 +250,19 @@
 
   /* ---- pointer tracking ---- */
   function onMove(e) {
+    var clientX, clientY;
+    if (e.touches && e.touches.length > 0) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+
     var now = performance.now();
     var dtMs = pointer.lastTime ? now - pointer.lastTime : 16;
-    var dx = e.clientX - pointer.lastX;
-    var dy = e.clientY - pointer.lastY;
+    var dx = clientX - pointer.lastX;
+    var dy = clientY - pointer.lastY;
     var vx = (dx / dtMs) * 1000;
     var vy = (dy / dtMs) * 1000;
     var speed = Math.hypot(vx, vy);
@@ -253,15 +273,15 @@
     }
 
     pointer.lastTime = now;
-    pointer.lastX = e.clientX;
-    pointer.lastY = e.clientY;
+    pointer.lastX = clientX;
+    pointer.lastY = clientY;
     pointer.vx = vx;
     pointer.vy = vy;
     pointer.speed = speed;
 
     var rect = wrapper.getBoundingClientRect();
-    pointer.x = e.clientX - rect.left;
-    pointer.y = e.clientY - rect.top;
+    pointer.x = clientX - rect.left;
+    pointer.y = clientY - rect.top;
 
     if (speed < config.speedTrigger) return;
 
@@ -283,9 +303,18 @@
   }
 
   function onClick(e) {
+    var clientX, clientY;
+    if (e.changedTouches && e.changedTouches.length > 0) {
+      clientX = e.changedTouches[0].clientX;
+      clientY = e.changedTouches[0].clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+
     var rect = wrapper.getBoundingClientRect();
-    var cx = e.clientX - rect.left;
-    var cy = e.clientY - rect.top;
+    var cx = clientX - rect.left;
+    var cy = clientY - rect.top;
     var rSq = config.shockRadius * config.shockRadius;
 
     for (var i = 0, len = dots.length; i < len; i++) {
@@ -314,11 +343,19 @@
   window.addEventListener('scroll', refreshTextRects, { passive: true });
 
   document.addEventListener('mousemove', onMove, { passive: true });
+  document.addEventListener('touchmove', onMove, { passive: false });
+  document.addEventListener('touchstart', function (e) {
+    pointer.lastX = e.touches[0].clientX;
+    pointer.lastY = e.touches[0].clientY;
+  }, { passive: true });
   document.addEventListener('click', onClick);
+  document.addEventListener('touchend', onClick);
 
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduceMotion) {
+    // If reduced motion, just render once and stop
     lastFrame = performance.now();
+    sizeCanvas(); // ensure dots are built
     frame(lastFrame);
     cancelAnimationFrame(rafId);
   } else {
