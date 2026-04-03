@@ -436,17 +436,26 @@
     const yearEl = document.getElementById('year');
     if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-    // Password gate
+    // Password gate (hash-based — password is not stored in source)
     (function () {
-      const PASS = 'johostudio';
+      // SHA-256 hash of the correct password
+      const PASS_HASH = '1c3e43116cc86a26f01d85d1d5118b4b721c6e5f262d1e73c4ee30f7e4869860';
+
+      async function sha256(str) {
+        const buf = new TextEncoder().encode(str);
+        const hash = await crypto.subtle.digest('SHA-256', buf);
+        return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+      }
+
       const gate = document.getElementById('password-gate');
       const input = document.getElementById('pw-input');
       const error = document.getElementById('pw-error');
       const content = document.getElementById('resume-content');
 
-      input.addEventListener('keydown', function (e) {
+      input.addEventListener('keydown', async function (e) {
         if (e.key === 'Enter') {
-          if (input.value === PASS) {
+          const hashed = await sha256(input.value);
+          if (hashed === PASS_HASH) {
             gate.classList.add('hidden');
             content.classList.add('unlocked');
           } else {

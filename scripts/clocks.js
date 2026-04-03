@@ -14,7 +14,7 @@
   }
 
   // Create clock elements
-  function createClock(side, label) {
+  function createClock(side, label, parent) {
     var container = document.createElement('div');
     container.className = 'clock-container clock-' + side;
 
@@ -31,13 +31,18 @@
     container.appendChild(labelEl);
     container.appendChild(timeEl);
     container.appendChild(dateEl);
-    document.body.appendChild(container);
+    parent.appendChild(container);
 
     return { time: timeEl, date: dateEl };
   }
 
-  var nanchangEl = createClock('left', 'Nanchang');
-  var pstEl = createClock('right', 'Vancouver');
+  // Wrapper div so clocks can be styled as a row on mobile
+  var wrapper = document.createElement('div');
+  wrapper.className = 'clocks-wrapper';
+  document.body.appendChild(wrapper);
+
+  var nanchangEl = createClock('left', 'Nanchang', wrapper);
+  var pstEl = createClock('right', 'Vancouver', wrapper);
 
   function formatDate(date) {
     var m = date.getMonth() + 1;

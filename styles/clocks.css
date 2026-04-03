@@ -37,3 +37,62 @@
   opacity: 0.5;
   margin-top: 1px;
 }
+
+/* ── Mobile clock spacing fixes ── */
+@media (max-width: 768px) {
+  .clock-container {
+    top: 100px;
+    font-size: 10px;
+  }
+
+  .clock-left {
+    left: 20px;
+  }
+
+  .clock-right {
+    right: 20px;
+  }
+
+  .clock-time {
+    font-size: 11px;
+  }
+
+  .clock-label {
+    font-size: 8px;
+  }
+
+  .clock-date {
+    font-size: 10px;
+  }
+}
+
+/* Very small screens — stack clocks as a centered row */
+@media (max-width: 480px) {
+  .clocks-wrapper {
+    position: fixed;
+    top: 90px;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    pointer-events: none;
+  }
+
+  .clock-container {
+    position: relative;
+    top: auto;
+    left: auto !important;
+    right: auto !important;
+    display: inline-block;
+    font-size: 9px;
+  }
+
+  .clock-left,
+  .clock-right {
+    left: auto;
+    right: auto;
+    text-align: center;
+  }
+}
