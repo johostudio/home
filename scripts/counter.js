@@ -1,7 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
-    fetch('https://abacus.jasoncameron.dev/hit/johostudio/portfolio')
+    const isNewVisitor = !localStorage.getItem('hasVisited');
+    
+    const endpoint = isNewVisitor 
+        ? 'https://abacus.jasoncameron.dev/hit/johostudio/portfolio'
+        : 'https://abacus.jasoncameron.dev/get/johostudio/portfolio';
+
+    fetch(endpoint)
         .then(response => response.json())
         .then(data => {
+            if (isNewVisitor) {
+                localStorage.setItem('hasVisited', 'true');
+            }
+
             const count = data.value || 0;
             const countStr = String(count).padStart(5, '0');
             
