@@ -11,6 +11,8 @@
   var path = window.location.pathname;
   var inSub = path.indexOf('/projects/') !== -1;
   var base = inSub ? '../' : '';
+  
+  var isHome = (path === '/' || path.endsWith('/index.html') || path.endsWith('/index') || path === '' || path.indexOf('index') !== -1);
 
   /* ── 2. Detect current section ── */
   var cur = '';
@@ -28,6 +30,7 @@
   style.id = 'jh-header-styles';
   style.textContent = [
     /* ── Base header ── */
+    '* { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important; }',
     '.jh-header {',
     '  position: fixed;',
     '  top: 0; left: 0; right: 0;',
@@ -36,7 +39,7 @@
     '  flex-direction: column;',
     '  align-items: center;',
     '  padding-top: 40px;',
-    '  padding-bottom: 1.5rem;',
+    '  padding-bottom: 3rem;',
     '  pointer-events: none;',
     '  transition: background 0.3s ease, backdrop-filter 0.3s ease;',
     '}',
@@ -52,12 +55,19 @@
     '',
     '.jh-header.jh-scrolled {',
     '  pointer-events: none;',
-    '  background: rgba(7, 16, 33, 0.45);',
-    '  backdrop-filter: blur(12px);',
-    '  -webkit-backdrop-filter: blur(12px);',
-    '  mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);',
-    '  -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);',
+    '  background: rgba(7, 16, 33, 0.65);',
+    '  backdrop-filter: blur(16px);',
+    '  -webkit-backdrop-filter: blur(16px);',
+    '  mask-image: linear-gradient(to bottom, black 50%, transparent 100%);',
+    '  -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);',
     '}',
+    '',
+    '    /* ── Home Page Black Text ── */',
+    '.jh-home-header .jh-logo { color: #000 !important; }',
+    '.jh-home-header .jh-nav a { color: rgba(0, 0, 0, 0.6) !important; }',
+    '.jh-home-header .jh-nav a:hover, .jh-home-header .jh-nav a.jh-cur { color: #000 !important; }',
+    '.jh-home-header .jh-hamburger { color: #000 !important; }',
+    '.jh-home-header.jh-scrolled { background: rgba(255, 255, 255, 0.45) !important; }',
     '',
     /* ── Logo ── */
     '.jh-logo {',
@@ -128,7 +138,7 @@
     '',
     '  .jh-header {',
     '    padding-top: 24px;',
-    '    padding-bottom: 0.75rem;',
+    '    padding-bottom: 1.5rem;',
     '  }',
     '',
     '  .jh-header.jh-scrolled {',
@@ -200,13 +210,13 @@
   /* ── 4. Build nav HTML ── */
   var items = [
     { key: 'gallery', label: 'GALLERY', href: base + 'gallery' },
+    { key: 'links', label: 'LINKS', href: base + 'links' },
     { key: 'archives', label: 'ARCHIVES', href: base + 'archives' },
     { key: 'hoshii', label: 'HSOH', href: base + 'hoshii' },
     { key: 'vancouver', label: 'VANCOUVER', href: base + 'projects/vancouver' },
     { key: 'darkroom', label: 'DARKROOM', href: base + 'darkroom' },
     { key: 'resume', label: 'RESUME', href: base + 'resume' },
-    { key: 'about', label: 'ABOUT', href: base + 'about' },
-    { key: 'links', label: 'LINKS', href: base + 'links' }
+    { key: 'about', label: 'ABOUT', href: base + 'about' }
   ];
 
   var navLinks = items.map(function (item) {
@@ -222,6 +232,9 @@
   /* ── 5. Build & insert header element ── */
   var header = document.createElement('header');
   header.className = 'jh-header';
+  if (isHome) {
+    header.className += ' jh-home-header';
+  }
   header.innerHTML =
     '<div class="jh-header-top">' +
     '<a class="jh-logo" href="' + base + '.">' +

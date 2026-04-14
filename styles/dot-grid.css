@@ -1,3 +1,6 @@
+html {
+  background-color: #071021;
+}
 /* Dot Grid Background */
 .dot-grid-wrapper {
   position: fixed;
