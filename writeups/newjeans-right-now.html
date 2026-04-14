@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NewJeans — Right Now — joho's studio</title>
+  <link rel="icon" type="image/x-icon" href="../favicon.ico" />
+  <link rel="stylesheet" href="../styles/tailwind-prod.css">
+  <link rel="stylesheet" href="../styles/dot-grid.css">
+  <link rel="stylesheet" href="../styles/clocks.css">
+  <link rel="stylesheet" href="../styles/writeup.css">
+</head>
+<body class="min-h-screen bg-[#071021] text-[#e6eef6]">
+  <div class="dot-grid-wrapper"></div>
+  <script src="../scripts/site-header.js"></script>
+
+  <main class="writeup-main relative z-10">
+    <a href="../gallery.html" class="writeup-back">← back to gallery</a>
+
+    <header class="writeup-header">
+      <h1>NewJeans — "Right Now" Kinetic Typography</h1>
+      <div class="writeup-meta">
+        <span class="writeup-date">Jan 2025</span>
+        <span class="writeup-tag">Motion Graphics</span>
+      </div>
+    </header>
+
+    <div class="writeup-cover">
+      <img src="../gif/NWJNS-RIGHTNOW.png" alt="NewJeans Right Now">
+    </div>
+
+    <div class="writeup-body" id="writeup-body"></div>
+  </main>
+
+  <script type="text/markdown" id="writeup-md">
+## About
+
+[IAT 100 Summer 2025] Kinetic typography video for NewJeans' "Right Now".
+
+## Watch
+
+- [Watch on YouTube →](https://www.youtube.com/watch?v=5yKRPkG97Z4)
+
+---
+
+*more details coming soon...*
+  </script>
+
+  <footer class="text-center mt-16 w-full mb-10 relative z-10">
+    <small>© <span id="year"></span> joho's studio 昌栢</small>
+    <div class="text-sm mt-2">ALL RIGHTS RESERVED. ®</div>
+  </footer>
+
+  <script>
+    const y = document.getElementById('year');
+    if (y) y.textContent = new Date().getFullYear();
+  </script>
+  <script src="../scripts/writeup-renderer.js"></script>
+  <script src="../scripts/page-transitions.js"></script>
+  <script src="../scripts/dot-grid.js"></script>
+  <script src="../scripts/clocks.js"></script>
+</body>
+</html>

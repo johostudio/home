@@ -2,8 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const isNewVisitor = !localStorage.getItem('hasVisited');
     
     const endpoint = isNewVisitor 
-        ? 'https://abacus.jasoncameron.dev/hit/johostudio/portfolio'
-        : 'https://abacus.jasoncameron.dev/get/johostudio/portfolio';
+        ? 'https://api.counterapi.dev/v1/johostudio/portfolio/up'
+        : 'https://api.counterapi.dev/v1/johostudio/portfolio';
 
     fetch(endpoint)
         .then(response => response.json())
@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem('hasVisited', 'true');
             }
 
-            const count = data.value || 0;
+            const count = data.count || 0;
             const countStr = String(count).padStart(5, '0');
             
             const counters = document.querySelectorAll('.visitor-count');

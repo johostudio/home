@@ -7,57 +7,22 @@
   <title>joho's studio</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
-  <!-- Tailwind CDN -->
   <link rel="stylesheet" href="styles/tailwind-prod.css">
   <link rel="stylesheet" href="styles/dot-grid.css">
   <link rel="stylesheet" href="styles/clocks.css">
 </head>
 
-<body class="min-h-screen bg-[#071021] text-[#e6eef6]">
-  <!-- Dot Grid Background -->
-  <div class="dot-grid-wrapper"></div>
+<body class="bg-[#000] text-white m-0 overflow-hidden h-screen w-screen relative">
+  <!-- Cables Patch -->
+  <iframe src="https://cables.gl/view/VKm0Fb"
+    style="position:absolute; top:0; left:0; width:100%; height:100%; border:0; outline:0;"
+    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"></iframe>
+
   <!-- Self-injecting site header -->
   <script src="scripts/site-header.js"></script>
 
-  <div class="max-w-4xl mx-auto px-6 flex flex-col items-center relative z-10 pt-28">
-    <main class="w-full flex flex-col items-center">
-      <!-- Socials centered in the middle, more spread out -->
-      <section id="socials" class="w-full flex flex-col items-center justify-center py-20">
-        <ul class="socials flex flex-col items-center gap-6">
-          <li><a class="text-lg" href="https://www.youtube.com/channel/UCm9AkiBCwALnpblVcV7E65g" target="_blank"
-              rel="noopener">youtube</a></li>
-          <li><a class="text-lg" href="https://www.tiktok.com/@lifeofjoho" target="_blank" rel="noopener">tiktok</a>
-          </li>
-          <li><a class="text-lg" href="https://instagram.com/96joho" target="_blank" rel="noopener">ig: personal</a>
-          </li>
-          <li><a class="text-lg" href="https://instagram.com/hosh.autumn">ig: photography</a></li>
-          <li><a class="text-lg" href="https://instagram.com/joho.studio">ig: creative archive</a></li>
-          <li><a class="text-lg" href="https://ko-fi.com/johostudio">ko-fi / tba shop</a></li>
-          <li><a class="text-lg" href="https://www.buymeacoffee.com/johostudio">buy me a matcha latte !</a></li>
-        </ul>
-      </section>
+  <footer class="hidden"></footer>
 
-      <!-- Contact centered -->
-      <section id="contact" class="w-full text-center mb-16">
-        <h2 class="text-2xl mb-4">contact:</h2>
-        <p><a href="mailto:contact@joho.studio">contact@joho.studio</a></p>
-      </section>
-    </main>
-
-    <footer class="text-center mt-6 w-full mb-10">
-      <small>© <span id="year"></span> joho's studio 昌栢</small>
-      <div class="text-sm mt-2">ALL RIGHTS RESERVED. ®</div>
-      <div class="visitor-counter-wrap text-xs mt-4 text-[#9aa4b2] opacity-50 font-mono tracking-widest hidden">
-        [<span class="visitor-count">00000</span>]
-      </div>
-    </footer>
-  </div>
-
-  <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
-  </script>
-  <!-- include glitch script -->
-  <script src="scripts/glitch.js"></script>
   <script src="scripts/page-transitions.js"></script>
   <script src="scripts/dot-grid.js"></script>
   <script src="scripts/clocks.js"></script>

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>joho.studio — joho's studio</title>
+  <link rel="icon" type="image/x-icon" href="../favicon.ico" />
+  <link rel="stylesheet" href="../styles/tailwind-prod.css">
+  <link rel="stylesheet" href="../styles/dot-grid.css">
+  <link rel="stylesheet" href="../styles/clocks.css">
+  <link rel="stylesheet" href="../styles/writeup.css">
+</head>
+<body class="min-h-screen bg-[#071021] text-[#e6eef6]">
+  <div class="dot-grid-wrapper"></div>
+  <script src="../scripts/site-header.js"></script>
+
+  <main class="writeup-main relative z-10">
+    <a href="../gallery.html" class="writeup-back">← back to gallery</a>
+
+    <header class="writeup-header">
+      <h1>joho.studio</h1>
+      <div class="writeup-meta">
+        <span class="writeup-date">Dec 2025</span>
+        <span class="writeup-tag">Engineering</span>
+      </div>
+    </header>
+
+    <div class="writeup-body" id="writeup-body"></div>
+  </main>
+
+  <script type="text/markdown" id="writeup-md">
+## Overview
+
+Personal portfolio site built from scratch — a non-coder trying to learn to make things work (and still look pretty).
+
+## Stack
+
+- HTML / CSS / JavaScript
+- Tailwind CSS
+- Cables.gl (for the landing visual)
+- Vercel (hosting)
+
+## Links
+
+- [Visit joho.studio →](https://joho.studio/)                  
+- [GitHub repo →](https://github.com/johostudio/home)
+
+---
+
+*more details coming soon...*
+  </script>
+
+  <footer class="text-center mt-16 w-full mb-10 relative z-10">
+    <small>© <span id="year"></span> joho's studio 昌栢</small>
+    <div class="text-sm mt-2">ALL RIGHTS RESERVED. ®</div>
+  </footer>
+
+  <script>
+    const y = document.getElementById('year');
+    if (y) y.textContent = new Date().getFullYear();
+  </script>
+  <script src="../scripts/writeup-renderer.js"></script>
+  <script src="../scripts/page-transitions.js"></script>
+  <script src="../scripts/dot-grid.js"></script>
+  <script src="../scripts/clocks.js"></script>
+</body>
+</html>

@@ -14,7 +14,8 @@
 
   /* ── 2. Detect current section ── */
   var cur = '';
-  if (path.indexOf('gallery') !== -1) cur = 'gallery';
+  if (path.indexOf('links') !== -1) cur = 'links';
+  else if (path.indexOf('gallery') !== -1 || path.indexOf('writeups') !== -1) cur = 'gallery';
   else if (path.indexOf('about') !== -1) cur = 'about';
   else if (path.indexOf('vancouver') !== -1 || path.indexOf('project') !== -1) cur = 'vancouver';
   else if (path.indexOf('hoshii') !== -1) cur = 'hoshii';
@@ -204,7 +205,8 @@
     { key: 'vancouver', label: 'VANCOUVER', href: base + 'projects/vancouver' },
     { key: 'darkroom', label: 'DARKROOM', href: base + 'darkroom' },
     { key: 'resume', label: 'RESUME', href: base + 'resume' },
-    { key: 'about', label: 'ABOUT', href: base + 'about' }
+    { key: 'about', label: 'ABOUT', href: base + 'about' },
+    { key: 'links', label: 'LINKS', href: base + 'links' }
   ];
 
   var navLinks = items.map(function (item) {
