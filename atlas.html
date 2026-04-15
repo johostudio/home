@@ -569,13 +569,32 @@
     }
 
     .archive-footer {
-      margin-top: 3.8rem;
-      padding: 0.8rem 1rem 3rem;
+      margin-top: 3.4rem;
+      padding: 0.9rem 1rem 3rem;
       text-align: center;
-      font-size: 0.66rem;
-      letter-spacing: -0.01em;
+      display: grid;
+      gap: 0.34rem;
+    }
+
+    .archive-footer-line {
+      margin: 0;
+      color: rgba(230, 238, 246, 0.88);
+      letter-spacing: -0.045em;
       text-transform: lowercase;
-      color: rgba(230, 238, 246, 0.44);
+      font-size: clamp(0.92rem, 1.8vw, 1.05rem);
+      line-height: 1.08;
+    }
+
+    .archive-footer-strong {
+      color: rgba(230, 238, 246, 0.96);
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      font-size: clamp(1.08rem, 2.4vw, 1.42rem);
+      line-height: 1.05;
+    }
+
+    .atlas-menu-toggle .label-short {
+      display: none;
     }
 
     main {
@@ -731,6 +750,14 @@
         font-size: 0.66rem;
         line-height: 1.15;
       }
+
+      .atlas-menu-toggle .label-full {
+        display: none;
+      }
+
+      .atlas-menu-toggle .label-short {
+        display: inline;
+      }
     }
 
     @media (max-width: 640px) {
@@ -786,6 +813,15 @@
       .archive-footer {
         margin-top: 3rem;
         padding-bottom: 2.6rem;
+        gap: 0.28rem;
+      }
+
+      .archive-footer-line {
+        font-size: 0.84rem;
+      }
+
+      .archive-footer-strong {
+        font-size: 1.02rem;
       }
     }
   </style>
@@ -903,16 +939,19 @@
 
     <section class="atlas-controls" aria-label="atlas controls">
       <div class="atlas-controls-grid">
-        <button class="atlas-menu-toggle" type="button" data-overlay-target="style">map style</button>
-        <button class="atlas-menu-toggle" type="button" data-overlay-target="jump">fast track</button>
-        <button class="atlas-menu-toggle" type="button" data-overlay-target="legend">legend</button>
-        <button class="atlas-menu-toggle" type="button" data-overlay-target="add">add your city</button>
-        <button class="atlas-menu-toggle" type="button" data-overlay-target="stamp">stamp board</button>
-        <button class="atlas-menu-toggle" type="button" data-overlay-target="browse">browse entries</button>
+        <button class="atlas-menu-toggle" type="button" data-overlay-target="style"><span class="label-full">map style</span><span class="label-short">style</span></button>
+        <button class="atlas-menu-toggle" type="button" data-overlay-target="jump"><span class="label-full">fast track</span><span class="label-short">track</span></button>
+        <button class="atlas-menu-toggle" type="button" data-overlay-target="legend"><span class="label-full">legend</span><span class="label-short">legend</span></button>
+        <button class="atlas-menu-toggle" type="button" data-overlay-target="add"><span class="label-full">add your city</span><span class="label-short">add city</span></button>
+        <button class="atlas-menu-toggle" type="button" data-overlay-target="stamp"><span class="label-full">stamp board</span><span class="label-short">stamps</span></button>
+        <button class="atlas-menu-toggle" type="button" data-overlay-target="browse"><span class="label-full">browse entries</span><span class="label-short">browse</span></button>
       </div>
     </section>
 
-    <footer class="archive-footer">johostudio, all rights reserved</footer>
+    <footer class="archive-footer" aria-label="copyright notice">
+      <p class="archive-footer-line">© 2026 joho's studio 昌佑</p>
+      <p class="archive-footer-line archive-footer-strong">ALL RIGHTS RESERVED. ®</p>
+    </footer>
   </main>
 
   <script src="scripts/cloudflare-config.js"></script>
