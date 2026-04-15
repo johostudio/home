@@ -99,6 +99,81 @@
       return items[items.length - 1];
     }
 
+    function zonesForBias(bias) {
+      var defaultZones = [
+        { weight: 1.1, x0: 0.00, x1: 0.26, y0: 0.00, y1: 0.34 },
+        { weight: 1.1, x0: 0.74, x1: 1.00, y0: 0.00, y1: 0.34 },
+        { weight: 1.2, x0: 0.00, x1: 0.30, y0: 0.48, y1: 1.00 },
+        { weight: 1.2, x0: 0.70, x1: 1.00, y0: 0.48, y1: 1.00 },
+        { weight: 0.95, x0: 0.08, x1: 0.38, y0: 0.68, y1: 1.00 },
+        { weight: 0.95, x0: 0.62, x1: 0.92, y0: 0.68, y1: 1.00 }
+      ];
+
+      var map = {
+        'left-top': [
+          { weight: 1.6, x0: 0.00, x1: 0.28, y0: 0.00, y1: 0.36 },
+          { weight: 1.0, x0: 0.00, x1: 0.24, y0: 0.36, y1: 0.72 },
+          { weight: 0.7, x0: 0.08, x1: 0.42, y0: 0.60, y1: 1.00 }
+        ],
+        'right-top': [
+          { weight: 1.6, x0: 0.72, x1: 1.00, y0: 0.00, y1: 0.36 },
+          { weight: 1.0, x0: 0.76, x1: 1.00, y0: 0.36, y1: 0.72 },
+          { weight: 0.7, x0: 0.58, x1: 0.92, y0: 0.60, y1: 1.00 }
+        ],
+        'left-bottom': [
+          { weight: 1.7, x0: 0.00, x1: 0.30, y0: 0.56, y1: 1.00 },
+          { weight: 0.8, x0: 0.00, x1: 0.24, y0: 0.20, y1: 0.56 }
+        ],
+        'right-bottom': [
+          { weight: 1.7, x0: 0.70, x1: 1.00, y0: 0.56, y1: 1.00 },
+          { weight: 0.8, x0: 0.76, x1: 1.00, y0: 0.20, y1: 0.56 }
+        ],
+        left: [
+          { weight: 1.7, x0: 0.00, x1: 0.30, y0: 0.00, y1: 1.00 },
+          { weight: 0.7, x0: 0.00, x1: 0.24, y0: 0.45, y1: 1.00 }
+        ],
+        right: [
+          { weight: 1.7, x0: 0.70, x1: 1.00, y0: 0.00, y1: 1.00 },
+          { weight: 0.7, x0: 0.76, x1: 1.00, y0: 0.45, y1: 1.00 }
+        ],
+        bottom: [
+          { weight: 1.8, x0: 0.00, x1: 1.00, y0: 0.66, y1: 1.00 },
+          { weight: 0.8, x0: 0.00, x1: 0.30, y0: 0.50, y1: 0.72 },
+          { weight: 0.8, x0: 0.70, x1: 1.00, y0: 0.50, y1: 0.72 }
+        ]
+      };
+
+      if (map[bias]) {
+        return map[bias].concat(defaultZones.map(function (zone) {
+          return {
+            weight: zone.weight * 0.38,
+            x0: zone.x0,
+            x1: zone.x1,
+            y0: zone.y0,
+            y1: zone.y1
+          };
+        }));
+      }
+
+      return defaultZones;
+    }
+
+    function minDistanceToRects(candidate, rects) {
+      if (!rects.length) return 999999;
+      var cx = candidate.x + (candidate.w / 2);
+      var cy = candidate.y + (candidate.h / 2);
+      var best = Infinity;
+      for (var i = 0; i < rects.length; i += 1) {
+        var rx = rects[i].x + (rects[i].w / 2);
+        var ry = rects[i].y + (rects[i].h / 2);
+        var dx = cx - rx;
+        var dy = cy - ry;
+        var dist = Math.sqrt((dx * dx) + (dy * dy));
+        if (dist < best) best = dist;
+      }
+      return best;
+    }
+
     function shouldAvoidCenter(cx, cy, bounds) {
       var rx = (cx - bounds.minX) / Math.max(1, bounds.maxX - bounds.minX);
       var ry = (cy - bounds.minY) / Math.max(1, bounds.maxY - bounds.minY);
@@ -113,18 +188,14 @@
       var spanX = Math.max(1, bounds.maxX - bounds.minX);
       var spanY = Math.max(1, bounds.maxY - bounds.minY);
 
-      var zones = [
-        { weight: 1.25, x0: 0.00, x1: 0.24, y0: 0.00, y1: 0.36 },
-        { weight: 1.25, x0: 0.76, x1: 1.00, y0: 0.00, y1: 0.36 },
-        { weight: 1.35, x0: 0.00, x1: 0.28, y0: 0.52, y1: 1.00 },
-        { weight: 1.35, x0: 0.72, x1: 1.00, y0: 0.52, y1: 1.00 },
-        { weight: 1.10, x0: 0.20, x1: 0.82, y0: 0.70, y1: 1.00 },
-        { weight: 0.90, x0: 0.00, x1: 0.18, y0: 0.30, y1: 0.62 },
-        { weight: 0.90, x0: 0.82, x1: 1.00, y0: 0.30, y1: 0.62 }
-      ];
-
+      var bias = (state.el.getAttribute('data-spawn-bias') || '').trim().toLowerCase();
+      var zones = zonesForBias(bias);
+      var pad = Math.max(14, Math.round(Math.min(width, height) * 0.1));
       var placed = false;
-      for (var i = 0; i < 180; i += 1) {
+      var best = null;
+      var bestScore = -1;
+
+      for (var i = 0; i < 260; i += 1) {
         var zone = weightedPick(zones);
         var minX = bounds.minX + (zone.x0 * spanX);
         var maxX = bounds.minX + (zone.x1 * spanX) - width;
@@ -139,17 +210,28 @@
         var cy = ny + (height / 2);
         if (shouldAvoidCenter(cx, cy, bounds)) continue;
 
-        var candidate = createRect(nx, ny, width, height, 16);
+        var candidate = createRect(nx, ny, width, height, pad);
         var blocked = occupiedRects.some(function (rect) {
           return intersectsRect(candidate, rect);
         });
-        if (blocked) continue;
+        if (!blocked) {
+          var spreadScore = minDistanceToRects(candidate, occupiedRects);
+          if (spreadScore > bestScore) {
+            bestScore = spreadScore;
+            best = candidate;
+          }
+          if (spreadScore > 210) {
+            best = candidate;
+            break;
+          }
+        }
+      }
 
-        state.x = nx;
-        state.y = ny;
-        occupiedRects.push(candidate);
+      if (best) {
+        state.x = best.x + pad;
+        state.y = best.y + pad;
+        occupiedRects.push(best);
         placed = true;
-        break;
       }
 
       if (!placed) {
