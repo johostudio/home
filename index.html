@@ -284,7 +284,7 @@
     }
 
     .sticker-selected {
-      filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.32)) drop-shadow(0 0 0 1px rgba(255,255,255,0.55));
+      filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.32)) drop-shadow(0 0 0 1px rgba(255, 255, 255, 0.55));
     }
 
     .sticker-rotate-handle {
@@ -294,9 +294,9 @@
       width: 24px;
       height: 24px;
       border-radius: 50%;
-      border: 1px solid rgba(0,0,0,0.25);
-      background: rgba(255,255,255,0.9);
-      color: rgba(0,0,0,0.68);
+      border: 1px solid rgba(0, 0, 0, 0.25);
+      background: rgba(255, 255, 255, 0.9);
+      color: rgba(0, 0, 0, 0.68);
       font-size: 13px;
       line-height: 1;
       display: none;
@@ -448,7 +448,8 @@
   <script src="scripts/site-header.js"></script>
 
   <div class="sticker-layer" data-sticker-layer data-safe-bottom="120" data-random-spawn="off">
-    <button class="sticker home-snoopy-sticker" type="button" data-sticker data-size="162" data-x="30" data-y="78" data-rotation="-8" style="--drag-x:30px;--drag-y:78px;--rot:-8deg;" aria-label="snoopy sticker">
+    <button class="sticker home-snoopy-sticker" type="button" data-sticker data-size="162" data-x="30" data-y="78"
+      data-rotation="-8" style="--drag-x:30px;--drag-y:78px;--rot:-8deg;" aria-label="snoopy sticker">
       <img src="gif/stickers/snoopy.png" alt="Snoopy sticker" loading="lazy">
     </button>
   </div>
@@ -537,13 +538,16 @@
     <p class="home-tagline pointer-events-auto">
       <a href="https://www.sfu.ca/fas/schools/sustainable-energy-engineering.html" target="_blank"
         class="home-bio-link home-tagline-link" data-preview-title="sustainable energy engineering @ sfu"
-        data-preview-desc="Program page" data-preview-img="gif/thumbnails/1600.jpg">sustainable energy engineering</a>
+        data-preview-desc="Program page"
+        data-preview-img="https://www.tradelineinc.com/sites/default/files/styles/article_feature/public/2019-05/simon_2.jpg?itok=eEiBGL1g">sustainable
+        energy engineering</a>
       +
       <a href="https://www.sfu.ca/siat.html" target="_blank" class="home-bio-link home-tagline-link"
         data-preview-title="interactive arts & technology @ sfu" data-preview-desc="SIAT program overview"
-        data-preview-img="gif/thumbnails/xt4.png">interactive arts &amp; technology</a> @ <a target="_blank"
-        class="home-bio-link home-tagline-link" data-preview-title="simon fraser university"
-        data-preview-desc="@ burnaby + surrey, BC" data-preview-img="gif/thumbnails/smiski1.png">sfu</a>
+        data-preview-img="https://www.sfu.ca/content/sfu/siat/contact/jcr:content/main_content/textimage/image.img.640.medium.jpg/1629221274072.jpg">interactive
+        arts &amp; technology</a> @ <a target="_blank" class="home-bio-link home-tagline-link"
+        data-preview-title="simon fraser university" data-preview-desc="@ burnaby + surrey, BC"
+        data-preview-img="https://www.sfu.ca/content/sfu/fas/study/surrey-campus/jcr:content/main_content/textimage/image.img.640.medium.jpg/1741030492840.jpg">sfu</a>
     </p>
 
     <ul class="home-bio-list">
@@ -605,9 +609,60 @@
   <script src="scripts/page-transitions.js"></script>
   <script src="scripts/clocks.js"></script>
   <script src="scripts/counter.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js" onerror="this.onerror=null;this.src='https://unpkg.com/interactjs/dist/interact.min.js';"></script>
-  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" onerror="this.onerror=null;this.src='https://unpkg.com/animejs@3.2.1/lib/anime.min.js';"></script>
-  <script src="scripts/stickers.js"></script>
+  <script>
+    (function () {
+      var stickersBooted = false;
+
+      function loadScript(src, fallbackSrc) {
+        return new Promise(function (resolve, reject) {
+          var script = document.createElement('script');
+          script.src = src;
+          script.async = true;
+          script.onload = function () { resolve(); };
+          script.onerror = function () {
+            if (!fallbackSrc) {
+              reject(new Error('script load failed: ' + src));
+              return;
+            }
+            var fallback = document.createElement('script');
+            fallback.src = fallbackSrc;
+            fallback.async = true;
+            fallback.onload = function () { resolve(); };
+            fallback.onerror = function () { reject(new Error('script load failed: ' + fallbackSrc)); };
+            document.body.appendChild(fallback);
+          };
+          document.body.appendChild(script);
+        });
+      }
+
+      function bootStickers() {
+        if (stickersBooted) return;
+        stickersBooted = true;
+
+        loadScript('https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js', 'https://unpkg.com/interactjs/dist/interact.min.js')
+          .then(function () {
+            return loadScript('https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js', 'https://unpkg.com/animejs@3.2.1/lib/anime.min.js');
+          })
+          .then(function () {
+            return loadScript('scripts/stickers.js');
+          })
+          .catch(function () {
+            stickersBooted = false;
+          });
+      }
+
+      function scheduleBoot() {
+        if ('requestIdleCallback' in window) {
+          window.requestIdleCallback(bootStickers, { timeout: 1400 });
+        } else {
+          window.setTimeout(bootStickers, 900);
+        }
+      }
+
+      window.addEventListener('load', scheduleBoot, { once: true, passive: true });
+      window.addEventListener('pointerdown', bootStickers, { once: true, passive: true });
+    })();
+  </script>
   <script>
     /* ── Hover preview logic ── */
     (function () {
@@ -616,6 +671,23 @@
       var previewTitle = document.getElementById('preview-title');
       var previewDesc = document.getElementById('preview-desc');
       var hideTimer = null;
+      var previewMoveRaf = 0;
+      var previewTargetX = 0;
+      var previewTargetY = 0;
+
+      function queuePreviewMove(x, y) {
+        previewTargetX = x;
+        previewTargetY = y;
+        if (previewMoveRaf) return;
+        previewMoveRaf = requestAnimationFrame(function () {
+          previewMoveRaf = 0;
+          var ry = previewTargetY + 24;
+          if (ry + 160 > window.innerHeight) ry = previewTargetY - 160;
+          var rx = Math.min(previewTargetX + 16, window.innerWidth - 276);
+          preview.style.left = rx + 'px';
+          preview.style.top = ry + 'px';
+        });
+      }
 
       function showPreview(link, clientX, clientY) {
         var title = link.getAttribute('data-preview-title') || '';
@@ -649,6 +721,10 @@
       }
 
       function hidePreview() {
+        if (previewMoveRaf) {
+          cancelAnimationFrame(previewMoveRaf);
+          previewMoveRaf = 0;
+        }
         preview.classList.remove('visible');
         hideTimer = setTimeout(function () {
           preview.style.display = 'none';
@@ -660,11 +736,7 @@
           showPreview(link, e.clientX, e.clientY);
         });
         link.addEventListener('mousemove', function (e) {
-          var y = e.clientY + 24;
-          if (y + 160 > window.innerHeight) y = e.clientY - 160;
-          var x = Math.min(e.clientX + 16, window.innerWidth - 276);
-          preview.style.left = x + 'px';
-          preview.style.top = y + 'px';
+          queuePreviewMove(e.clientX, e.clientY);
         });
         link.addEventListener('mouseleave', hidePreview);
         link.addEventListener('focus', function (e) {

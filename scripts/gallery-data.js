@@ -11,18 +11,18 @@
  */
 
 var GALLERY_CATEGORIES = [
-  { key: 'engineering',      label: 'engineering projects' },
-  { key: 'graphic-design',   label: 'graphic design' },
-  { key: 'brand-design',     label: 'brand design' },
-  { key: 'ui-ux',            label: 'ui / ux' },
-  { key: 'videography',      label: 'videography' },
-  { key: 'photography',      label: 'photography' },
-  { key: 'production',       label: 'production' },
-  { key: 'motion-graphics',  label: 'motion graphics' },
-  { key: 'illustration',     label: 'illustration' },
+  { key: 'engineering', label: 'engineering projects' },
+  { key: 'graphic-design', label: 'graphic design' },
+  { key: 'brand-design', label: 'brand design' },
+  { key: 'ui-ux', label: 'ui / ux' },
+  { key: 'videography', label: 'videography' },
+  { key: 'photography', label: 'photography' },
+  { key: 'production', label: 'production' },
+  { key: 'motion-graphics', label: 'motion graphics' },
+  { key: 'illustration', label: 'illustration' },
   { key: 'urban-architecture', label: 'urban+architecture' },
-  { key: 'diy-projects',      label: 'diy projects' },
-  { key: 'misc',             label: 'misc' }
+  { key: 'diy-projects', label: 'diy projects' },
+  { key: 'misc', label: 'misc' }
 ];
 
 var GALLERY_PROJECTS = [
@@ -33,7 +33,7 @@ var GALLERY_PROJECTS = [
     category: 'engineering',
     date: '2026-04',
     description: 'A class project for energy design: making a biomimetic boat with sustainable design in mind.',
-    thumb: null  // set to an image path like 'gif/thumbnails/bioboat.png' when ready
+    thumb: 'gif/thumbnails/bioboat.png'
   },
   {
     slug: 'wind-vane',
@@ -92,7 +92,7 @@ var GALLERY_PROJECTS = [
     title: 'hobbies',
     category: 'misc',
     date: '2026-04',
-    description: 'A living gallery of selected photos and everyday hobby snapshots.',
+    description: 'gallery of my everyday objects around me',
     thumb: 'gif/thumbnails/1600.jpg',
     href: 'projects/photography'
   },
@@ -102,8 +102,8 @@ var GALLERY_PROJECTS = [
     title: 'photography',
     category: 'photography',
     date: '2026-04',
-    description: 'Client-facing photo gallery in polaroid format.',
-    thumb: 'gif/thumbnails/1600.jpg',
+    description: 'photo gallery for clients',
+    thumb: 'gif/thumbnails/junny.jpg',
     href: 'projects/photography-client'
   },
 
@@ -155,16 +155,8 @@ var GALLERY_PROJECTS = [
     href: 'projects/vancouver'  // external page override
   },
   {
-    slug: 'hackathon-projects',
-    title: 'hackathon projects @ ubc + sfu',
-    category: 'misc',
-    date: '2025-10',
-    description: 'Four hackathons within a couple months of each other.',
-    thumb: null
-  },
-  {
     slug: 'sustainable-food',
-    title: 'sustainable food workshops @ fraser basin',
+    title: 'sustainable food workshops @ fraser basin council',
     category: 'misc',
     date: '2023-08',
     description: 'Led workshops and community events about sustainable food practices in B.C. with the Fraser Basin CCSBC team.',
