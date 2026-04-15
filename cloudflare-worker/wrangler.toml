@@ -13,6 +13,6 @@ bucket_name = "atlas-stamps"
 preview_bucket_name = "atlas-stamps"
 
 [vars]
-R2_PUBLIC_BASE_URL = "https://fbb8d28006d9a107c7451259eb560a45.r2.cloudflarestorage.com/atlas-stamps"
+R2_PUBLIC_BASE_URL = "https://pub-7c46495052a84263bb7c0bf405fecef3.r2.dev"
 MAPBOX_PUBLIC_TOKEN = ""
 OPEN_LIBRARY_QUERY = "design engineering art photography architecture film typography"
