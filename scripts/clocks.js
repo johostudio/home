@@ -41,40 +41,6 @@
   wrapper.className = 'clocks-wrapper';
   document.body.appendChild(wrapper);
 
-  function getClockTop() {
-    var sample = wrapper.querySelector('.clock-container');
-    if (!sample) {
-      var rawRoot = getComputedStyle(document.documentElement).getPropertyValue('--clocks-top');
-      var parsedRoot = parseFloat(rawRoot);
-      return Number.isFinite(parsedRoot) ? parsedRoot : 206;
-    }
-    var raw = getComputedStyle(sample).top;
-    var parsed = parseFloat(raw);
-    return Number.isFinite(parsed) ? parsed : 206;
-  }
-
-  function ensureMainBelowClocks() {
-    var main = document.querySelector('main');
-    if (!main) return;
-
-    var computed = getComputedStyle(main);
-    if (!main.dataset.clockBasePaddingTop) {
-      var base = parseFloat(computed.paddingTop);
-      main.dataset.clockBasePaddingTop = Number.isFinite(base) ? String(base) : '0';
-    }
-
-    var basePadding = parseFloat(main.dataset.clockBasePaddingTop);
-    if (!Number.isFinite(basePadding)) basePadding = 0;
-
-    var sample = wrapper.querySelector('.clock-container');
-    var clockHeight = sample ? sample.getBoundingClientRect().height : 42;
-    var requiredTop = getClockTop() + clockHeight + 34;
-    var mainTop = main.getBoundingClientRect().top;
-    var extra = Math.max(0, requiredTop - mainTop);
-
-    main.style.paddingTop = (basePadding + extra) + 'px';
-  }
-
   function syncHeaderClearance() {
     var header = document.querySelector('.jh-header');
     var headerBottom = 130;
@@ -85,19 +51,17 @@
       }
     }
 
-    var desktopTop = headerBottom + 60;
-    var mobileTop = headerBottom + 54;
+    var desktopTop = headerBottom + 14;
+    var mobileTop = headerBottom + 12;
 
     document.documentElement.style.setProperty('--clocks-top', desktopTop + 'px');
     document.documentElement.style.setProperty('--clocks-top-mobile', mobileTop + 'px');
-    ensureMainBelowClocks();
   }
 
   window.addEventListener('resize', syncHeaderClearance, { passive: true });
-  window.addEventListener('scroll', syncHeaderClearance, { passive: true });
   window.setTimeout(syncHeaderClearance, 0);
   window.setTimeout(syncHeaderClearance, 250);
-  window.setTimeout(syncHeaderClearance, 700);
+  window.setTimeout(syncHeaderClearance, 600);
 
   function updateClockVisibility() {
     var y = window.scrollY || 0;
