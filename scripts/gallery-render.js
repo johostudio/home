@@ -5,36 +5,7 @@
 ;(function () {
   var grid = document.getElementById('gallery-grid');
   var filtersNav = document.getElementById('gallery-filters');
-  var headerTitle = document.querySelector('.gallery-header h1');
-  var headerSubtitle = document.querySelector('.gallery-subtitle');
   if (!grid || !filtersNav) return;
-
-  function applyHeader(filter) {
-    if (!headerTitle || !headerSubtitle) return;
-
-    if (!filter || filter === 'all') {
-      headerTitle.textContent = 'projects';
-      headerSubtitle.textContent = 'a collection of works across different fields and mediums.';
-      return;
-    }
-
-    var cat = null;
-    for (var i = 0; i < GALLERY_CATEGORIES.length; i += 1) {
-      if (GALLERY_CATEGORIES[i].key === filter) {
-        cat = GALLERY_CATEGORIES[i];
-        break;
-      }
-    }
-
-    if (!cat) {
-      headerTitle.textContent = 'projects';
-      headerSubtitle.textContent = 'a collection of works across different fields and mediums.';
-      return;
-    }
-
-    headerTitle.textContent = cat.label;
-    headerSubtitle.textContent = 'selected work in ' + cat.label + '.';
-  }
 
   // ── Build filter pills from categories that have at least one project ──
   var usedCategories = {};
@@ -54,7 +25,6 @@
   // ── Render project cards ──
   function renderProjects(filter) {
     grid.innerHTML = '';
-    applyHeader(filter);
 
     var filtered = filter === 'all'
       ? GALLERY_PROJECTS

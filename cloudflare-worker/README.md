@@ -31,6 +31,7 @@ Edit `cloudflare-worker/wrangler.toml`:
 - Set `database_id` in `[[d1_databases]]`
 - Set `R2_PUBLIC_BASE_URL` to your public R2 URL (for example `https://media.joho.studio`)
 - Set `MAPBOX_PUBLIC_TOKEN` (public `pk...` token used by atlas)
+- Set `GOOGLE_BOOKS_API_KEY`, `GOOGLE_BOOKS_USER_ID`, and `GOOGLE_BOOKS_SHELF_ID` for bookshelf page
 
 If you do not have a custom domain for R2 yet, create a public bucket domain in Cloudflare and use that URL.
 
@@ -60,6 +61,7 @@ window.MAPBOX_ACCESS_TOKEN = '';
 ```
 
 Atlas will auto-fetch the token from Worker endpoint `GET /public-config` when local token is empty.
+Bookshelf will auto-fetch Google Books config from the same endpoint when local values are empty.
 
 This URL is consumed by both:
 - `hoshii.html` song catalogue

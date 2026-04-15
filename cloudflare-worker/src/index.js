@@ -162,7 +162,10 @@ async function listStrips(env) {
 
 function publicConfig(env) {
   return json({
-    mapboxPublicToken: (env.MAPBOX_PUBLIC_TOKEN || '').trim()
+    mapboxPublicToken: (env.MAPBOX_PUBLIC_TOKEN || '').trim(),
+    googleBooksApiKey: (env.GOOGLE_BOOKS_API_KEY || '').trim(),
+    googleBooksUserId: (env.GOOGLE_BOOKS_USER_ID || '').trim(),
+    googleBooksShelfId: (env.GOOGLE_BOOKS_SHELF_ID || '').trim()
   });
 }
 

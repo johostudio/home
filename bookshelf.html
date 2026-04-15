@@ -59,38 +59,40 @@
       filter: saturate(1.06);
     }
 
-    .book-title {
-      font-size: 13px;
-      font-weight: 700;
-      line-height: 1.3;
-      margin: 0 0 0.25rem;
-      color: #fff;
-      transition: color 0.2s ease;
-    }
+      .book-title {
+        font-size: 13px;
+        font-weight: 400;
+        line-height: 1.3;
+        margin: 0 0 0.25rem;
+        color: #fff;
+        transition: color 0.2s ease;
+        text-transform: lowercase;
+        letter-spacing: -0.02em;
+      }
 
-    .book-card:hover .book-title,
-    .book-card:focus-visible .book-title {
-      color: #c084fc;
-    }
+      .book-card:hover .book-title,
+      .book-card:focus-visible .book-title {
+        color: #e6eef6;
+      }
 
-    .book-authors {
-      font-size: 11px;
-      color: rgba(230, 238, 246, 0.5);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin: 0;
-      line-height: 1.35;
-    }
+      .book-authors {
+        font-size: 11px;
+        color: rgba(230, 238, 246, 0.5);
+        letter-spacing: -0.01em;
+        text-transform: lowercase;
+        margin: 0;
+        line-height: 1.35;
+      }
 
-    .books-status {
-      font-size: 0.72rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: rgba(230, 238, 246, 0.55);
-      margin-bottom: 1.1rem;
-      min-height: 1.2em;
-      text-align: center;
-    }
+      .books-status {
+        font-size: 0.72rem;
+        letter-spacing: -0.01em;
+        text-transform: lowercase;
+        color: rgba(230, 238, 246, 0.55);
+        margin-bottom: 1.1rem;
+        min-height: 1.2em;
+        text-align: center;
+      }
 
     #books-grid {
       justify-items: center;
@@ -130,11 +132,37 @@
 
   <script>
     window.JOHO_BOOKS_CONFIG = window.JOHO_BOOKS_CONFIG || {
-      apiKey: 'AIzaSyC3HPjHmPbuCuLb2E5ZqrRLm13HXdXhiQY',
+      apiKey: '',
       userId: '',
       shelfId: '',
       maxResults: 40
     };
+  </script>
+
+  <script>
+    (function () {
+      var workerBase = (window.CLOUDFLARE_WORKER_URL || '').trim().replace(/\/$/, '');
+      if (!workerBase) return;
+
+      fetch(workerBase + '/public-config')
+        .then(function (res) {
+          if (!res.ok) throw new Error('public config unavailable');
+          return res.json();
+        })
+        .then(function (data) {
+          if (!window.JOHO_BOOKS_CONFIG) return;
+          if (!window.JOHO_BOOKS_CONFIG.apiKey && data && data.googleBooksApiKey) {
+            window.JOHO_BOOKS_CONFIG.apiKey = data.googleBooksApiKey;
+          }
+          if (!window.JOHO_BOOKS_CONFIG.userId && data && data.googleBooksUserId) {
+            window.JOHO_BOOKS_CONFIG.userId = data.googleBooksUserId;
+          }
+          if (!window.JOHO_BOOKS_CONFIG.shelfId && data && data.googleBooksShelfId) {
+            window.JOHO_BOOKS_CONFIG.shelfId = data.googleBooksShelfId;
+          }
+        })
+        .catch(function () {});
+    })();
   </script>
 
   <script>
