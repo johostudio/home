@@ -610,6 +610,16 @@
   </main>
 
   <script src="scripts/cloudflare-config.js"></script>
+  <script>
+    window.__loadLocalConfig = function () {
+      var s = document.createElement('script');
+      s.src = 'scripts/local-config.js';
+      s.defer = true;
+      s.onerror = function () {};
+      document.head.appendChild(s);
+    };
+    window.__loadLocalConfig();
+  </script>
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
   <script>
     window.MAPBOX_ACCESS_TOKEN = window.MAPBOX_ACCESS_TOKEN || '';
