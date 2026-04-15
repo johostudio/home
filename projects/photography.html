@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -93,6 +94,7 @@
     }
   </style>
 </head>
+
 <body class="min-h-screen">
   <div class="dot-grid-wrapper"></div>
   <script src="../scripts/site-header.js"></script>
@@ -202,8 +204,7 @@
           '<article class="photo-card" style="transform: rotate(', tilt, 'deg);">',
           '<img src="', esc(entry.image), '" alt="photo" loading="lazy">',
           '<div class="photo-note">',
-          '<div class="meta">', esc(entry.date), ' @ ', esc(entry.location), '</div>',
-          '<p>', esc(entry.note), '</p>',
+          '<div class="meta">', esc(entry.note), '</div>',
           '</div>',
           '</article>'
         ].join('');
@@ -215,4 +216,5 @@
   <script src="../scripts/dot-grid.js"></script>
   <script src="../scripts/clocks.js"></script>
 </body>
+
 </html>
