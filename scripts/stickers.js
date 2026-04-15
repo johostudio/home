@@ -44,7 +44,9 @@
 
   function initLayer(layer) {
     var safeBottom = toNumber(layer.getAttribute('data-safe-bottom'), 230);
+    var randomizeSpawn = layer.getAttribute('data-random-spawn') !== 'off';
     var stickers = layer.querySelectorAll('[data-sticker]');
+    var occupiedRects = [];
 
     function getBounds(state) {
       var pad = 8;
@@ -71,6 +73,88 @@
       var bounds = getBounds(state);
       state.x = clamp(state.x, bounds.minX, bounds.maxX);
       state.y = clamp(state.y, bounds.minY, bounds.maxY);
+    }
+
+    function intersectsRect(a, b) {
+      return !(a.x + a.w < b.x || b.x + b.w < a.x || a.y + a.h < b.y || b.y + b.h < a.y);
+    }
+
+    function createRect(x, y, w, h, pad) {
+      return {
+        x: x - pad,
+        y: y - pad,
+        w: w + (pad * 2),
+        h: h + (pad * 2)
+      };
+    }
+
+    function weightedPick(items) {
+      var total = 0;
+      items.forEach(function (item) { total += item.weight; });
+      var r = Math.random() * total;
+      for (var i = 0; i < items.length; i += 1) {
+        r -= items[i].weight;
+        if (r <= 0) return items[i];
+      }
+      return items[items.length - 1];
+    }
+
+    function shouldAvoidCenter(cx, cy, bounds) {
+      var rx = (cx - bounds.minX) / Math.max(1, bounds.maxX - bounds.minX);
+      var ry = (cy - bounds.minY) / Math.max(1, bounds.maxY - bounds.minY);
+      return rx > 0.34 && rx < 0.66 && ry > 0.2 && ry < 0.72;
+    }
+
+    function randomizeInitialSpawn(state) {
+      if (!randomizeSpawn) return;
+      var bounds = getBounds(state);
+      var width = Math.max(64, state.el.offsetWidth || state.size);
+      var height = Math.max(64, state.el.offsetHeight || state.size);
+      var spanX = Math.max(1, bounds.maxX - bounds.minX);
+      var spanY = Math.max(1, bounds.maxY - bounds.minY);
+
+      var zones = [
+        { weight: 1.25, x0: 0.00, x1: 0.24, y0: 0.00, y1: 0.36 },
+        { weight: 1.25, x0: 0.76, x1: 1.00, y0: 0.00, y1: 0.36 },
+        { weight: 1.35, x0: 0.00, x1: 0.28, y0: 0.52, y1: 1.00 },
+        { weight: 1.35, x0: 0.72, x1: 1.00, y0: 0.52, y1: 1.00 },
+        { weight: 1.10, x0: 0.20, x1: 0.82, y0: 0.70, y1: 1.00 },
+        { weight: 0.90, x0: 0.00, x1: 0.18, y0: 0.30, y1: 0.62 },
+        { weight: 0.90, x0: 0.82, x1: 1.00, y0: 0.30, y1: 0.62 }
+      ];
+
+      var placed = false;
+      for (var i = 0; i < 180; i += 1) {
+        var zone = weightedPick(zones);
+        var minX = bounds.minX + (zone.x0 * spanX);
+        var maxX = bounds.minX + (zone.x1 * spanX) - width;
+        var minY = bounds.minY + (zone.y0 * spanY);
+        var maxY = bounds.minY + (zone.y1 * spanY) - height;
+
+        if (maxX <= minX || maxY <= minY) continue;
+
+        var nx = minX + Math.random() * (maxX - minX);
+        var ny = minY + Math.random() * (maxY - minY);
+        var cx = nx + (width / 2);
+        var cy = ny + (height / 2);
+        if (shouldAvoidCenter(cx, cy, bounds)) continue;
+
+        var candidate = createRect(nx, ny, width, height, 16);
+        var blocked = occupiedRects.some(function (rect) {
+          return intersectsRect(candidate, rect);
+        });
+        if (blocked) continue;
+
+        state.x = nx;
+        state.y = ny;
+        occupiedRects.push(candidate);
+        placed = true;
+        break;
+      }
+
+      if (!placed) {
+        occupiedRects.push(createRect(state.x, state.y, width, height, 10));
+      }
     }
 
     function resolveCollision(state, bounds) {
@@ -305,6 +389,7 @@
 
       sticker.style.setProperty('--sticker-size', state.size + 'px');
       sticker.style.zIndex = String(state.z);
+      randomizeInitialSpawn(state);
       clampState(state);
       applyState(state);
       createRotateHandle(state);
@@ -381,17 +466,6 @@
         state.movedBeforeDrag = false;
         state.holdReady = false;
         window.clearTimeout(state.holdTimer);
-
-        if (state.pointerType === 'touch') {
-          state.holdTimer = window.setTimeout(function () {
-            state.holdReady = true;
-            state.el.classList.add('sticker-hold-ready');
-            if (event.interaction && event.interaction.pointerIsDown && !event.interaction.interacting()) {
-              event.interaction.start({ name: 'drag' }, event.interactable, state.el);
-            }
-          }, HOLD_MS);
-          return;
-        }
 
         state.holdReady = true;
         if (event.interaction && !event.interaction.interacting()) {

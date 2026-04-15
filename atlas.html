@@ -44,6 +44,7 @@
       grid-template-columns: repeat(5, minmax(150px, 1fr));
       gap: 1rem;
       align-items: start;
+      justify-items: stretch;
     }
 
     .atlas-menu {
@@ -91,10 +92,12 @@
       position: absolute;
       left: 0;
       top: 0;
-      width: 100%;
-      border-radius: 10px;
-      background: rgba(8, 12, 19, 0.3);
-      backdrop-filter: blur(6px);
+      width: 0;
+      height: 0;
+      border-radius: 12px;
+      background: rgba(8, 12, 19, 0.24);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       opacity: 0;
       transition: opacity 0.2s ease;
       pointer-events: auto;
@@ -106,11 +109,11 @@
 
     .atlas-overlay-panel {
       position: absolute;
-      left: 50%;
-      top: 16px;
-      transform: translateX(-50%) translateY(8px);
-      width: min(740px, calc(100% - 28px));
-      max-height: calc(100% - 110px);
+      left: 12px;
+      top: 12px;
+      transform: translateY(8px);
+      width: min(380px, calc(100% - 24px));
+      max-height: calc(100% - 24px);
       overflow: auto;
       border: 1px solid rgba(255, 255, 255, 0.12);
       background: rgba(9, 12, 18, 0.95);
@@ -124,7 +127,7 @@
 
     .atlas-overlay.open .atlas-overlay-panel {
       opacity: 1;
-      transform: translateX(-50%) translateY(0);
+      transform: translateY(0);
     }
 
     .atlas-overlay-view {
@@ -462,6 +465,11 @@
 
       .atlas-controls-grid {
         grid-template-columns: repeat(3, minmax(180px, 1fr));
+        justify-items: center;
+      }
+
+      .atlas-menu-toggle {
+        width: min(220px, 100%);
       }
     }
 
@@ -476,12 +484,18 @@
 
       .atlas-controls-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+        justify-items: center;
       }
     }
 
     @media (max-width: 520px) {
       .atlas-controls-grid {
         grid-template-columns: 1fr;
+        justify-items: center;
+      }
+
+      .atlas-menu-toggle {
+        width: min(250px, 100%);
       }
     }
   </style>
@@ -620,6 +634,7 @@
       function openOverlay(section) {
         if (!overlay) return;
         var target = document.getElementById('atlas-overlay-' + section);
+        var panel = overlay.querySelector('.atlas-overlay-panel');
         if (!target) return;
 
         document.querySelectorAll('.atlas-overlay-view').forEach(function (view) {
@@ -629,8 +644,13 @@
         overlay.removeAttribute('hidden');
         overlay.classList.add('open');
 
-        if (overlayBlur && atlasShell) {
-          overlayBlur.style.height = atlasShell.offsetHeight + 'px';
+        if (overlayBlur && atlasShell && panel) {
+          var mapRect = atlasShell.getBoundingClientRect();
+          var panelRect = panel.getBoundingClientRect();
+          overlayBlur.style.left = '0px';
+          overlayBlur.style.top = '0px';
+          overlayBlur.style.width = Math.max(0, panelRect.right - mapRect.left) + 'px';
+          overlayBlur.style.height = Math.max(0, panelRect.bottom - mapRect.top) + 'px';
         }
 
         if (overlayTitle) {
