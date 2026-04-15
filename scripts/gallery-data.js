@@ -33,7 +33,7 @@ var GALLERY_PROJECTS = [
     category: 'engineering',
     date: '2026-04',
     description: 'A class project for energy design: making a biomimetic boat with sustainable design in mind.',
-    thumb: null  // set to an image path like 'gif/images/bioboat.png' when ready
+    thumb: null  // set to an image path like 'gif/thumbnails/bioboat.png' when ready
   },
   {
     slug: 'wind-vane',
@@ -59,7 +59,7 @@ var GALLERY_PROJECTS = [
     category: 'videography',
     date: '2024-01',
     description: 'A short film about turning eighteen.',
-    thumb: 'gif/images/whatweusedtobe.png'
+    thumb: 'gif/thumbnails/whatweusedtobe.png'
   },
   {
     slug: 'memoir-002',
@@ -67,7 +67,7 @@ var GALLERY_PROJECTS = [
     category: 'videography',
     date: '2026-01',
     description: 'A short memoir about a fun evening skating @ Robson Square.',
-    thumb: 'gif/archive-png/MEMOIR02.png'
+    thumb: 'gif/thumbnails/MEMOIR02.png'
   },
   {
     slug: 'memoir-003',
@@ -75,7 +75,7 @@ var GALLERY_PROJECTS = [
     category: 'videography',
     date: '2026-02',
     description: 'A short memoir about a good time w/ friends @ UBC HTC \'26.',
-    thumb: 'gif/images/MEMOIR03 - YT.png'
+    thumb: 'gif/thumbnails/MEMOIR03 - YT.png'
   },
   {
     slug: 'old-photos',
@@ -83,7 +83,7 @@ var GALLERY_PROJECTS = [
     category: 'videography',
     date: '2026-03',
     description: '"old photos", a message lost and found between generations. [IAT 202 Spring 2026]',
-    thumb: 'gif/archive-png/FINAL PHOTO_15.1.2 (1) (1).png'
+    thumb: 'gif/thumbnails/FINAL PHOTO_15.1.2 (1) (1).png'
   },
 
   // ─── Photography ───
@@ -93,7 +93,7 @@ var GALLERY_PROJECTS = [
     category: 'misc',
     date: '2026-04',
     description: 'A living gallery of selected photos and everyday hobby snapshots.',
-    thumb: 'gif/1600.jpg',
+    thumb: 'gif/thumbnails/1600.jpg',
     href: 'projects/photography'
   },
 
@@ -103,7 +103,7 @@ var GALLERY_PROJECTS = [
     category: 'photography',
     date: '2026-04',
     description: 'Client-facing photo gallery in polaroid format.',
-    thumb: 'gif/1600.jpg',
+    thumb: 'gif/thumbnails/1600.jpg',
     href: 'projects/photography-client'
   },
 
@@ -114,7 +114,7 @@ var GALLERY_PROJECTS = [
     category: 'motion-graphics',
     date: '2025-01',
     description: '[IAT 100 Summer 2025] Kinetic typography video for NewJeans\' "Right Now".',
-    thumb: 'gif/NWJNS-RIGHTNOW.png'
+    thumb: 'gif/thumbnails/NWJNS-RIGHTNOW.png'
   },
 
   // ─── Graphic Design ───

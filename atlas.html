@@ -41,7 +41,7 @@
 
     .atlas-controls-grid {
       display: grid;
-      grid-template-columns: repeat(5, minmax(150px, 1fr));
+      grid-template-columns: repeat(6, minmax(120px, 1fr));
       gap: 1rem;
       align-items: start;
       justify-items: stretch;
@@ -73,6 +73,12 @@
       border-color: rgba(255, 255, 255, 0.24);
     }
 
+    .atlas-menu-toggle.active {
+      background: rgba(192, 132, 252, 0.2);
+      border-color: rgba(192, 132, 252, 0.58);
+      color: #f4e9ff;
+    }
+
     .atlas-overlay {
       position: absolute;
       inset: 0;
@@ -92,8 +98,8 @@
       position: absolute;
       left: 0;
       top: 0;
-      width: 0;
-      height: 0;
+      width: 100%;
+      height: 100%;
       border-radius: 12px;
       background: rgba(8, 12, 19, 0.24);
       backdrop-filter: blur(8px);
@@ -115,7 +121,7 @@
       transform: translateY(8px);
       width: min(380px, calc(100% - 24px));
       max-height: calc(100% - 24px);
-      overflow: auto;
+      overflow: hidden;
       border: 1px solid rgba(255, 255, 255, 0.12);
       background: rgba(9, 12, 18, 0.95);
       border-radius: 10px;
@@ -124,12 +130,33 @@
       opacity: 0;
       transition: opacity 0.18s ease, transform 0.18s ease;
       pointer-events: auto;
+      cursor: default;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .atlas-overlay-content {
+      overflow: auto;
+      max-height: calc(100% - 44px);
+      padding-right: 0.12rem;
     }
 
     .atlas-overlay.open .atlas-overlay-panel {
       opacity: 1;
       transform: translateY(0);
       animation: atlasPanelIn 260ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .atlas-overlay.closing {
+      pointer-events: none;
+    }
+
+    .atlas-overlay.closing .atlas-overlay-panel {
+      animation: atlasPanelOut 220ms cubic-bezier(0.4, 0, 1, 1);
+    }
+
+    .atlas-overlay.closing .atlas-overlay-blur {
+      animation: atlasBlurOut 220ms cubic-bezier(0.4, 0, 1, 1);
     }
 
     @keyframes atlasPanelIn {
@@ -143,6 +170,17 @@
       }
     }
 
+    @keyframes atlasPanelOut {
+      from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      to {
+        opacity: 0;
+        transform: translateY(10px) scale(0.986);
+      }
+    }
+
     @keyframes atlasBlurIn {
       from {
         opacity: 0;
@@ -150,6 +188,11 @@
       to {
         opacity: 1;
       }
+    }
+
+    @keyframes atlasBlurOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
     }
 
     .atlas-overlay-view {
@@ -170,6 +213,13 @@
       margin-bottom: 0.65rem;
       padding-bottom: 0.5rem;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+    }
+
+    .atlas-overlay-header.dragging {
+      cursor: grabbing;
     }
 
     .atlas-overlay-header h2 {
@@ -192,10 +242,132 @@
       line-height: 1;
       cursor: pointer;
       font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      flex-shrink: 0;
     }
 
     .atlas-overlay-close:hover {
       background: rgba(255, 255, 255, 0.12);
+    }
+
+    .atlas-legend-popout {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      width: min(260px, calc(100% - 20px));
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(8, 12, 18, 0.94);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      padding: 0.72rem;
+      z-index: 330;
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+    }
+
+    .atlas-legend-popout[hidden] {
+      display: none;
+    }
+
+    .atlas-legend-popout.open {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+      animation: atlasPanelIn 220ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .atlas-legend-popout.closing {
+      pointer-events: none;
+      animation: atlasPanelOut 200ms cubic-bezier(0.4, 0, 1, 1);
+    }
+
+    .atlas-legend-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.52rem;
+      padding-bottom: 0.45rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+    }
+
+    .atlas-legend-head.dragging {
+      cursor: grabbing;
+    }
+
+    .atlas-legend-head h3 {
+      margin: 0;
+      font-size: 0.76rem;
+      color: #fff;
+      font-weight: 400;
+      text-transform: lowercase;
+      letter-spacing: -0.01em;
+    }
+
+    .atlas-legend-close {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(230, 238, 246, 0.85);
+      font-size: 13px;
+      line-height: 1;
+      cursor: pointer;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    .atlas-legend-close:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .atlas-browse-list {
+      display: grid;
+      gap: 0.4rem;
+      max-height: 48vh;
+      overflow: auto;
+      padding-right: 0.2rem;
+    }
+
+    .atlas-browse-item {
+      width: 100%;
+      display: block;
+      text-align: left;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 0.52rem 0.58rem;
+      font-size: 0.72rem;
+      color: rgba(230, 238, 246, 0.86);
+      line-height: 1.35;
+      text-transform: lowercase;
+      letter-spacing: -0.01em;
+      cursor: pointer;
+      transition: background 0.18s ease;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    .atlas-browse-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .atlas-browse-item strong {
+      display: block;
+      color: #fff;
+      font-weight: 400;
+      font-size: 0.75rem;
+      margin-bottom: 0.18rem;
+      letter-spacing: -0.015em;
+    }
+
+    .atlas-browse-empty {
+      font-size: 0.72rem;
+      color: rgba(230, 238, 246, 0.56);
+      text-transform: lowercase;
+      letter-spacing: -0.01em;
     }
 
     .atlas-style-stack {
@@ -324,6 +496,19 @@
       gap: 0.62rem;
     }
 
+    #atlas-city-jump {
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(5, 9, 14, 0.92);
+      color: #e6eef6;
+      font-size: 0.78rem;
+      padding: 0.6rem 0.7rem;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      text-transform: lowercase;
+      color-scheme: dark;
+    }
+
     .atlas-overlay-view .legend-list {
       margin-top: 0.15rem;
     }
@@ -440,6 +625,22 @@
       color: #e6eef6;
       border: 1px solid rgba(255, 255, 255, 0.12);
       box-shadow: 0 16px 34px rgba(0, 0, 0, 0.4);
+      padding: 0.72rem 0.78rem 0.68rem;
+      min-width: 240px;
+      max-width: min(300px, calc(100vw - 28px));
+    }
+
+    .mapboxgl-popup-close-button {
+      right: 6px;
+      top: 4px;
+      font-size: 16px;
+      color: rgba(230, 238, 246, 0.84);
+      line-height: 1;
+      border-radius: 4px;
+    }
+
+    .mapboxgl-popup-close-button:hover {
+      background: rgba(255, 255, 255, 0.12);
     }
 
     .atlas-city-photos {
@@ -486,7 +687,7 @@
       }
 
       .atlas-controls-grid {
-        grid-template-columns: repeat(3, minmax(180px, 1fr));
+        grid-template-columns: repeat(3, minmax(160px, 1fr));
         justify-items: center;
       }
 
@@ -501,7 +702,20 @@
       }
 
       .atlas-overlay-panel {
+        left: 8px;
+        top: 8px;
+        width: min(360px, calc(100% - 16px));
         max-height: calc(100% - 88px);
+      }
+
+      .atlas-overlay-content {
+        max-height: calc(100% - 42px);
+      }
+
+      .atlas-legend-popout {
+        right: 8px;
+        bottom: 8px;
+        width: min(230px, calc(100% - 16px));
       }
 
       .atlas-controls-grid {
@@ -550,6 +764,8 @@
           <button class="atlas-overlay-close" id="atlas-overlay-close" type="button" aria-label="close overlay">×</button>
         </header>
 
+        <div class="atlas-overlay-content">
+
         <div class="atlas-overlay-view" id="atlas-overlay-style" hidden>
           <div class="atlas-style-stack">
             <select class="atlas-style-select" id="atlas-style-select" aria-label="map style mode">
@@ -573,8 +789,9 @@
           </div>
         </div>
 
-        <div class="atlas-overlay-view" id="atlas-overlay-legend" hidden>
-          <ul class="legend-list" id="atlas-legend"></ul>
+        <div class="atlas-overlay-view" id="atlas-overlay-browse" hidden>
+          <div class="atlas-browse-list" id="atlas-browse-list"></div>
+          <p class="atlas-browse-empty" id="atlas-browse-empty" hidden>no user-added cities or stamps yet.</p>
         </div>
 
         <div class="atlas-overlay-view" id="atlas-overlay-add" hidden>
@@ -583,18 +800,19 @@
             <textarea id="user-note" placeholder="why this city matters to you" maxlength="220"></textarea>
             <select id="user-stamp">
               <option value="">stamp (optional)</option>
-              <option value="⭐">star</option>
-              <option value="📸">camera</option>
-              <option value="📍">pin</option>
-              <option value="🌊">wave</option>
-              <option value="🌸">flower</option>
-              <option value="🛤️">journey</option>
+              <option value="postmark">postmark</option>
+              <option value="star">star</option>
+              <option value="camera">camera</option>
+              <option value="pin">pin</option>
+              <option value="wave">wave</option>
+              <option value="flower">flower</option>
+              <option value="journey">journey</option>
             </select>
             <input type="file" id="user-photo-file" accept="image/*">
             <input type="url" id="user-photo" placeholder="optional photo url (comma-separated for many)">
             <button type="submit">add permanent city</button>
           </form>
-          <p class="atlas-help">stored in your browser via local storage so it stays on reload for this device.</p>
+          <p class="atlas-help">share a place that matters and it will appear on the map.</p>
           <p class="atlas-toast" id="atlas-toast"></p>
         </div>
 
@@ -602,22 +820,31 @@
           <form class="atlas-form" id="stamp-form" novalidate>
             <input type="text" id="stamp-city" placeholder="city, country">
             <select id="stamp-icon">
-              <option value="📮">postmark</option>
-              <option value="⭐">star</option>
-              <option value="📸">camera</option>
-              <option value="🌸">flower</option>
-              <option value="🌊">wave</option>
+              <option value="postmark">postmark</option>
+              <option value="star">star</option>
+              <option value="camera">camera</option>
+              <option value="flower">flower</option>
+              <option value="wave">wave</option>
             </select>
             <input type="file" id="stamp-photo-file" accept="image/*">
             <input type="url" id="stamp-photo" placeholder="photo url (optional if file selected)">
             <textarea id="stamp-note" placeholder="short note" maxlength="140"></textarea>
             <button type="submit">attach stamp</button>
           </form>
-          <p class="atlas-help">figma-style stamp flow. full image upload/persistence will be wired via cloudflare worker + r2.</p>
+          <p class="atlas-help">pin a photo stamp to a city with a short note.</p>
           <p class="atlas-toast" id="stamp-toast"></p>
+        </div>
         </div>
         </section>
       </div>
+
+      <aside class="atlas-legend-popout" id="atlas-legend-popout" hidden>
+        <div class="atlas-legend-head" id="atlas-legend-head">
+          <h3>legend</h3>
+          <button class="atlas-legend-close" id="atlas-legend-close" type="button" aria-label="close legend">×</button>
+        </div>
+        <ul class="legend-list" id="atlas-legend"></ul>
+      </aside>
     </div>
 
     <section class="atlas-controls" aria-label="atlas controls">
@@ -627,6 +854,7 @@
         <button class="atlas-menu-toggle" type="button" data-overlay-target="legend">legend</button>
         <button class="atlas-menu-toggle" type="button" data-overlay-target="add">add your city</button>
         <button class="atlas-menu-toggle" type="button" data-overlay-target="stamp">stamp board</button>
+        <button class="atlas-menu-toggle" type="button" data-overlay-target="browse">browse entries</button>
       </div>
     </section>
   </main>
@@ -656,67 +884,257 @@
       var overlayClose = document.getElementById('atlas-overlay-close');
       var overlayTitle = document.getElementById('atlas-overlay-title');
       var atlasShell = document.getElementById('atlas-shell');
+      var overlayPanel = overlay ? overlay.querySelector('.atlas-overlay-panel') : null;
+      var overlayHeader = overlay ? overlay.querySelector('.atlas-overlay-header') : null;
+      var legendPopout = document.getElementById('atlas-legend-popout');
+      var legendHead = document.getElementById('atlas-legend-head');
+      var legendClose = document.getElementById('atlas-legend-close');
+      var activeOverlaySection = '';
+      var overlayCloseTimer = null;
+      var legendCloseTimer = null;
 
-      function closeOverlay() {
-        if (!overlay) return;
-        overlay.classList.remove('open');
-        overlay.setAttribute('hidden', 'hidden');
+      function setMenuActive(section, active) {
+        var button = document.querySelector('[data-overlay-target="' + section + '"]');
+        if (!button) return;
+        button.classList.toggle('active', !!active);
+      }
+
+      function hideOverlayViews() {
         document.querySelectorAll('.atlas-overlay-view').forEach(function (view) {
           view.setAttribute('hidden', 'hidden');
         });
       }
 
+      function finishOverlayClose() {
+        if (!overlay) return;
+        overlay.classList.remove('open');
+        overlay.classList.remove('closing');
+        overlay.setAttribute('hidden', 'hidden');
+        hideOverlayViews();
+      }
+
+      function closeOverlay(animated) {
+        if (!overlay || overlay.hasAttribute('hidden')) return;
+        if (overlayCloseTimer) {
+          window.clearTimeout(overlayCloseTimer);
+          overlayCloseTimer = null;
+        }
+        if (activeOverlaySection) {
+          setMenuActive(activeOverlaySection, false);
+        }
+        activeOverlaySection = '';
+        if (animated === false) {
+          finishOverlayClose();
+          return;
+        }
+        overlay.classList.remove('open');
+        overlay.classList.add('closing');
+        overlayCloseTimer = window.setTimeout(function () {
+          finishOverlayClose();
+          overlayCloseTimer = null;
+        }, 220);
+      }
+
       function openOverlay(section) {
         if (!overlay) return;
         var target = document.getElementById('atlas-overlay-' + section);
-        var panel = overlay.querySelector('.atlas-overlay-panel');
         if (!target) return;
 
-        document.querySelectorAll('.atlas-overlay-view').forEach(function (view) {
-          view.setAttribute('hidden', 'hidden');
-        });
+        if (activeOverlaySection === section && overlay.classList.contains('open')) {
+          closeOverlay(true);
+          return;
+        }
+
+        if (overlayCloseTimer) {
+          window.clearTimeout(overlayCloseTimer);
+          overlayCloseTimer = null;
+        }
+        overlay.classList.remove('closing');
+
+        hideOverlayViews();
         target.removeAttribute('hidden');
         overlay.removeAttribute('hidden');
         overlay.classList.add('open');
 
-        if (overlayBlur && atlasShell && panel) {
-          var mapRect = atlasShell.getBoundingClientRect();
-          var panelRect = panel.getBoundingClientRect();
-          overlayBlur.style.left = '0px';
-          overlayBlur.style.top = '0px';
-          overlayBlur.style.width = Math.max(0, panelRect.right - mapRect.left) + 'px';
-          overlayBlur.style.height = Math.max(0, panelRect.bottom - mapRect.top) + 'px';
+        if (section === 'browse') {
+          renderBrowseList();
         }
 
         if (overlayTitle) {
           var labels = {
             style: 'map style',
             jump: 'fast track',
-            legend: 'legend',
             add: 'add your city',
-            stamp: 'stamp board'
+            stamp: 'stamp board',
+            browse: 'browse entries'
           };
           overlayTitle.textContent = labels[section] || 'atlas menu';
         }
+
+        if (activeOverlaySection && activeOverlaySection !== section) {
+          setMenuActive(activeOverlaySection, false);
+        }
+        activeOverlaySection = section;
+        setMenuActive(section, true);
+      }
+
+      function finishLegendClose() {
+        if (!legendPopout) return;
+        legendPopout.classList.remove('open');
+        legendPopout.classList.remove('closing');
+        legendPopout.setAttribute('hidden', 'hidden');
+        setMenuActive('legend', false);
+      }
+
+      function closeLegend(animated) {
+        if (!legendPopout || legendPopout.hasAttribute('hidden')) return;
+        if (legendCloseTimer) {
+          window.clearTimeout(legendCloseTimer);
+          legendCloseTimer = null;
+        }
+        if (animated === false) {
+          finishLegendClose();
+          return;
+        }
+        legendPopout.classList.remove('open');
+        legendPopout.classList.add('closing');
+        legendCloseTimer = window.setTimeout(function () {
+          finishLegendClose();
+          legendCloseTimer = null;
+        }, 200);
+      }
+
+      function openLegend() {
+        if (!legendPopout) return;
+        if (legendCloseTimer) {
+          window.clearTimeout(legendCloseTimer);
+          legendCloseTimer = null;
+        }
+        legendPopout.removeAttribute('hidden');
+        legendPopout.classList.remove('closing');
+        legendPopout.classList.add('open');
+        setMenuActive('legend', true);
+      }
+
+      function toggleLegend() {
+        if (!legendPopout) return;
+        if (legendPopout.classList.contains('open') || legendPopout.classList.contains('closing')) {
+          closeLegend(true);
+          return;
+        }
+        openLegend();
+      }
+
+      function makeDraggable(handle, panel) {
+        if (!handle || !panel || !atlasShell) return;
+        var state = null;
+
+        function clamp(value, min, max) {
+          return Math.max(min, Math.min(max, value));
+        }
+
+        handle.addEventListener('pointerdown', function (event) {
+          if (event.button !== 0) return;
+          if (event.target && event.target.closest('button')) return;
+          if (!atlasShell.contains(panel)) return;
+
+          var shellRect = atlasShell.getBoundingClientRect();
+          var panelRect = panel.getBoundingClientRect();
+          var computed = window.getComputedStyle(panel);
+          var startLeft = panel.offsetLeft;
+          var startTop = panel.offsetTop;
+
+          if (computed.right !== 'auto' && panel.style.left === '') {
+            startLeft = panelRect.left - shellRect.left;
+            panel.style.left = startLeft + 'px';
+            panel.style.right = 'auto';
+          }
+          if (computed.bottom !== 'auto' && panel.style.top === '') {
+            startTop = panelRect.top - shellRect.top;
+            panel.style.top = startTop + 'px';
+            panel.style.bottom = 'auto';
+          }
+
+          state = {
+            pointerId: event.pointerId,
+            startX: event.clientX,
+            startY: event.clientY,
+            startLeft: panel.offsetLeft,
+            startTop: panel.offsetTop
+          };
+
+          handle.classList.add('dragging');
+          panel.style.cursor = 'grabbing';
+
+          if (handle.setPointerCapture) {
+            handle.setPointerCapture(event.pointerId);
+          }
+
+          event.preventDefault();
+        });
+
+        handle.addEventListener('pointermove', function (event) {
+          if (!state || state.pointerId !== event.pointerId) return;
+          var dx = event.clientX - state.startX;
+          var dy = event.clientY - state.startY;
+
+          var maxLeft = Math.max(6, atlasShell.clientWidth - panel.offsetWidth - 6);
+          var maxTop = Math.max(6, atlasShell.clientHeight - panel.offsetHeight - 6);
+          var nextLeft = clamp(state.startLeft + dx, 6, maxLeft);
+          var nextTop = clamp(state.startTop + dy, 6, maxTop);
+
+          panel.style.left = nextLeft + 'px';
+          panel.style.top = nextTop + 'px';
+        });
+
+        function endDrag(event) {
+          if (!state || state.pointerId !== event.pointerId) return;
+          if (handle.releasePointerCapture) {
+            handle.releasePointerCapture(event.pointerId);
+          }
+          state = null;
+          handle.classList.remove('dragging');
+          panel.style.cursor = '';
+        }
+
+        handle.addEventListener('pointerup', endDrag);
+        handle.addEventListener('pointercancel', endDrag);
       }
 
       document.querySelectorAll('[data-overlay-target]').forEach(function (button) {
         button.addEventListener('click', function () {
-          openOverlay(button.getAttribute('data-overlay-target'));
+          var target = button.getAttribute('data-overlay-target');
+          if (target === 'legend') {
+            toggleLegend();
+            return;
+          }
+          openOverlay(target);
         });
       });
 
       if (overlayClose) {
-        overlayClose.addEventListener('click', closeOverlay);
+        overlayClose.addEventListener('click', function () { closeOverlay(true); });
       }
 
       if (overlayBlur) {
-        overlayBlur.addEventListener('click', closeOverlay);
+        overlayBlur.addEventListener('click', function () { closeOverlay(true); });
+      }
+
+      if (legendClose) {
+        legendClose.addEventListener('click', function () { closeLegend(true); });
       }
 
       document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape') closeOverlay();
+        if (event.key !== 'Escape') return;
+        if (overlay && !overlay.hasAttribute('hidden')) {
+          closeOverlay(true);
+          return;
+        }
+        closeLegend(true);
       });
+
+      makeDraggable(overlayHeader, overlayPanel);
+      makeDraggable(legendHead, legendPopout);
 
       mapboxgl.accessToken = (window.MAPBOX_ACCESS_TOKEN || '').trim();
       if (!mapboxgl.accessToken) {
@@ -725,7 +1143,7 @@
         mapRoot.style.alignItems = 'center';
         mapRoot.style.justifyContent = 'center';
         mapRoot.style.padding = '1rem';
-        mapRoot.innerHTML = '<div class="atlas-token-help"><p>mapbox token missing.</p><input id="atlas-token-input" type="text" placeholder="paste your mapbox public token (pk...)" /><button id="atlas-token-apply" type="button">use token + reload map</button><p>for permanent setup add it in <code>scripts/cloudflare-config.js</code>.</p></div>';
+        mapRoot.innerHTML = '<div class="atlas-token-help"><p>mapbox token missing.</p><input id="atlas-token-input" type="text" placeholder="paste your mapbox public token (pk...)" /><button id="atlas-token-apply" type="button">use token + reload map</button><p>for permanent setup, place your token in site config.</p></div>';
         var applyBtn = document.getElementById('atlas-token-apply');
         var tokenInput = document.getElementById('atlas-token-input');
         if (applyBtn && tokenInput) {
@@ -796,23 +1214,29 @@
 
       function renderStampLine(entry) {
         if (!entry.stamp) return '';
-        return '<div class="meta" style="margin-top:0.3rem;color:rgba(255,255,255,0.72);">stamp: ' + entry.stamp + '</div>';
+        return '<div class="meta" style="margin-top:0.3rem;color:rgba(255,255,255,0.72);">stamp: ' + stampLabel(entry.stamp) + '</div>';
       }
 
       function popupHtml(entry) {
         var type = markerTypes[entry.type] || markerTypes.visited;
-        var stamp = entry.stamp ? (' <span style="font-size:0.95em;">' + entry.stamp + '</span>') : '';
+        var stamp = entry.stamp ? (' <span style="font-size:0.8em;opacity:0.88;">(' + stampLabel(entry.stamp) + ')</span>') : '';
         return '<div class="atlas-popup"><h3>' + entry.city + stamp + '</h3><div class="meta" style="color:' + type.color + '">' + type.label + '</div><p>' + entry.note + '</p>' + renderStampLine(entry) + renderCityPhotos(entry) + '</div>';
       }
 
+      var seenEntryIds = {};
+
       function addPoint(entry) {
+        var id = entryId(entry);
+        if (seenEntryIds[id]) return false;
         var type = markerTypes[entry.type] || markerTypes.visited;
         var marker = new mapboxgl.Marker({ element: markerElement(type.color) })
           .setLngLat([entry.lng, entry.lat])
           .setPopup(new mapboxgl.Popup({ offset: 12 }).setHTML(popupHtml(entry)))
           .addTo(map);
         allMarkers.push(marker);
-        markerById[entryId(entry)] = marker;
+        markerById[id] = marker;
+        seenEntryIds[id] = true;
+        return true;
       }
 
       var legend = document.getElementById('atlas-legend');
@@ -829,7 +1253,7 @@
       var USER_KEY = 'joho-atlas-user-cities-v1';
       var workerBase = (window.CLOUDFLARE_WORKER_URL || '').trim().replace(/\/$/, '');
       var useCloudStorage = !!workerBase;
-      function readUserCities() {
+      function readStoredEntries() {
         if (useCloudStorage) return [];
         try {
           var raw = localStorage.getItem(USER_KEY);
@@ -841,23 +1265,95 @@
         }
       }
 
-      function writeUserCities(items) {
+      function writeStoredEntries() {
         if (useCloudStorage) return;
-        localStorage.setItem(USER_KEY, JSON.stringify(items));
+        localStorage.setItem(USER_KEY, JSON.stringify(userCities.concat(stampEntries)));
       }
 
-      var userCities = readUserCities();
-      userCities.forEach(addPoint);
+      var stampAlias = {
+        '': '',
+        postmark: 'postmark',
+        star: 'star',
+        camera: 'camera',
+        pin: 'pin',
+        wave: 'wave',
+        flower: 'flower',
+        journey: 'journey',
+        '📮': 'postmark',
+        '⭐': 'star',
+        '📸': 'camera',
+        '📍': 'pin',
+        '🌊': 'wave',
+        '🌸': 'flower',
+        '🛤️': 'journey',
+        '🛤': 'journey'
+      };
+
+      function stampLabel(value) {
+        var key = (value || '').trim().toLowerCase();
+        return (stampAlias && stampAlias[key]) || key;
+      }
+
+      function normalizeEntry(entry) {
+        if (!entry || !entry.city) return null;
+        var lat = parseFloat(entry.lat);
+        var lng = parseFloat(entry.lng);
+        if (isNaN(lat) || isNaN(lng)) return null;
+        return {
+          city: String(entry.city),
+          type: entry.type || 'user',
+          lat: lat,
+          lng: lng,
+          note: String(entry.note || ''),
+          stamp: stampLabel(entry.stamp),
+          photos: Array.isArray(entry.photos) ? entry.photos.filter(Boolean) : []
+        };
+      }
+
+      function listHasEntry(list, entry) {
+        var id = entryId(entry);
+        return list.some(function (item) { return entryId(item) === id; });
+      }
+
+      var userCities = [];
+      var storedEntries = readStoredEntries();
+      storedEntries.forEach(function (rawEntry) {
+        var entry = normalizeEntry(rawEntry);
+        if (!entry) return;
+        addPoint(entry);
+        if (entry.stamp) {
+          if (!listHasEntry(stampEntries, entry)) {
+            stampEntries.push(entry);
+          }
+        } else if (!listHasEntry(userCities, entry)) {
+          userCities.push(entry);
+        }
+      });
+
+      function addAtlasEntry(rawEntry, options) {
+        var entry = normalizeEntry(rawEntry);
+        if (!entry) return null;
+
+        addPoint(entry);
+
+        if (entry.stamp) {
+          if (!listHasEntry(stampEntries, entry)) {
+            stampEntries.push(entry);
+          }
+        } else if (!listHasEntry(userCities, entry)) {
+          userCities.push(entry);
+        }
+
+        if (!options || options.persist !== false) {
+          writeStoredEntries();
+        }
+
+        return entry;
+      }
 
       loadCloudAtlasPoints().then(function (points) {
         points.forEach(function (entry) {
-          if (!entry || typeof entry.lat !== 'number' || typeof entry.lng !== 'number') return;
-          addPoint(entry);
-          if (entry.stamp) {
-            stampEntries.push(entry);
-          } else {
-            userCities.push(entry);
-          }
+          addAtlasEntry(entry, { persist: false });
         });
         updateJumpList();
       });
@@ -886,6 +1382,8 @@
       var cityJumpSelect = document.getElementById('atlas-city-jump');
       var cityJumpBtn = document.getElementById('atlas-jump-btn');
       var cityJump3dBtn = document.getElementById('atlas-jump-3d-btn');
+      var browseList = document.getElementById('atlas-browse-list');
+      var browseEmpty = document.getElementById('atlas-browse-empty');
 
       var is3D = false;
 
@@ -934,6 +1432,70 @@
           option.value = JSON.stringify({ id: id, lat: entry.lat, lng: entry.lng, city: entry.city });
           option.textContent = entry.city;
           cityJumpSelect.appendChild(option);
+        });
+        renderBrowseList();
+      }
+
+      function renderBrowseList() {
+        if (!browseList || !browseEmpty) return;
+        browseList.innerHTML = '';
+
+        var userEntries = userCities.concat(stampEntries);
+        var items = [];
+        var seen = {};
+
+        userEntries.forEach(function (entry) {
+          if (!entry || typeof entry.lat !== 'number' || typeof entry.lng !== 'number') return;
+          var id = entryId(entry);
+          if (seen[id]) return;
+          seen[id] = true;
+          items.push(entry);
+        });
+
+        if (!items.length) {
+          browseEmpty.removeAttribute('hidden');
+          return;
+        }
+
+        browseEmpty.setAttribute('hidden', 'hidden');
+
+        items.slice().reverse().forEach(function (entry) {
+          var button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'atlas-browse-item';
+
+          var title = document.createElement('strong');
+          title.textContent = entry.city;
+          button.appendChild(title);
+
+          var meta = document.createElement('div');
+          var metaText = entry.stamp
+            ? 'stamp: ' + stampLabel(entry.stamp)
+            : 'city note';
+          meta.textContent = metaText;
+          button.appendChild(meta);
+
+          if (entry.note) {
+            var note = document.createElement('div');
+            note.textContent = entry.note.length > 88 ? (entry.note.slice(0, 88) + '...') : entry.note;
+            button.appendChild(note);
+          }
+
+          button.addEventListener('click', function () {
+            map.flyTo({
+              center: [entry.lng, entry.lat],
+              zoom: Math.max(map.getZoom(), 6),
+              essential: true
+            });
+            var marker = markerById[entryId(entry)];
+            if (marker && marker.getPopup()) {
+              window.setTimeout(function () {
+                marker.togglePopup();
+              }, 460);
+            }
+          });
+
+          browseList.appendChild(button);
         });
       }
 
@@ -1051,9 +1613,11 @@
           });
       }
 
-      styleSelect.addEventListener('change', function () {
-        map.setStyle(styleSelect.value);
-      });
+      if (styleSelect) {
+        styleSelect.addEventListener('change', function () {
+          map.setStyle(styleSelect.value);
+        });
+      }
 
       map.on('style.load', function () {
         mapReady = true;
@@ -1132,7 +1696,7 @@
               lat: parseFloat(first.lat),
               lng: parseFloat(first.lon),
               note: note,
-              stamp: (stampInput.value || '').trim(),
+              stamp: stampLabel((stampInput.value || '').trim()),
               photos: (photoInput.value || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean)
             };
 
@@ -1142,11 +1706,13 @@
 
             saveAtlasPoint(entry)
               .then(function (savedEntry) {
-                addPoint(savedEntry);
-                map.flyTo({ center: [savedEntry.lng, savedEntry.lat], zoom: Math.max(map.getZoom(), 3.4), essential: true });
+                var normalized = addAtlasEntry(savedEntry);
+                if (!normalized) {
+                  showToast('could not save city right now.');
+                  return;
+                }
 
-                userCities.push(savedEntry);
-                writeUserCities(userCities);
+                map.flyTo({ center: [normalized.lng, normalized.lat], zoom: Math.max(map.getZoom(), 3.4), essential: true });
                 updateJumpList();
                 form.reset();
                 showToast('city saved permanently.');
@@ -1165,7 +1731,7 @@
         var query = stampCityInput.value.trim();
         var photo = stampPhotoInput.value.trim();
         var note = stampNoteInput.value.trim() || 'stamp entry';
-        var icon = (stampIconInput.value || '📮').trim();
+        var icon = stampLabel((stampIconInput.value || 'postmark').trim());
         var photoFile = stampPhotoFileInput.files && stampPhotoFileInput.files[0];
         clearFields([stampCityInput, stampPhotoInput, stampPhotoFileInput]);
 
@@ -1212,10 +1778,14 @@
 
             saveAtlasPoint(entry)
               .then(function (savedEntry) {
-                stampEntries.push(savedEntry);
-                addPoint(savedEntry);
+                var normalized = addAtlasEntry(savedEntry);
+                if (!normalized) {
+                  stampToast.textContent = 'could not save stamp right now';
+                  return;
+                }
+
                 updateJumpList();
-                map.flyTo({ center: [savedEntry.lng, savedEntry.lat], zoom: Math.max(map.getZoom(), 3.6), essential: true });
+                map.flyTo({ center: [normalized.lng, normalized.lat], zoom: Math.max(map.getZoom(), 3.6), essential: true });
                 stampForm.reset();
                 clearFields([stampCityInput, stampPhotoInput, stampPhotoFileInput]);
                 stampToast.textContent = 'stamp linked to city';

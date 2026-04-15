@@ -7,6 +7,7 @@ package.json
 package-lock.json
 scripts/local-config.js
 gif/patches/
+.vercel/.env.development.local
 
 # wrangler files
 .wrangler
