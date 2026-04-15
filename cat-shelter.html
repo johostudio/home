@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>cat shelter — joho's studio</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="stylesheet" href="styles/tailwind-prod.css">
+  <link rel="stylesheet" href="styles/dot-grid.css">
+  <link rel="stylesheet" href="styles/clocks.css">
+  <style>
+    body {
+      background: #000;
+      color: #e6eef6;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    .cat-shell {
+      width: min(760px, 100%);
+      margin: 0 auto;
+      display: grid;
+      gap: 1rem;
+    }
+
+    .cat-card {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      background: rgba(6, 8, 12, 0.85);
+      box-shadow: 0 22px 46px rgba(0, 0, 0, 0.4);
+      overflow: hidden;
+    }
+
+    .cat-image-wrap {
+      width: min(420px, 100%);
+      margin: 0.8rem auto 0;
+      aspect-ratio: 4 / 3;
+      background: rgba(255, 255, 255, 0.04);
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .cat-image-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .cat-fact {
+      padding: 0.9rem 1rem;
+      font-size: 0.78rem;
+      line-height: 1.44;
+      letter-spacing: -0.01em;
+      text-transform: lowercase;
+      color: rgba(230, 238, 246, 0.84);
+      text-align: center;
+      max-width: 640px;
+      margin: 0.25rem auto 0;
+    }
+
+    .cat-controls {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .cat-btn {
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      color: rgba(230, 238, 246, 0.78);
+      font-size: 0.68rem;
+      text-transform: lowercase;
+      letter-spacing: -0.01em;
+      padding: 0.4rem 0.72rem;
+      cursor: pointer;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    .cat-btn:hover {
+      border-color: rgba(255, 255, 255, 0.36);
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .cat-status {
+      text-align: center;
+      font-size: 0.66rem;
+      color: rgba(230, 238, 246, 0.54);
+      text-transform: lowercase;
+      letter-spacing: -0.01em;
+      min-height: 1.1em;
+    }
+
+    .archive-footer {
+      margin-top: clamp(220px, 30vh, 360px);
+      width: 100%;
+      margin-bottom: 0.75rem;
+    }
+
+    @media (max-width: 640px) {
+      .cat-image-wrap {
+        width: min(300px, 100%);
+      }
+
+      .archive-footer {
+        margin-top: 180px;
+      }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen relative">
+  <div class="dot-grid-wrapper"></div>
+  <script src="scripts/site-header.js"></script>
+
+  <a href="archives.html" class="back-btn relative z-50 text-[13px] text-white/50 hover:text-white transition-colors" style="position:fixed; top:24px; left:24px; pointer-events:auto;">← back</a>
+
+  <main class="relative z-10 pt-40 px-6 pb-24 max-w-5xl mx-auto flex flex-col items-center">
+    <div class="mb-10 text-center">
+      <h1 class="text-4xl md:text-5xl font-normal tracking-tight mb-3" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:-0.07em;text-transform:lowercase;">cat shelter</h1>
+      <p class="text-[0.72rem] text-white/45 max-w-lg" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:-0.01em;text-transform:lowercase;">a random cat and a random cat fact on every load.</p>
+    </div>
+
+    <section class="cat-shell" aria-label="random cat panel">
+      <div class="cat-card">
+        <div class="cat-image-wrap">
+          <img id="cat-photo" alt="random cat" loading="eager" decoding="async">
+        </div>
+        <p class="cat-fact" id="cat-fact">loading cat fact...</p>
+      </div>
+
+      <div class="cat-controls">
+        <button class="cat-btn" id="cat-refresh-btn" type="button">new cat + fact</button>
+      </div>
+
+      <p class="cat-status" id="cat-status"></p>
+    </section>
+
+    <footer class="archive-footer text-center mt-0 w-full mb-3" aria-label="copyright notice">
+      <small>© <span id="year"></span> joho's studio 昌栢</small>
+      <div class="text-sm mt-2">ALL RIGHTS RESERVED. ®</div>
+    </footer>
+  </main>
+
+  <script>
+    (function () {
+      var yearEl = document.getElementById('year');
+      if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+      var photoEl = document.getElementById('cat-photo');
+      var factEl = document.getElementById('cat-fact');
+      var statusEl = document.getElementById('cat-status');
+      var refreshBtn = document.getElementById('cat-refresh-btn');
+
+      var fallbackFact = 'cats can rotate their ears up to 180 degrees to track sounds.';
+
+      function randomBust() {
+        return String(Date.now()) + '-' + Math.floor(Math.random() * 1000000);
+      }
+
+      function fetchCatFact() {
+        return fetch('https://meowfacts.herokuapp.com/?count=1', { headers: { 'Accept': 'application/json' } })
+          .then(function (response) {
+            if (!response.ok) throw new Error('fact request failed');
+            return response.json();
+          })
+          .then(function (data) {
+            if (data && Array.isArray(data.data) && data.data[0]) {
+              return String(data.data[0]);
+            }
+            throw new Error('fact payload missing');
+          })
+          .catch(function () {
+            return fallbackFact;
+          });
+      }
+
+      function fetchCatImageUrl() {
+        var endpoint = 'https://cataas.com/cat?json=true&t=' + randomBust();
+        return fetch(endpoint, { headers: { 'Accept': 'application/json' } })
+          .then(function (response) {
+            if (!response.ok) throw new Error('cat image metadata failed');
+            return response.json();
+          })
+          .then(function (data) {
+            if (data && data.url) {
+              return String(data.url).indexOf('http') === 0
+                ? String(data.url)
+                : ('https://cataas.com' + String(data.url));
+            }
+            throw new Error('cat url missing');
+          })
+          .catch(function () {
+            return 'https://cataas.com/cat?width=1100&height=700&t=' + randomBust();
+          });
+      }
+
+      function renderFallbackImage() {
+        if (!photoEl) return;
+        var fallbackSvg = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
+          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675">' +
+          '<rect width="1200" height="675" fill="#0e1219"/>' +
+          '<text x="600" y="326" text-anchor="middle" fill="#d6dce8" font-family="Helvetica, Arial, sans-serif" font-size="46">cat image unavailable</text>' +
+          '<text x="600" y="372" text-anchor="middle" fill="#9aa6bc" font-family="Helvetica, Arial, sans-serif" font-size="24">try refresh</text>' +
+          '</svg>'
+        );
+        photoEl.src = fallbackSvg;
+      }
+
+      function loadRandomCatBundle() {
+        if (statusEl) statusEl.textContent = 'loading a new cat...';
+
+        Promise.all([fetchCatFact(), fetchCatImageUrl()])
+          .then(function (results) {
+            var fact = results[0] || fallbackFact;
+            var imageUrl = results[1] || '';
+
+            if (factEl) factEl.textContent = fact;
+
+            if (photoEl) {
+              photoEl.onerror = function () {
+                renderFallbackImage();
+                if (statusEl) statusEl.textContent = 'loaded with fallback image.';
+              };
+              photoEl.src = imageUrl;
+            }
+
+            if (statusEl) statusEl.textContent = 'new cat loaded.';
+          })
+          .catch(function () {
+            if (factEl) factEl.textContent = fallbackFact;
+            renderFallbackImage();
+            if (statusEl) statusEl.textContent = 'could not fetch live data, using fallback.';
+          });
+      }
+
+      if (refreshBtn) {
+        refreshBtn.addEventListener('click', loadRandomCatBundle);
+      }
+
+      loadRandomCatBundle();
+    })();
+  </script>
+
+  <script src="scripts/page-transitions.js"></script>
+  <script src="scripts/dot-grid.js"></script>
+  <script src="scripts/clocks.js"></script>
+</body>
+
+</html>

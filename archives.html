@@ -66,10 +66,10 @@
     }
 
     .archives-links {
-      width: min(820px, 100%);
+      width: min(1120px, 100%);
       display: grid;
-      grid-template-columns: repeat(3, minmax(130px, 1fr));
-      gap: clamp(1.2rem, 5vw, 4rem);
+      grid-template-columns: repeat(4, minmax(150px, 1fr));
+      gap: clamp(1rem, 3vw, 2.4rem);
       align-items: start;
       justify-items: center;
     }
@@ -128,6 +128,15 @@
       color: rgba(230, 238, 246, 0.88);
     }
 
+    .archives-link-desc {
+      max-width: 190px;
+      font-size: 0.66rem;
+      line-height: 1.38;
+      letter-spacing: -0.01em;
+      text-transform: lowercase;
+      color: rgba(230, 238, 246, 0.46);
+    }
+
     .archives-link:hover,
     .archives-link:focus-visible {
       color: #c084fc;
@@ -141,18 +150,26 @@
     }
 
 
-    @media (max-width: 640px) {
+    @media (max-width: 920px) {
       #gardens-section {
         padding-top: 10.5rem;
       }
 
       .archives-links {
-        grid-template-columns: 1fr;
-        gap: 1.35rem;
+        grid-template-columns: repeat(2, minmax(150px, 1fr));
+        gap: 1.15rem 0.95rem;
       }
 
       .archives-link {
         gap: 0.5rem;
+      }
+
+      .archives-link-label {
+        font-size: 0.92rem;
+      }
+
+      .archives-link-desc {
+        font-size: 0.62rem;
       }
     }
 
@@ -600,16 +617,25 @@
         <a href="scrambled.html" class="archives-link" title="a scrambled mind">
           <svg class="sketch-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5c1.1-1.8 2.6-2.8 4.6-2.8 1.4 0 2.8.6 4 1.6 1.5 1.2 2.8 1.8 4.2 1.8 1.2 0 2.4-.4 3.2-1.2"></path><path d="M4.8 15.6c1.1-1.1 2.4-1.7 3.9-1.7 1.4 0 2.8.5 4.2 1.5 1.7 1.3 3.1 1.9 4.5 1.9 1 0 1.9-.2 2.8-.8"></path><circle cx="7" cy="7" r="1.4"></circle><circle cx="12" cy="6" r="1.1"></circle><circle cx="17" cy="7.4" r="1.3"></circle></svg>
           <span class="archives-link-label">a scrambled mind</span>
+          <span class="archives-link-desc">node-based journal fragments, linked thoughts, and loose memory trails.</span>
         </a>
 
         <a href="bookshelf.html" class="archives-link" title="a cluttered shelf">
           <svg class="sketch-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.2 5.2h3.1v13.4H4.2z"></path><path d="M8.6 4.3h3.7v14.3H8.6z"></path><path d="M13.5 5.6H18v13H13.5z"></path><path d="M4 19.6h16"></path><line x1="10.5" y1="7" x2="10.5" y2="15"></line></svg>
           <span class="archives-link-label">a cluttered shelf</span>
+          <span class="archives-link-desc">curated books with personal ratings and quick review popups.</span>
         </a>
 
         <a href="atlas.html" class="archives-link" title="a colourful atlas">
           <svg class="sketch-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 8.2l6.5-2.1 4.3 1.6 6.4-1.8v10.1l-6.4 2.1-4.3-1.6-6.5 1.8z"></path><path d="M9.9 6.1v10.2"></path><path d="M14.2 7.7v10.2"></path><path d="M3.4 12.2l6.5-1.8 4.3 1.4 6.4-1.7"></path></svg>
           <span class="archives-link-label">a colourful atlas</span>
+          <span class="archives-link-desc">save city stories, place stamps, and browse shared map entries.</span>
+        </a>
+
+        <a href="cat-shelter.html" class="archives-link" title="cat shelter">
+          <svg class="sketch-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.3c0-3.3 2.6-6 5.9-6h4.2c3.3 0 5.9 2.7 5.9 6v1.4c0 1.3-1.1 2.4-2.4 2.4H6.4C5.1 18.1 4 17 4 15.7v-1.4z"></path><path d="M8.2 8.3 6.9 5.9a1 1 0 0 1 1.4-1.3l2.1 1.5"></path><path d="m15.8 8.3 1.3-2.4a1 1 0 0 0-1.4-1.3l-2.1 1.5"></path><circle cx="10" cy="13" r="0.9"></circle><circle cx="14" cy="13" r="0.9"></circle><path d="M10.9 15.4h2.2"></path></svg>
+          <span class="archives-link-label">cat shelter</span>
+          <span class="archives-link-desc">random cat photos with meowfacts on every load and refresh.</span>
         </a>
       </div>
     </div>

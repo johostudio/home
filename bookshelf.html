@@ -192,9 +192,13 @@
     }
 
     .archive-footer {
-      margin-top: 0;
+      margin-top: clamp(220px, 30vh, 360px);
       width: 100%;
       margin-bottom: 0.75rem;
+    }
+
+    #books-grid {
+      margin-bottom: 140px;
     }
 
     main {
@@ -227,7 +231,7 @@
       background: rgba(3, 4, 7, 0.72);
       backdrop-filter: blur(8px);
       opacity: 0;
-      transition: opacity 0.25s ease;
+      transition: opacity 0.34s cubic-bezier(0.22, 1, 0.36, 1);
       cursor: pointer;
     }
 
@@ -244,8 +248,9 @@
       box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45);
       padding: 1rem;
       opacity: 0;
-      transform: translateY(12px) scale(0.985);
-      transition: opacity 0.25s ease, transform 0.25s ease;
+      transform: translateY(16px) scale(0.972);
+      transition: opacity 0.36s cubic-bezier(0.22, 1, 0.36, 1), transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: opacity, transform;
     }
 
     .book-modal.open .book-modal-panel {
@@ -330,6 +335,66 @@
       width: fit-content;
     }
 
+    .book-modal-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.44rem;
+      margin-top: -0.08rem;
+    }
+
+    .book-modal-badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(230, 238, 246, 0.84);
+      padding: 0.2rem 0.52rem;
+      font-size: 0.65rem;
+      line-height: 1;
+      text-transform: lowercase;
+      letter-spacing: -0.01em;
+    }
+
+    .book-modal-badge[data-state="finished"] {
+      border-color: rgba(52, 211, 153, 0.45);
+      background: rgba(52, 211, 153, 0.16);
+      color: rgba(184, 252, 227, 0.96);
+    }
+
+    .book-modal-badge[data-state="reading"] {
+      border-color: rgba(251, 191, 36, 0.45);
+      background: rgba(251, 191, 36, 0.14);
+      color: rgba(255, 229, 174, 0.96);
+    }
+
+    .books-controls {
+      display: flex;
+      justify-content: center;
+      gap: 0.45rem;
+      margin: 0 auto 0.95rem;
+      flex-wrap: wrap;
+    }
+
+    .books-sort-btn {
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      color: rgba(230, 238, 246, 0.72);
+      font-size: 0.66rem;
+      letter-spacing: -0.01em;
+      text-transform: lowercase;
+      padding: 0.32rem 0.66rem;
+      cursor: pointer;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    .books-sort-btn.active {
+      border-color: rgba(192, 132, 252, 0.48);
+      background: rgba(192, 132, 252, 0.2);
+      color: #f0dcff;
+    }
+
     .book-modal-review {
       font-size: 0.78rem;
       line-height: 1.45;
@@ -361,9 +426,11 @@
     @media (max-width: 520px) {
       #books-grid {
         grid-template-columns: 1fr;
+        margin-bottom: 110px;
       }
 
       .archive-footer {
+        margin-top: 180px;
         margin-bottom: 0.45rem;
       }
 
@@ -393,6 +460,12 @@
     </div>
 
     <p class="books-status" id="books-status">loading shelf...</p>
+
+    <div class="books-controls" id="books-controls" hidden>
+      <button class="books-sort-btn active" type="button" data-sort="all">all</button>
+      <button class="books-sort-btn" type="button" data-sort="finished">finished</button>
+      <button class="books-sort-btn" type="button" data-sort="reading">reading</button>
+    </div>
 
     <div class="books-loader" id="books-loader" aria-hidden="true">
       <div class="books-loader-track">
@@ -427,6 +500,7 @@
         <div class="book-modal-meta">
           <p class="book-authors" id="book-modal-authors"></p>
           <div class="book-modal-rating" id="book-modal-rating">rating: — / 10</div>
+          <div class="book-modal-badges" id="book-modal-badges"></div>
           <p class="book-modal-review" id="book-modal-review">no review added yet.</p>
           <a class="book-modal-link" id="book-modal-link" href="#" target="_blank" rel="noopener">open book page</a>
         </div>
@@ -445,32 +519,32 @@
     };
 
     window.JOHO_BOOK_NOTES = window.JOHO_BOOK_NOTES || [
-      { title: '101 things i learned in product design school', author: 'sung jang', rating: 0, review: '' },
-      { title: 'battle hymn of the tiger mother', author: 'amy chua', rating: 0, review: '' },
-      { title: 'permission to come home', author: 'jenny wang', rating: 0, review: '' },
-      { title: 'the book thief', author: 'markus zusak', rating: 0, review: '' },
-      { title: 'atomic habits', author: 'james clear', rating: 0, review: '' },
-      { title: '101 things i learned in architecture school', author: 'matthew frederick', rating: 0, review: '' },
-      { title: 'the creative act', author: 'rick rubin', rating: 0, review: '' },
-      { title: 'the convenience store by the sea', author: 'sonoko machida', rating: 0, review: '' },
-      { title: 'we\'ll prescribe you a cat', author: 'syou ishida', rating: 0, review: '' },
-      { title: 'goodnight tokyo', author: 'atsuhiro yoshida', rating: 0, review: '' },
-      { title: 'the lantern of lost memories', author: 'sanaka hiiragi', rating: 0, review: '' },
-      { title: 'ikigai', author: 'hector garcia', rating: 0, review: '' },
-      { title: 'more days at the morisaki bookshop', author: 'satoshi yagisawa', rating: 0, review: '' },
-      { title: 'days at the morisaki bookshop', author: 'satoshi yagisawa', rating: 0, review: '' },
-      { title: 'the restaurant of lost recipes', author: 'hisashi kashiwai', rating: 0, review: '' },
-      { title: 'welcome to the hyunam-dong bookshop', author: 'hwang bo-reum', rating: 0, review: '' },
-      { title: 'the second chance convenience store', author: 'kim ho-yeon', rating: 0, review: '' },
-      { title: 'the 99% invisible city', author: 'roman mars', rating: 0, review: '' },
-      { title: 'in praise of shadows', author: 'junichiro tanizaki', rating: 0, review: '' },
-      { title: 'snowglobe', author: 'soyoung park', rating: 0, review: '' },
-      { title: 'snowglobe 2', author: 'soyoung park', rating: 0, review: '' },
-      { title: 'the passengers on the hankyu line', author: 'hiro arikawa', rating: 0, review: '' },
-      { title: 'the travelling cat chronicles', author: 'hiro arikawa', rating: 0, review: '' },
-      { title: 'break room', author: 'miye lee', rating: 0, review: '' },
-      { title: 'i want to die but i want to eat tteokbokki', author: 'baek sehee', rating: 0, review: '' },
-      { title: 'i want to die but i still want to eat tteokbokki', author: '', rating: 0, review: '' }
+      { title: '101 things i learned in product design school', author: 'sung jang', rating: 0, review: '', status: 'reading', year: 2020 },
+      { title: 'battle hymn of the tiger mother', author: 'amy chua', rating: 0, review: '', status: 'finished', year: 2011 },
+      { title: 'permission to come home', author: 'jenny wang', rating: 0, review: '', status: 'reading', year: 2022 },
+      { title: 'the book thief', author: 'markus zusak', rating: 0, review: '', status: 'finished', year: 2006 },
+      { title: 'atomic habits', author: 'james clear', rating: 0, review: '', status: 'finished', year: 2018 },
+      { title: '101 things i learned in architecture school', author: 'matthew frederick', rating: 0, review: '', status: 'finished', year: 2007 },
+      { title: 'the creative act', author: 'rick rubin', rating: 0, review: '', status: 'reading', year: 2023 },
+      { title: 'the convenience store by the sea', author: 'sonoko machida', rating: 0, review: '', status: 'reading', year: 2025 },
+      { title: 'we\'ll prescribe you a cat', author: 'syou ishida', rating: 0, review: '', status: 'reading', year: 2024 },
+      { title: 'goodnight tokyo', author: 'atsuhiro yoshida', rating: 0, review: '', status: 'reading', year: 2024 },
+      { title: 'the lantern of lost memories', author: 'sanaka hiiragi', rating: 0, review: '', status: 'reading', year: 2024 },
+      { title: 'ikigai', author: 'hector garcia', rating: 0, review: '', status: 'finished', year: 2017 },
+      { title: 'more days at the morisaki bookshop', author: 'satoshi yagisawa', rating: 0, review: '', status: 'reading', year: 2023 },
+      { title: 'days at the morisaki bookshop', author: 'satoshi yagisawa', rating: 0, review: '', status: 'finished', year: 2023 },
+      { title: 'the restaurant of lost recipes', author: 'hisashi kashiwai', rating: 0, review: '', status: 'reading', year: 2024 },
+      { title: 'welcome to the hyunam-dong bookshop', author: 'hwang bo-reum', rating: 0, review: '', status: 'reading', year: 2024 },
+      { title: 'the second chance convenience store', author: 'kim ho-yeon', rating: 0, review: '', status: 'reading', year: 2025 },
+      { title: 'the 99% invisible city', author: 'roman mars', rating: 0, review: '', status: 'reading', year: 2020 },
+      { title: 'in praise of shadows', author: 'junichiro tanizaki', rating: 0, review: '', status: 'finished', year: 1991 },
+      { title: 'snowglobe', author: 'soyoung park', rating: 0, review: '', status: 'reading', year: 2024 },
+      { title: 'snowglobe 2', author: 'soyoung park', rating: 0, review: '', status: 'reading', year: 2025 },
+      { title: 'the passengers on the hankyu line', author: 'hiro arikawa', rating: 0, review: '', status: 'reading', year: 2025 },
+      { title: 'the travelling cat chronicles', author: 'hiro arikawa', rating: 0, review: '', status: 'finished', year: 2018 },
+      { title: 'break room', author: 'miye lee', rating: 0, review: '', status: 'reading', year: 2025 },
+      { title: 'i want to die but i want to eat tteokbokki', author: 'baek sehee', rating: 0, review: '', status: 'reading', year: 2022 },
+      { title: 'i want to die but i still want to eat tteokbokki', author: '', rating: 0, review: '', status: 'reading', year: 2024 }
     ];
   </script>
 
@@ -497,9 +571,12 @@
       var loader = document.getElementById('books-loader');
       var loaderFill = document.getElementById('books-loader-fill');
       var loaderText = document.getElementById('books-loader-text');
+      var controls = document.getElementById('books-controls');
       var closeModalTimer = null;
       var progressTimer = null;
       var visualProgress = 0;
+      var currentSort = 'all';
+      var curatedItemsCache = [];
       var fallbackCover = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 450">' +
         '<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">' +
@@ -577,15 +654,43 @@
       }
 
       function openLibraryCover(item) {
-        if (!item) return fallbackCover;
-        if (item.cover_url) return item.cover_url;
+        var list = coverCandidates(item);
+        return list.length ? list[0] : fallbackCover;
+      }
+
+      function coverCandidates(item) {
+        if (!item) return [fallbackCover];
+        var list = [];
+
+        function push(url) {
+          if (!url) return;
+          if (list.indexOf(url) >= 0) return;
+          list.push(url);
+        }
+
+        if (item.cover_url) push(item.cover_url);
+        if (Array.isArray(item.cover_urls)) {
+          item.cover_urls.forEach(push);
+        }
+
         if (item.cover_i) {
-          return 'https://covers.openlibrary.org/b/id/' + encodeURIComponent(item.cover_i) + '-L.jpg';
+          var id = encodeURIComponent(item.cover_i);
+          push('https://covers.openlibrary.org/b/id/' + id + '-L.jpg');
+          push('https://covers.openlibrary.org/b/id/' + id + '-M.jpg');
+          push('https://covers.openlibrary.org/b/id/' + id + '-S.jpg');
         }
+
         if (Array.isArray(item.isbn) && item.isbn.length) {
-          return 'https://covers.openlibrary.org/b/isbn/' + encodeURIComponent(item.isbn[0]) + '-L.jpg';
+          var isbn = encodeURIComponent(item.isbn[0]);
+          push('https://images.penguinrandomhouse.com/cover/' + isbn);
+          push('https://covers.openlibrary.org/b/isbn/' + isbn + '-L.jpg');
+          push('https://covers.openlibrary.org/b/isbn/' + isbn + '-M.jpg');
+          push('https://covers.openlibrary.org/b/isbn/' + isbn + '-S.jpg');
+          push('https://books.google.com/books/content?vid=ISBN:' + isbn + '&printsec=frontcover&img=1&zoom=1&source=gbs_api');
         }
-        return fallbackCover;
+
+        if (!list.length) push(fallbackCover);
+        return list;
       }
 
       function normalizeKey(value) {
@@ -623,6 +728,67 @@
           return note;
         }
         return null;
+      }
+
+      function normalizeStatus(value) {
+        var statusValue = String(value || '').trim().toLowerCase();
+        if (statusValue === 'finished') return 'finished';
+        return 'reading';
+      }
+
+      function getBookYear(item, noteMeta) {
+        if (noteMeta && noteMeta.year) {
+          var noteYear = parseInt(noteMeta.year, 10);
+          if (Number.isFinite(noteYear)) return noteYear;
+        }
+        if (item && item.first_publish_year) {
+          var publishYear = parseInt(item.first_publish_year, 10);
+          if (Number.isFinite(publishYear)) return publishYear;
+        }
+        return null;
+      }
+
+      function shouldIncludeItemBySort(item) {
+        if (currentSort === 'all') return true;
+        var noteMeta = findBookNote(item);
+        var state = normalizeStatus(noteMeta && noteMeta.status);
+        return state === currentSort;
+      }
+
+      function updateSortButtons() {
+        if (!controls) return;
+        controls.querySelectorAll('[data-sort]').forEach(function (button) {
+          button.classList.toggle('active', button.getAttribute('data-sort') === currentSort);
+        });
+      }
+
+      function renderCuratedItemsFromCache() {
+        if (!Array.isArray(curatedItemsCache) || !curatedItemsCache.length) {
+          grid.innerHTML = '';
+          if (controls) controls.setAttribute('hidden', 'hidden');
+          status.textContent = 'could not load your curated shelf yet.';
+          empty.classList.remove('hidden');
+          return;
+        }
+
+        var filtered = curatedItemsCache.filter(shouldIncludeItemBySort);
+        if (controls) controls.removeAttribute('hidden');
+        updateSortButtons();
+
+        if (!filtered.length) {
+          grid.innerHTML = '';
+          status.textContent = currentSort === 'finished'
+            ? 'no finished books yet.'
+            : 'no currently reading books yet.';
+          empty.classList.add('hidden');
+          return;
+        }
+
+        grid.innerHTML = filtered.map(renderBook).join('');
+        wireCoverFallbacks();
+        wireBookCardEvents();
+        status.textContent = 'loaded ' + filtered.length + ' books (' + currentSort + ')';
+        empty.classList.add('hidden');
       }
 
       function scoreCandidate(entry, doc) {
@@ -677,10 +843,28 @@
       function mapGoogleVolumeToItem(volume) {
         var info = (volume && volume.volumeInfo) || {};
         var authors = Array.isArray(info.authors) && info.authors.length ? info.authors : ['Unknown author'];
-        var coverUrl = '';
+        var coverUrls = [];
 
-        if (info.imageLinks && (info.imageLinks.thumbnail || info.imageLinks.smallThumbnail)) {
-          coverUrl = (info.imageLinks.thumbnail || info.imageLinks.smallThumbnail || '').replace(/^http:/, 'https:');
+        function pushCover(url) {
+          if (!url) return;
+          var safeUrl = String(url).replace(/^http:/, 'https:');
+          if (coverUrls.indexOf(safeUrl) >= 0) return;
+          coverUrls.push(safeUrl);
+        }
+
+        if (info.imageLinks) {
+          pushCover(info.imageLinks.extraLarge);
+          pushCover(info.imageLinks.large);
+          pushCover(info.imageLinks.medium);
+          pushCover(info.imageLinks.thumbnail);
+          pushCover(info.imageLinks.small);
+          pushCover(info.imageLinks.smallThumbnail);
+        }
+
+        if (volume && volume.id) {
+          var volumeId = encodeURIComponent(volume.id);
+          pushCover('https://books.google.com/books/content?id=' + volumeId + '&printsec=frontcover&img=1&zoom=2&source=gbs_api');
+          pushCover('https://books.google.com/books/content?id=' + volumeId + '&printsec=frontcover&img=1&zoom=1&source=gbs_api');
         }
 
         return {
@@ -689,7 +873,8 @@
           key: '',
           info_link: info.infoLink || '',
           cover_i: null,
-          cover_url: coverUrl || fallbackCover,
+          cover_url: coverUrls[0] || fallbackCover,
+          cover_urls: coverUrls,
           isbn: []
         };
       }
@@ -720,18 +905,47 @@
       }
 
       function fetchCuratedEntry(entry) {
-        return searchOpenLibraryEntry(entry)
-          .catch(function () {
-            return null;
-          })
-          .then(function (openItem) {
-            if (openItem) return openItem;
-            return searchGoogleEntry(entry).catch(function () {
-              return null;
+        return Promise.allSettled([
+          searchOpenLibraryEntry(entry),
+          searchGoogleEntry(entry)
+        ])
+          .then(function (results) {
+            var openItem = results[0] && results[0].status === 'fulfilled' ? results[0].value : null;
+            var googleItem = results[1] && results[1].status === 'fulfilled' ? results[1].value : null;
+
+            if (!openItem && !googleItem) {
+              return makeFallbackItem(entry);
+            }
+
+            if (!openItem && googleItem) {
+              return googleItem;
+            }
+
+            if (openItem && !googleItem) {
+              return openItem;
+            }
+
+            var merged = Object.assign({}, openItem);
+            var mergedCoverUrls = coverCandidates(openItem)
+              .concat(coverCandidates(googleItem))
+              .filter(Boolean);
+
+            var deduped = [];
+            mergedCoverUrls.forEach(function (url) {
+              if (deduped.indexOf(url) >= 0) return;
+              deduped.push(url);
             });
-          })
-          .then(function (resolved) {
-            return resolved || makeFallbackItem(entry);
+
+            if (deduped.length) {
+              merged.cover_url = deduped[0];
+              merged.cover_urls = deduped;
+            }
+
+            if (!merged.info_link && googleItem.info_link) {
+              merged.info_link = googleItem.info_link;
+            }
+
+            return merged;
           })
           .catch(function () {
             return makeFallbackItem(entry);
@@ -765,7 +979,22 @@
 
       function wireCoverFallbacks() {
         grid.querySelectorAll('.book-cover').forEach(function (img) {
+          var raw = img.getAttribute('data-cover-candidates') || '';
+          var candidates = raw ? raw.split('|').filter(Boolean) : [];
+          if (!candidates.length) candidates = [fallbackCover];
+          img.dataset.coverIndex = img.dataset.coverIndex || '0';
+
           img.addEventListener('error', function () {
+            var current = parseInt(img.dataset.coverIndex || '0', 10);
+            if (!Number.isFinite(current)) current = 0;
+            var next = current + 1;
+
+            if (next < candidates.length) {
+              img.dataset.coverIndex = String(next);
+              img.src = candidates[next];
+              return;
+            }
+
             if (img.dataset.fallbackApplied === '1') return;
             img.dataset.fallbackApplied = '1';
             img.src = fallbackCover;
@@ -789,11 +1018,8 @@
 
             setProgress(16, 'found books...');
             return preloadBookCovers(valid).then(function () {
-              grid.innerHTML = valid.map(renderBook).join('');
-              wireCoverFallbacks();
-              wireBookCardEvents();
-              status.textContent = 'loaded ' + valid.length + ' books from your list';
-              empty.classList.add('hidden');
+              curatedItemsCache = valid.slice();
+              renderCuratedItemsFromCache();
               hideLoader('loaded');
             });
           })
@@ -826,7 +1052,7 @@
         closeModalTimer = window.setTimeout(function () {
           finishCloseModal();
           closeModalTimer = null;
-        }, 220);
+        }, 320);
       }
 
       function openBookModal(item) {
@@ -836,12 +1062,26 @@
         var cover = openLibraryCover(item);
         var infoLink = item.info_link || (item.key ? ('https://openlibrary.org' + item.key) : '#');
         var noteMeta = findBookNote(item);
+        var statusValue = normalizeStatus(noteMeta && noteMeta.status);
+        var yearValue = getBookYear(item, noteMeta);
+        var badgeHtml = '';
 
         bookModalTitle.textContent = title;
         bookModalCover.src = cover;
         bookModalCover.alt = title + ' cover';
         bookModalAuthors.textContent = authors;
         bookModalLink.href = infoLink;
+
+        if (statusValue === 'finished') {
+          badgeHtml += '<span class="book-modal-badge" data-state="finished">finished</span>';
+        } else {
+          badgeHtml += '<span class="book-modal-badge" data-state="reading">reading</span>';
+        }
+        if (yearValue) {
+          badgeHtml += '<span class="book-modal-badge">year: ' + yearValue + '</span>';
+        }
+        var badgesEl = document.getElementById('book-modal-badges');
+        if (badgesEl) badgesEl.innerHTML = badgeHtml;
 
         if (noteMeta && Number.isFinite(Number(noteMeta.rating)) && Number(noteMeta.rating) > 0) {
           bookModalRating.textContent = 'rating: ' + Number(noteMeta.rating).toFixed(1) + ' / 10';
@@ -869,19 +1109,24 @@
         var title = item.title || 'Untitled';
         var authors = Array.isArray(item.author_name) ? item.author_name.join(', ') : 'Unknown author';
         var cover = openLibraryCover(item);
+        var coverList = coverCandidates(item);
         var noteMeta = findBookNote(item);
         var hasNote = hasNoteContent(noteMeta);
+        var statusValue = normalizeStatus(noteMeta && noteMeta.status);
+        var chips = [];
+
+        chips.push(statusValue);
 
         return [
           '<button class="book-card" type="button" data-book-card data-book-json="', escapeHtml(JSON.stringify(item)), '">',
           '<div class="book-cover-wrap">',
-          '<img class="book-cover" src="', escapeHtml(cover), '" alt="', escapeHtml(title), ' cover" loading="lazy">',
+          '<img class="book-cover" src="', escapeHtml(cover), '" alt="', escapeHtml(title), ' cover" loading="eager" decoding="async" data-cover-candidates="', escapeHtml(coverList.join('|')), '" data-cover-index="0">',
           '</div>',
           '<div class="book-plank" aria-hidden="true"></div>',
           '<h3 class="book-title">', escapeHtml(title), '</h3>',
           '<p class="book-authors">', escapeHtml(authors), '</p>',
+          '<p class="book-authors" style="margin-top:0.28rem;">', escapeHtml(chips.join(' • ')), '</p>',
           hasNote ? '<p class="book-authors" style="margin-top:0.35rem;color:rgba(192,132,252,0.76);">review added</p>' : '',
-          '<p class="book-authors" style="margin-top:0.35rem;">tap for review</p>',
           '</button>'
         ].join('');
       }
@@ -970,6 +1215,15 @@
 
       if (bookModalBackdrop) {
         bookModalBackdrop.addEventListener('click', closeBookModal);
+      }
+
+      if (controls) {
+        controls.addEventListener('click', function (event) {
+          var button = event.target.closest('[data-sort]');
+          if (!button) return;
+          currentSort = button.getAttribute('data-sort') || 'all';
+          renderCuratedItemsFromCache();
+        });
       }
 
       document.addEventListener('keydown', function (event) {

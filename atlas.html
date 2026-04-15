@@ -569,9 +569,13 @@
     }
 
     .archive-footer {
-      margin-top: 0;
+      margin-top: clamp(220px, 30vh, 360px);
       width: 100%;
       margin-bottom: 0.75rem;
+    }
+
+    .atlas-shell {
+      margin-bottom: 140px;
     }
 
     .atlas-menu-toggle .label-short {
@@ -778,6 +782,10 @@
     }
 
     @media (max-width: 520px) {
+      .atlas-shell {
+        margin-bottom: 110px;
+      }
+
       .atlas-controls-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         justify-items: center;
@@ -792,6 +800,7 @@
       }
 
       .archive-footer {
+        margin-top: 180px;
         margin-bottom: 0.45rem;
       }
     }
@@ -930,14 +939,22 @@
     var yearEl = document.getElementById('year');
     if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-    window.__loadLocalConfig = function () {
+    window.__loadLocalConfig = function (onDone) {
+      var done = false;
+      function finish() {
+        if (done) return;
+        done = true;
+        if (typeof onDone === 'function') onDone();
+      }
+
       var s = document.createElement('script');
       s.src = 'scripts/local-config.js';
-      s.defer = true;
-      s.onerror = function () {};
+      s.async = true;
+      s.onload = finish;
+      s.onerror = finish;
       document.head.appendChild(s);
+      window.setTimeout(finish, 1200);
     };
-    window.__loadLocalConfig();
   </script>
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
   <script>
@@ -1969,6 +1986,7 @@
     };
 
     (function () {
+      function bootAtlas() {
       var runtimeWorkerBase = (window.CLOUDFLARE_WORKER_URL || '').trim().replace(/\/$/, '');
       if (!window.MAPBOX_ACCESS_TOKEN && runtimeWorkerBase) {
         fetch(runtimeWorkerBase + '/public-config')
@@ -1989,6 +2007,13 @@
       }
 
       window.__atlasStart();
+      }
+
+      if (typeof window.__loadLocalConfig === 'function') {
+        window.__loadLocalConfig(bootAtlas);
+      } else {
+        bootAtlas();
+      }
     })();
   </script>
 
