@@ -43,8 +43,8 @@
 
   function updateClockVisibility() {
     var y = window.scrollY || 0;
-    wrapper.classList.toggle('clocks-faded', y > 14);
-    wrapper.classList.toggle('clocks-hidden', y > 92);
+    wrapper.classList.toggle('clocks-faded', y > 8);
+    wrapper.classList.toggle('clocks-hidden', y > 54);
   }
 
   window.addEventListener('scroll', updateClockVisibility, { passive: true });

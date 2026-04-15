@@ -133,7 +133,7 @@
       margin: 0;
       cursor: grab;
       pointer-events: auto;
-      touch-action: manipulation;
+      touch-action: none;
       transform-origin: 50% 50%;
       transform: translate3d(var(--drag-x), var(--drag-y), 0) rotate(var(--rot));
       filter: drop-shadow(0 7px 16px rgba(0, 0, 0, 0.28));
@@ -426,8 +426,8 @@
     })();
   </script>
 
-  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js" onerror="this.onerror=null;this.src='https://unpkg.com/interactjs/dist/interact.min.js';"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" onerror="this.onerror=null;this.src='https://unpkg.com/animejs@3.2.1/lib/anime.min.js';"></script>
   <script src="scripts/stickers.js"></script>
   <script src="scripts/page-transitions.js"></script>
   <script src="scripts/dot-grid.js"></script>
