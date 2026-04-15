@@ -41,6 +41,28 @@
   wrapper.className = 'clocks-wrapper';
   document.body.appendChild(wrapper);
 
+  function syncHeaderClearance() {
+    var header = document.querySelector('.jh-header');
+    var headerBottom = 130;
+    if (header) {
+      var rect = header.getBoundingClientRect();
+      if (rect && Number.isFinite(rect.bottom)) {
+        headerBottom = Math.max(0, Math.round(rect.bottom));
+      }
+    }
+
+    var desktopTop = headerBottom + 52;
+    var mobileTop = headerBottom + 44;
+
+    document.documentElement.style.setProperty('--clocks-top', desktopTop + 'px');
+    document.documentElement.style.setProperty('--clocks-top-mobile', mobileTop + 'px');
+  }
+
+  window.addEventListener('resize', syncHeaderClearance, { passive: true });
+  window.addEventListener('scroll', syncHeaderClearance, { passive: true });
+  window.setTimeout(syncHeaderClearance, 0);
+  window.setTimeout(syncHeaderClearance, 250);
+
   function updateClockVisibility() {
     var y = window.scrollY || 0;
     wrapper.classList.toggle('clocks-faded', y > 8);
