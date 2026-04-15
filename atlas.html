@@ -28,6 +28,11 @@
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
     }
 
+    .atlas-shell {
+      position: relative;
+      width: 100%;
+    }
+
     .atlas-controls {
       width: 100%;
       margin-top: 1.35rem;
@@ -68,30 +73,58 @@
     }
 
     .atlas-overlay {
-      position: fixed;
+      position: absolute;
       inset: 0;
-      z-index: 560;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1.2rem;
-      background: rgba(4, 6, 10, 0.72);
-      backdrop-filter: blur(6px);
+      z-index: 320;
+      pointer-events: none;
     }
 
     .atlas-overlay[hidden] {
       display: none;
     }
 
+    .atlas-overlay.open {
+      pointer-events: auto;
+    }
+
+    .atlas-overlay-blur {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      border-radius: 10px;
+      background: rgba(8, 12, 19, 0.3);
+      backdrop-filter: blur(6px);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      pointer-events: auto;
+    }
+
+    .atlas-overlay.open .atlas-overlay-blur {
+      opacity: 1;
+    }
+
     .atlas-overlay-panel {
-      width: min(740px, calc(100vw - 2.4rem));
-      max-height: calc(100vh - 2.4rem);
+      position: absolute;
+      left: 50%;
+      top: 16px;
+      transform: translateX(-50%) translateY(8px);
+      width: min(740px, calc(100% - 28px));
+      max-height: calc(100% - 110px);
       overflow: auto;
       border: 1px solid rgba(255, 255, 255, 0.12);
-      background: rgba(9, 12, 18, 0.96);
+      background: rgba(9, 12, 18, 0.95);
       border-radius: 10px;
       padding: 1rem;
       box-shadow: 0 26px 50px rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      transition: opacity 0.18s ease, transform 0.18s ease;
+      pointer-events: auto;
+    }
+
+    .atlas-overlay.open .atlas-overlay-panel {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
     }
 
     .atlas-overlay-view {
@@ -270,6 +303,42 @@
       margin-top: 0.15rem;
     }
 
+    .atlas-token-help {
+      width: min(420px, 100%);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 10px;
+      background: rgba(9, 12, 18, 0.9);
+      padding: 0.9rem;
+      display: grid;
+      gap: 0.55rem;
+      text-transform: lowercase;
+      letter-spacing: -0.01em;
+    }
+
+    .atlas-token-help input {
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(5, 9, 14, 0.92);
+      color: #e6eef6;
+      font-size: 0.74rem;
+      padding: 0.55rem 0.62rem;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    .atlas-token-help button {
+      border-radius: 999px;
+      border: 1px solid rgba(192, 132, 252, 0.5);
+      color: #eed9ff;
+      background: rgba(192, 132, 252, 0.16);
+      font-size: 0.72rem;
+      text-transform: lowercase;
+      letter-spacing: -0.01em;
+      padding: 0.55rem 0.82rem;
+      cursor: pointer;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
     .atlas-jump-help {
       font-size: 0.68rem;
       color: rgba(230, 238, 246, 0.5);
@@ -401,6 +470,10 @@
         min-height: 390px;
       }
 
+      .atlas-overlay-panel {
+        max-height: calc(100% - 88px);
+      }
+
       .atlas-controls-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
@@ -430,19 +503,12 @@
 
     <div style="height: 18px;"></div>
 
-    <div id="atlas-map" aria-label="world map"></div>
-    <section class="atlas-controls" aria-label="atlas controls">
-      <div class="atlas-controls-grid">
-        <button class="atlas-menu-toggle" type="button" data-overlay-target="style">map style</button>
-        <button class="atlas-menu-toggle" type="button" data-overlay-target="jump">fast track</button>
-        <button class="atlas-menu-toggle" type="button" data-overlay-target="legend">legend</button>
-        <button class="atlas-menu-toggle" type="button" data-overlay-target="add">add your city</button>
-        <button class="atlas-menu-toggle" type="button" data-overlay-target="stamp">stamp board</button>
-      </div>
-    </section>
+    <div class="atlas-shell" id="atlas-shell">
+      <div id="atlas-map" aria-label="world map"></div>
 
-    <div class="atlas-overlay" id="atlas-overlay" hidden>
-      <section class="atlas-overlay-panel">
+      <div class="atlas-overlay" id="atlas-overlay" hidden>
+        <button class="atlas-overlay-blur" id="atlas-overlay-blur" type="button" aria-label="close atlas panel"></button>
+        <section class="atlas-overlay-panel">
         <header class="atlas-overlay-header">
           <h2 id="atlas-overlay-title">atlas menu</h2>
           <button class="atlas-overlay-close" id="atlas-overlay-close" type="button" aria-label="close overlay">×</button>
@@ -514,8 +580,19 @@
           <p class="atlas-help">figma-style stamp flow. full image upload/persistence will be wired via cloudflare worker + r2.</p>
           <p class="atlas-toast" id="stamp-toast"></p>
         </div>
-      </section>
+        </section>
+      </div>
     </div>
+
+    <section class="atlas-controls" aria-label="atlas controls">
+      <div class="atlas-controls-grid">
+        <button class="atlas-menu-toggle" type="button" data-overlay-target="style">map style</button>
+        <button class="atlas-menu-toggle" type="button" data-overlay-target="jump">fast track</button>
+        <button class="atlas-menu-toggle" type="button" data-overlay-target="legend">legend</button>
+        <button class="atlas-menu-toggle" type="button" data-overlay-target="add">add your city</button>
+        <button class="atlas-menu-toggle" type="button" data-overlay-target="stamp">stamp board</button>
+      </div>
+    </section>
   </main>
 
   <script src="scripts/cloudflare-config.js"></script>
@@ -526,11 +603,14 @@
   <script>
     (function () {
       var overlay = document.getElementById('atlas-overlay');
+      var overlayBlur = document.getElementById('atlas-overlay-blur');
       var overlayClose = document.getElementById('atlas-overlay-close');
       var overlayTitle = document.getElementById('atlas-overlay-title');
+      var atlasShell = document.getElementById('atlas-shell');
 
       function closeOverlay() {
         if (!overlay) return;
+        overlay.classList.remove('open');
         overlay.setAttribute('hidden', 'hidden');
         document.querySelectorAll('.atlas-overlay-view').forEach(function (view) {
           view.setAttribute('hidden', 'hidden');
@@ -547,6 +627,11 @@
         });
         target.removeAttribute('hidden');
         overlay.removeAttribute('hidden');
+        overlay.classList.add('open');
+
+        if (overlayBlur && atlasShell) {
+          overlayBlur.style.height = atlasShell.offsetHeight + 'px';
+        }
 
         if (overlayTitle) {
           var labels = {
@@ -570,24 +655,32 @@
         overlayClose.addEventListener('click', closeOverlay);
       }
 
-      if (overlay) {
-        overlay.addEventListener('click', function (event) {
-          if (event.target === overlay) closeOverlay();
-        });
+      if (overlayBlur) {
+        overlayBlur.addEventListener('click', closeOverlay);
       }
 
       document.addEventListener('keydown', function (event) {
         if (event.key === 'Escape') closeOverlay();
       });
 
-      mapboxgl.accessToken = window.MAPBOX_ACCESS_TOKEN || '';
+      mapboxgl.accessToken = (window.MAPBOX_ACCESS_TOKEN || '').trim();
       if (!mapboxgl.accessToken) {
         var mapRoot = document.getElementById('atlas-map');
         mapRoot.style.display = 'flex';
         mapRoot.style.alignItems = 'center';
         mapRoot.style.justifyContent = 'center';
         mapRoot.style.padding = '1rem';
-        mapRoot.innerHTML = '<div style="font-family:Helvetica,Arial,sans-serif;font-size:12px;letter-spacing:0.03em;color:rgba(230,238,246,0.72);text-transform:lowercase;text-align:center;line-height:1.6;">mapbox token missing.<br>set <code style="font-family:inherit;color:#c084fc;">window.MAPBOX_ACCESS_TOKEN</code> in scripts/cloudflare-config.js.</div>';
+        mapRoot.innerHTML = '<div class="atlas-token-help"><p>mapbox token missing.</p><input id="atlas-token-input" type="text" placeholder="paste your mapbox public token (pk...)" /><button id="atlas-token-apply" type="button">use token + reload map</button><p>for permanent setup add it in <code>scripts/cloudflare-config.js</code>.</p></div>';
+        var applyBtn = document.getElementById('atlas-token-apply');
+        var tokenInput = document.getElementById('atlas-token-input');
+        if (applyBtn && tokenInput) {
+          applyBtn.addEventListener('click', function () {
+            var value = (tokenInput.value || '').trim();
+            if (!value) return;
+            window.MAPBOX_ACCESS_TOKEN = value;
+            window.location.reload();
+          });
+        }
         return;
       }
 
