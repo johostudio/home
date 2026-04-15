@@ -6,3 +6,4 @@ tailwind.config.js
 package.json
 package-lock.json
 scripts/local-config.js
+gif/patches/
