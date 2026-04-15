@@ -292,7 +292,7 @@
     <div id="books-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8 gap-y-12"></div>
 
     <div id="books-empty" class="books-empty hidden text-sm text-white/55 mt-8">
-      Could not load shelf yet. Add your Google Books settings in `bookshelf.html` and reload.
+      Could not load shelf yet. Check your Open Library query or curated book list in `bookshelf.html` and reload.
     </div>
   </main>
 
@@ -397,7 +397,14 @@
       }
 
       function normalizeKey(value) {
-        return String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
+        var text = String(value || '').trim().toLowerCase();
+        if (text.normalize) {
+          text = text.normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
+        }
+        return text
+          .replace(/[^a-z0-9]+/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
       }
 
       function findBookNote(item) {
@@ -412,11 +419,106 @@
           var noteTitle = normalizeKey(note.title);
           var noteAuthor = normalizeKey(note.author || '');
           if (!noteTitle) continue;
-          if (titleKey !== noteTitle) continue;
-          if (noteAuthor && firstAuthor && noteAuthor !== firstAuthor) continue;
+          var titleMatched = (titleKey === noteTitle) ||
+            (titleKey && noteTitle && (titleKey.indexOf(noteTitle) >= 0 || noteTitle.indexOf(titleKey) >= 0));
+          if (!titleMatched) continue;
+
+          if (noteAuthor && firstAuthor) {
+            var authorMatched = (noteAuthor === firstAuthor) ||
+              (noteAuthor.indexOf(firstAuthor) >= 0 || firstAuthor.indexOf(noteAuthor) >= 0);
+            if (!authorMatched) continue;
+          }
           return note;
         }
         return null;
+      }
+
+      function scoreCandidate(entry, doc) {
+        var entryTitle = normalizeKey(entry.title);
+        var entryAuthor = normalizeKey(entry.author || '');
+        var docTitle = normalizeKey(doc && doc.title);
+        var docAuthor = normalizeKey(
+          Array.isArray(doc && doc.author_name) && doc.author_name.length ? doc.author_name[0] : ''
+        );
+
+        var score = 0;
+
+        if (entryTitle && docTitle) {
+          if (entryTitle === docTitle) score += 80;
+          else if (docTitle.indexOf(entryTitle) >= 0 || entryTitle.indexOf(docTitle) >= 0) score += 50;
+        }
+
+        if (entryAuthor && docAuthor) {
+          if (entryAuthor === docAuthor) score += 40;
+          else if (docAuthor.indexOf(entryAuthor) >= 0 || entryAuthor.indexOf(docAuthor) >= 0) score += 24;
+        }
+
+        if (doc && doc.cover_i) score += 8;
+        return score;
+      }
+
+      function makeFallbackItem(entry) {
+        return {
+          title: entry.title,
+          author_name: entry.author ? [entry.author] : ['Unknown author'],
+          key: '',
+          cover_i: null,
+          isbn: []
+        };
+      }
+
+      function pickBestDoc(entry, docs) {
+        if (!Array.isArray(docs) || !docs.length) return makeFallbackItem(entry);
+        var ranked = docs.slice().sort(function (a, b) {
+          return scoreCandidate(entry, b) - scoreCandidate(entry, a);
+        });
+        var top = ranked[0];
+        if (!top || scoreCandidate(entry, top) <= 0) {
+          return makeFallbackItem(entry);
+        }
+        return top;
+      }
+
+      function fetchCuratedEntry(entry) {
+        var endpoint = 'https://openlibrary.org/search.json?title=' + encodeURIComponent(entry.title || '') +
+          '&author=' + encodeURIComponent(entry.author || '') +
+          '&language=' + encodeURIComponent(cfg.language || 'en') +
+          '&limit=8';
+
+        return fetch(endpoint)
+          .then(function (response) {
+            if (!response.ok) throw new Error('curated search failed');
+            return response.json();
+          })
+          .then(function (data) {
+            var docs = Array.isArray(data.docs) ? data.docs : [];
+            return pickBestDoc(entry, docs);
+          })
+          .catch(function () {
+            return makeFallbackItem(entry);
+          });
+      }
+
+      function loadCuratedShelf() {
+        status.textContent = 'loading curated shelf...';
+        Promise.all(notes.map(fetchCuratedEntry))
+          .then(function (items) {
+            var valid = items.filter(Boolean);
+            if (!valid.length) {
+              status.textContent = 'could not load your curated shelf yet.';
+              empty.classList.remove('hidden');
+              return;
+            }
+
+            grid.innerHTML = valid.map(renderBook).join('');
+            wireBookCardEvents();
+            status.textContent = 'loaded ' + valid.length + ' books from your list';
+            empty.classList.add('hidden');
+          })
+          .catch(function () {
+            status.textContent = 'unable to load curated shelf right now.';
+            empty.classList.remove('hidden');
+          });
       }
 
       function hasNoteContent(noteMeta) {
@@ -538,6 +640,11 @@
       }
 
       function loadShelf() {
+        if (notes.length) {
+          loadCuratedShelf();
+          return;
+        }
+
         if (!cfg.query) {
           setMissingConfigMessage();
           return;
@@ -555,22 +662,15 @@
           })
           .then(function (data) {
             var items = Array.isArray(data.docs) ? data.docs : [];
-            if (notes.length) {
-              items = items.filter(function (item) {
-                return !!findBookNote(item);
-              });
-            }
             if (!items.length) {
-              status.textContent = notes.length
-                ? 'could not match your list yet. refine titles/authors in JOHO_BOOK_NOTES.'
-                : 'shelf loaded, but no books returned';
+              status.textContent = 'shelf loaded, but no books returned';
               empty.classList.remove('hidden');
               return;
             }
 
             grid.innerHTML = items.map(renderBook).join('');
             wireBookCardEvents();
-            status.textContent = 'loaded ' + items.length + ' books from your list';
+            status.textContent = 'loaded ' + items.length + ' books';
             empty.classList.add('hidden');
           })
           .catch(function () {
