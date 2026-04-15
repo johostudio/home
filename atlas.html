@@ -1601,6 +1601,31 @@
       var browseList = document.getElementById('atlas-browse-list');
       var browseEmpty = document.getElementById('atlas-browse-empty');
       var adminTokenCache = '';
+      var jumpPopupTimer = null;
+      var jumpListRaf = null;
+
+      function schedulePopup(marker, delay) {
+        if (!marker || !marker.getPopup()) return;
+        if (jumpPopupTimer) {
+          window.clearTimeout(jumpPopupTimer);
+          jumpPopupTimer = null;
+        }
+        jumpPopupTimer = window.setTimeout(function () {
+          jumpPopupTimer = null;
+          marker.togglePopup();
+        }, delay || 460);
+      }
+
+      function scheduleMapFlyTo(options) {
+        if (!options) return;
+        if (typeof window.requestAnimationFrame === 'function') {
+          window.requestAnimationFrame(function () {
+            map.flyTo(options);
+          });
+          return;
+        }
+        map.flyTo(options);
+      }
 
       function removeAtlasEntryById(id) {
         if (!id) return;
@@ -1708,6 +1733,16 @@
       }
 
       function updateJumpList() {
+        if (jumpListRaf) {
+          window.cancelAnimationFrame(jumpListRaf);
+        }
+        jumpListRaf = window.requestAnimationFrame(function () {
+          jumpListRaf = null;
+          updateJumpListNow();
+        });
+      }
+
+      function updateJumpListNow() {
         if (!cityJumpSelect) return;
         cityJumpSelect.innerHTML = '';
         var all = seedCities.concat(userCities).concat(stampEntries);
@@ -1784,17 +1819,13 @@
           }
 
           function openEntryOnMap() {
-            map.flyTo({
+            scheduleMapFlyTo({
               center: [entry.lng, entry.lat],
               zoom: Math.max(map.getZoom(), 6),
               essential: true
             });
             var marker = markerById[entryId(entry)];
-            if (marker && marker.getPopup()) {
-              window.setTimeout(function () {
-                marker.togglePopup();
-              }, 460);
-            }
+            schedulePopup(marker, 460);
           }
 
           card.addEventListener('click', function () {
@@ -1825,7 +1856,7 @@
           apply3D(true, 500);
         }
 
-        map.flyTo({
+        scheduleMapFlyTo({
           center: [parsed.lng, parsed.lat],
           zoom: with3D ? 10.6 : 8.8,
           pitch: with3D ? 60 : map.getPitch(),
@@ -1835,11 +1866,7 @@
         });
 
         var marker = parsed.id ? markerById[parsed.id] : null;
-        if (marker && marker.getPopup()) {
-          window.setTimeout(function () {
-            marker.togglePopup();
-          }, 650);
-        }
+        schedulePopup(marker, 650);
       }
 
       function markInvalid(field) {
@@ -2024,7 +2051,7 @@
                   return;
                 }
 
-                map.flyTo({ center: [normalized.lng, normalized.lat], zoom: Math.max(map.getZoom(), 3.4), essential: true });
+                scheduleMapFlyTo({ center: [normalized.lng, normalized.lat], zoom: Math.max(map.getZoom(), 3.4), essential: true });
                 updateJumpList();
                 form.reset();
                 showToast('city saved permanently.');
@@ -2097,7 +2124,7 @@
                 }
 
                 updateJumpList();
-                map.flyTo({ center: [normalized.lng, normalized.lat], zoom: Math.max(map.getZoom(), 3.6), essential: true });
+                scheduleMapFlyTo({ center: [normalized.lng, normalized.lat], zoom: Math.max(map.getZoom(), 3.6), essential: true });
                 stampForm.reset();
                 clearFields([stampCityInput, stampPhotoInput, stampPhotoFileInput]);
                 stampToast.textContent = 'stamp linked to city';

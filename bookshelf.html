@@ -706,9 +706,14 @@ it really brought an interesting argument, often pushed myself to compare to my 
       var currentSort = 'all';
       var curatedItemsCache = [];
       var isCuratedShelfReady = false;
+      var curatedCachePersistTimer = null;
       var CURATED_CACHE_KEY = 'joho_books_curated_cache_v6';
       var CURATED_CACHE_TTL = 1000 * 60 * 60 * 24 * 14;
       var curatedFetchCache = loadCuratedFetchCache();
+      var COVER_URL_HEALTH_KEY = 'joho_books_cover_health_v1';
+      var coverUrlHealth = loadCoverUrlHealth();
+      var coverUrlPersistTimer = null;
+      var curatedFetchConcurrency = getAdaptiveFetchConcurrency();
       var notesByKey = {};
       var MANUAL_BOOK_HINTS = {
         'goodnight tokyo::atsuhiro yoshida': { isbn: ['9781787705128'] },
@@ -784,10 +789,101 @@ it really brought an interesting argument, often pushed myself to compare to my 
       }
 
       function persistCuratedFetchCache() {
+        if (curatedCachePersistTimer) return;
+        curatedCachePersistTimer = window.setTimeout(function () {
+          curatedCachePersistTimer = null;
+          try {
+            if (!window.localStorage) return;
+            window.localStorage.setItem(CURATED_CACHE_KEY, JSON.stringify(curatedFetchCache));
+          } catch (_e) { }
+        }, 180);
+      }
+
+      function loadCoverUrlHealth() {
         try {
-          if (!window.localStorage) return;
-          window.localStorage.setItem(CURATED_CACHE_KEY, JSON.stringify(curatedFetchCache));
-        } catch (_e) { }
+          if (!window.localStorage) return {};
+          var raw = window.localStorage.getItem(COVER_URL_HEALTH_KEY);
+          if (!raw) return {};
+          var parsed = JSON.parse(raw);
+          if (!parsed || typeof parsed !== 'object') return {};
+          return parsed;
+        } catch (_e) {
+          return {};
+        }
+      }
+
+      function persistCoverUrlHealth() {
+        if (coverUrlPersistTimer) return;
+        coverUrlPersistTimer = window.setTimeout(function () {
+          coverUrlPersistTimer = null;
+          try {
+            if (!window.localStorage) return;
+            window.localStorage.setItem(COVER_URL_HEALTH_KEY, JSON.stringify(coverUrlHealth));
+          } catch (_e) { }
+        }, 200);
+      }
+
+      function trimCoverUrlHealth() {
+        var keys = Object.keys(coverUrlHealth);
+        if (keys.length <= 280) return;
+        keys.sort(function (a, b) {
+          var aTs = Number((coverUrlHealth[a] && coverUrlHealth[a].ts) || 0);
+          var bTs = Number((coverUrlHealth[b] && coverUrlHealth[b].ts) || 0);
+          return bTs - aTs;
+        });
+        keys.slice(240).forEach(function (dropKey) {
+          delete coverUrlHealth[dropKey];
+        });
+      }
+
+      function markCoverUrlFailure(url) {
+        var key = String(url || '').trim();
+        if (!key) return;
+        var existing = coverUrlHealth[key] || { fail: 0, ts: 0 };
+        existing.fail = Number(existing.fail || 0) + 1;
+        existing.ts = Date.now();
+        coverUrlHealth[key] = existing;
+        trimCoverUrlHealth();
+        persistCoverUrlHealth();
+      }
+
+      function markCoverUrlSuccess(url) {
+        var key = String(url || '').trim();
+        if (!key) return;
+        var existing = coverUrlHealth[key] || { fail: 0, ts: 0 };
+        existing.fail = 0;
+        existing.ts = Date.now();
+        coverUrlHealth[key] = existing;
+        trimCoverUrlHealth();
+        persistCoverUrlHealth();
+      }
+
+      function reorderCandidatesByHealth(candidates) {
+        var list = Array.isArray(candidates) ? candidates.slice() : [];
+        if (!list.length) return list;
+
+        return list.sort(function (a, b) {
+          var aInfo = coverUrlHealth[a] || { fail: 0, ts: 0 };
+          var bInfo = coverUrlHealth[b] || { fail: 0, ts: 0 };
+          var aFail = Number(aInfo.fail || 0);
+          var bFail = Number(bInfo.fail || 0);
+          if (aFail !== bFail) return aFail - bFail;
+
+          var aTs = Number(aInfo.ts || 0);
+          var bTs = Number(bInfo.ts || 0);
+          return bTs - aTs;
+        });
+      }
+
+      function getAdaptiveFetchConcurrency() {
+        var cpu = Number(navigator.hardwareConcurrency || 0);
+        var memory = Number(navigator.deviceMemory || 0);
+        var isMobile = window.matchMedia && window.matchMedia('(max-width: 700px)').matches;
+        if (isMobile) return 2;
+        if (cpu && cpu <= 4) return 2;
+        if (memory && memory <= 4) return 2;
+        if (cpu && cpu <= 8) return 3;
+        return 4;
       }
 
       function requestJson(url, timeoutMs) {
@@ -873,7 +969,12 @@ it really brought an interesting argument, often pushed myself to compare to my 
         }
 
         if (!list.length) push(fallbackCover);
-        return list;
+
+        var reordered = reorderCandidatesByHealth(list);
+        if (reordered.length > 10) {
+          reordered = reordered.slice(0, 10);
+        }
+        return reordered;
       }
 
       function normalizeKey(value) {
@@ -1461,6 +1562,10 @@ it really brought an interesting argument, often pushed myself to compare to my 
 
           img.addEventListener('load', function () {
             img.classList.add('book-cover-loaded');
+            var currentIndex = parseInt(img.dataset.coverIndex || '0', 10);
+            if (!Number.isFinite(currentIndex)) currentIndex = 0;
+            var loadedUrl = candidates[currentIndex] || img.src;
+            markCoverUrlSuccess(loadedUrl);
           }, { once: true });
 
           if (img.complete && img.naturalWidth > 0) {
@@ -1473,6 +1578,7 @@ it really brought an interesting argument, often pushed myself to compare to my 
             var next = current + 1;
 
             if (next < candidates.length) {
+              markCoverUrlFailure(candidates[current]);
               img.dataset.coverIndex = String(next);
               img.src = candidates[next];
               return;
@@ -1480,6 +1586,7 @@ it really brought an interesting argument, often pushed myself to compare to my 
 
             if (img.dataset.fallbackApplied === '1') return;
             img.dataset.fallbackApplied = '1';
+            markCoverUrlFailure(candidates[current]);
             img.src = fallbackCover;
           });
         });
@@ -1491,7 +1598,7 @@ it really brought an interesting argument, often pushed myself to compare to my 
         showLoader('loading shelf...');
         setProgress(8, 'finding books...');
         status.textContent = 'loading curated shelf...';
-        mapWithConcurrency(notes, 4, fetchCuratedEntry, function (done, total) {
+        mapWithConcurrency(notes, curatedFetchConcurrency, fetchCuratedEntry, function (done, total) {
           var pct = 12 + (done / total) * 80;
           setProgress(pct, 'loading books...');
           status.textContent = 'loading curated shelf... ' + done + '/' + total;
@@ -1555,15 +1662,23 @@ it really brought an interesting argument, often pushed myself to compare to my 
         bookModalCover.src = cover;
         bookModalCover.alt = title + ' cover';
         bookModalCover.dataset.coverIndex = '0';
+        bookModalCover.onload = function () {
+          var loadedIndex = parseInt(bookModalCover.dataset.coverIndex || '0', 10);
+          if (!Number.isFinite(loadedIndex)) loadedIndex = 0;
+          var loadedUrl = coverList[loadedIndex] || bookModalCover.src;
+          markCoverUrlSuccess(loadedUrl);
+        };
         bookModalCover.onerror = function () {
           var current = parseInt(bookModalCover.dataset.coverIndex || '0', 10);
           if (!Number.isFinite(current)) current = 0;
           var next = current + 1;
           if (next < coverList.length) {
+            markCoverUrlFailure(coverList[current]);
             bookModalCover.dataset.coverIndex = String(next);
             bookModalCover.src = coverList[next];
             return;
           }
+          markCoverUrlFailure(coverList[current]);
           bookModalCover.onerror = null;
           bookModalCover.src = fallbackCover;
         };
