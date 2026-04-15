@@ -141,32 +141,6 @@
 
   <script>
     (function () {
-      var workerBase = (window.CLOUDFLARE_WORKER_URL || '').trim().replace(/\/$/, '');
-      if (!workerBase) return;
-
-      fetch(workerBase + '/public-config')
-        .then(function (res) {
-          if (!res.ok) throw new Error('public config unavailable');
-          return res.json();
-        })
-        .then(function (data) {
-          if (!window.JOHO_BOOKS_CONFIG) return;
-          if (!window.JOHO_BOOKS_CONFIG.apiKey && data && data.googleBooksApiKey) {
-            window.JOHO_BOOKS_CONFIG.apiKey = data.googleBooksApiKey;
-          }
-          if (!window.JOHO_BOOKS_CONFIG.userId && data && data.googleBooksUserId) {
-            window.JOHO_BOOKS_CONFIG.userId = data.googleBooksUserId;
-          }
-          if (!window.JOHO_BOOKS_CONFIG.shelfId && data && data.googleBooksShelfId) {
-            window.JOHO_BOOKS_CONFIG.shelfId = data.googleBooksShelfId;
-          }
-        })
-        .catch(function () {});
-    })();
-  </script>
-
-  <script>
-    (function () {
       var cfg = window.JOHO_BOOKS_CONFIG || {
         apiKey: '',
         userId: '',
@@ -218,37 +192,64 @@
         empty.classList.remove('hidden');
       }
 
-      if (!cfg.apiKey || !cfg.userId || !cfg.shelfId) {
-        setMissingConfigMessage();
-        return;
+      function fetchPublicConfig() {
+        var workerBase = (window.CLOUDFLARE_WORKER_URL || '').trim().replace(/\/$/, '');
+        if (!workerBase) return Promise.resolve();
+
+        return fetch(workerBase + '/public-config')
+          .then(function (res) {
+            if (!res.ok) throw new Error('public config unavailable');
+            return res.json();
+          })
+          .then(function (data) {
+            if (!cfg.apiKey && data && data.googleBooksApiKey) {
+              cfg.apiKey = data.googleBooksApiKey;
+            }
+            if (!cfg.userId && data && data.googleBooksUserId) {
+              cfg.userId = data.googleBooksUserId;
+            }
+            if (!cfg.shelfId && data && data.googleBooksShelfId) {
+              cfg.shelfId = data.googleBooksShelfId;
+            }
+          })
+          .catch(function () {});
       }
 
-      var endpoint = 'https://www.googleapis.com/books/v1/users/' + encodeURIComponent(cfg.userId) +
-        '/bookshelves/' + encodeURIComponent(cfg.shelfId) +
-        '/volumes?maxResults=' + encodeURIComponent(cfg.maxResults || 40) +
-        '&key=' + encodeURIComponent(cfg.apiKey);
+      function loadShelf() {
+        if (!cfg.apiKey || !cfg.userId || !cfg.shelfId) {
+          setMissingConfigMessage();
+          return;
+        }
 
-      fetch(endpoint)
-        .then(function (response) {
-          if (!response.ok) throw new Error('request failed');
-          return response.json();
-        })
-        .then(function (data) {
-          var items = Array.isArray(data.items) ? data.items : [];
-          if (!items.length) {
-            status.textContent = 'shelf loaded, but no books returned';
+        var endpoint = 'https://www.googleapis.com/books/v1/users/' + encodeURIComponent(cfg.userId) +
+          '/bookshelves/' + encodeURIComponent(cfg.shelfId) +
+          '/volumes?maxResults=' + encodeURIComponent(cfg.maxResults || 40) +
+          '&key=' + encodeURIComponent(cfg.apiKey);
+
+        fetch(endpoint)
+          .then(function (response) {
+            if (!response.ok) throw new Error('request failed');
+            return response.json();
+          })
+          .then(function (data) {
+            var items = Array.isArray(data.items) ? data.items : [];
+            if (!items.length) {
+              status.textContent = 'shelf loaded, but no books returned';
+              empty.classList.remove('hidden');
+              return;
+            }
+
+            grid.innerHTML = items.map(renderBook).join('');
+            status.textContent = 'loaded ' + items.length + ' books';
+            empty.classList.add('hidden');
+          })
+          .catch(function () {
+            status.textContent = 'unable to load google books shelf';
             empty.classList.remove('hidden');
-            return;
-          }
+          });
+      }
 
-          grid.innerHTML = items.map(renderBook).join('');
-          status.textContent = 'loaded ' + items.length + ' books';
-          empty.classList.add('hidden');
-        })
-        .catch(function () {
-          status.textContent = 'unable to load google books shelf';
-          empty.classList.remove('hidden');
-        });
+      fetchPublicConfig().then(loadShelf);
     })();
   </script>
 
