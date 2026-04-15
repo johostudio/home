@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>a scrambled mind — joho's studio</title>
+  <title>a scrambled mind</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <link rel="stylesheet" href="styles/tailwind-prod.css">
   <link rel="stylesheet" href="styles/dot-grid.css">
@@ -18,15 +18,18 @@
       margin: 0;
       overflow: hidden;
     }
+
     #graph-container {
       position: absolute;
       inset: 0;
       z-index: 10;
       cursor: grab;
     }
+
     #graph-container:active {
       cursor: grabbing;
     }
+
     #info-panel {
       position: absolute;
       top: 50%;
@@ -59,7 +62,7 @@
       margin: -0.15rem 0 0.6rem;
       cursor: grab;
       user-select: none;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       padding-bottom: 0.35rem;
       touch-action: none;
     }
@@ -71,10 +74,12 @@
       text-transform: lowercase;
       font-weight: 400;
     }
+
     #info-panel.visible {
       opacity: 1;
       pointer-events: auto;
     }
+
     #info-panel h3 {
       font-size: clamp(1.45rem, 2.9vw, 1.7rem);
       font-weight: 400;
@@ -83,6 +88,7 @@
       margin-bottom: 0.45rem;
       letter-spacing: -0.075em;
     }
+
     #info-panel .date {
       font-size: 0.92rem;
       letter-spacing: 0;
@@ -91,6 +97,7 @@
       display: block;
       font-weight: 500;
     }
+
     #info-panel .now-playing {
       font-size: 0.74rem;
       color: rgba(230, 238, 246, 0.75);
@@ -98,6 +105,7 @@
       line-height: 1.5;
       text-transform: lowercase;
     }
+
     #info-panel .now-playing a {
       color: #c084fc;
       text-decoration: underline;
@@ -105,9 +113,11 @@
       text-underline-offset: 2px;
       transition: color 0.2s ease;
     }
+
     #info-panel .now-playing a:hover {
       color: #e5c2ff;
     }
+
     #info-panel p {
       font-size: clamp(0.84rem, 1.2vw, 0.96rem);
       line-height: 1.45;
@@ -116,6 +126,7 @@
       margin: 0;
       font-weight: 400;
     }
+
     #info-panel .panel-close {
       margin-top: 0;
       border: 0;
@@ -132,13 +143,14 @@
     }
 
     #info-panel .panel-close:hover {
-      background: rgba(255,255,255,0.08);
+      background: rgba(255, 255, 255, 0.08);
       color: #fff;
     }
 
     #panel-content {
       white-space: pre-line;
     }
+
     @media (max-width: 760px) {
       #info-panel {
         right: 1rem;
@@ -149,9 +161,11 @@
         transform: none;
         max-height: 56vh;
       }
+
       #info-panel h3 {
         font-size: 1.2rem;
       }
+
       #info-panel p {
         font-size: 0.92rem;
       }
@@ -170,7 +184,7 @@
       color: rgba(230, 238, 246, 0.42);
       padding: 0.45rem 0 1.1rem;
       pointer-events: none;
-      background: linear-gradient(to top, rgba(0,0,0,0.62), transparent);
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.62), transparent);
     }
   </style>
 </head>
@@ -181,8 +195,9 @@
   <!-- Self-injecting site header -->
   <script src="scripts/site-header.js"></script>
 
-  <a href="archives.html" class="back-btn relative z-50 text-[13px] text-white/50 hover:text-white transition-colors" style="position:fixed; top:24px; left:24px; pointer-events:auto;">← back</a>
-  
+  <a href="archives.html" class="back-btn relative z-50 text-[13px] text-white/50 hover:text-white transition-colors"
+    style="position:fixed; top:24px; left:24px; pointer-events:auto;">← back</a>
+
   <!-- Info panel that appears when clicking a node -->
   <div id="info-panel">
     <div class="panel-drag-handle" id="panel-drag-handle">
@@ -197,117 +212,146 @@
 
   <div id="graph-container"></div>
 
-  <footer class="archive-footer">johostudio, all rights reserved</footer>
+  <!-- FOOTER -->
+  <footer class="text-center mt-6 w-full mb-10">
+    <small>© <span id="year"></span> joho's studio 昌栢</small>
+    <div class="text-sm mt-2">ALL RIGHTS RESERVED. ®</div>
+  </footer>
 
   <script>
     // Define the graph data (an "obsidian-like" network of thoughts/journals)
     const gData = {
       nodes: [
-        { id: 'start', name: 'Start Here', group: 1, val: 20, content: 'Welcome to my scrambled mind. This is an interconnected web of my thoughts, journals, and project ideas.', date: 'Now' },
-        
-         { id: 'journal_1', name: 'late night thoughts', group: 2, val: 10, content: 'Staring at the ceiling at 3AM. Thinking about how the internet used to feel like a neighborhood, and now it feels like a billboard.', date: '10/12/2025', nowPlaying: 'Broken Clocks - SZA', nowPlayingUrl: 'https://open.spotify.com/track/2fXwCWkh6YG5zU1IyvQrbs' },
-         { id: 'journal_2', name: 'vancouver weather', group: 2, val: 8, content: 'It rained again today. There is something comforting about the grey skies when you have a warm cup of coffee.', date: '11/03/2025', nowPlaying: 'Ribs - Lorde', nowPlayingUrl: 'https://open.spotify.com/track/2MvvoeRt8NcOXWESkxWn3g' },
-        
-         { id: 'idea_1', name: 'project: ukiyo', group: 3, val: 14, content: 'An app and a device that somehow brings you back to the present moment. Tangible tech.', date: '10/27/2025', nowPlaying: 'Nights - Frank Ocean', nowPlayingUrl: 'https://open.spotify.com/track/7eqoqGkKwgOaWNNHx90uEZ' },
-         { id: 'idea_2', name: 'camera rig', group: 3, val: 12, content: 'Thinking of building a custom top-handle rig for the FX3 using carbon fiber rods. Needs to be lightweight.', date: '11/10/2025', nowPlaying: 'Kyoto - Phoebe Bridgers', nowPlayingUrl: 'https://open.spotify.com/track/4Of7rzpRpV1mWRbhp5rAqG' },
-        
-         { id: 'list_1', name: 'movies to watch', group: 4, val: 8, content: '1. Perfect Days\n2. Dune: Part Two\n3. Past Lives\n4. Blade Runner 2049', date: '10/30/2025', nowPlaying: 'Dreams Tonite - Alvvays', nowPlayingUrl: 'https://open.spotify.com/track/1f9M9oc95PBA0zMRCV4n5m' },
-         { id: 'list_2', name: 'design inspo', group: 4, val: 8, content: 'Brutalism, Swiss typography, old Dieter Rams Braun products, transparent tech.', date: '11/05/2025', nowPlaying: 'Instant Crush - Daft Punk', nowPlayingUrl: 'https://open.spotify.com/track/2cGxRwrMyEAp8dEbuZaVv6' },
-        
-         { id: 'img_1', name: 'kyoto 2025', group: 5, val: 16, img: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=600&q=80', content: 'The rain made everything so quiet. I stood under the awning for half an hour just watching.', date: '10/20/2025', nowPlaying: 'I Think They Call This Love - Elliot James Reay', nowPlayingUrl: 'https://open.spotify.com/track/5QBY8IP6A6WyQfX5MtxXgJ' }
+        { id: 'start', name: 'START', group: 1, val: 20, content: 'welcome to my mind. as an avid obsidian user, this was the best way to visualize my thoughts (i thought it would look cool..)\nall the songs linked are something i listened from that day or moment.', date: 'Now' },
+
+        { id: 'journal_1', name: 'quote one', group: 2, val: 10, content: '"deeds, not words" - a promotional poster i saw for @FENNEL_official', date: '10/12/2025', nowPlaying: '', nowPlayingUrl: '' },
+        { id: 'journal_2', name: 'quote two', group: 2, val: 8, content: '"failure runs through life, this is life" - @clementine0418', date: '10/19/2024', nowPlaying: 'osun', nowPlayingUrl: 'https://open.spotify.com/track/0dYjYrObtplnFsDoge0KJF?si=501dee2137b84efe' },
+        { id: 'journal_3', name: 'my dream', group: 2, val: 8, content: '"i want to design, build, engineer, my own café. preferably with cats.', date: '12/29/2023', nowPlaying: 'junny', nowPlayingUrl: 'https://open.spotify.com/track/79cmYpry5DEPtK4KbmAUqj?si=64202cfe5f95427b' },
+        { id: 'journal_4', name: 'yayyoung - flowers', group: 2, val: 8, content: 'said you call but i didn’t hear a thing\nhave i asked for much; \nyou don’t even take my side…\ntold myself flowers are fine\nbut i know..\nthat you weren’t in it for me\nfrom the start\n\nroses mean diamonds, did i ask for much\njust needed someone i could trust\ntake me to places where i fell in love\nby your side\n\ndidn’t need perfect, but the truth\nall i heard was your excuse\nmaybe i was just a fool for you\n\nyou know i’m not one to\nmake a big deal\nbut we’ll still be together if you\nif you given me flowers\nand maybe waited for hours\nbut i guess that wasn’t worth it\nfor you\n\ni kept all your texts\nthey meant nothing\ntold all my friends\nit was just a phase, denied(?)’\nguess i hoped you would prove me wrong\nbut you didn’t stay long\nbecause you weren’t in it for me\nfrom the start\n\nroses mean diamonds, did i ask for much\njust needed someone i could trust\ntake me to places where i fell in love\nby your side\n\ndidn’t need perfect, but the truth\nall i heard was your excuse\nmaybe i was just a fool for you\n\nyou know i’m not one to\nmake a big deal\nbut we’ll still be together if you\nif you given me flowers\nand maybe waited for hours\nbut i guess that wasn’t worth it\nfor you\n\nyou know i’m not one to\nmake a big deal\nbut we’ll still be together if you\nif you given me flowers\ni would’ve waited for hours\nbut i guess you weren’t worth\nfor me', date: '06/12/2025', nowPlaying: 'yayyoung', nowPlayingUrl: 'https://open.spotify.com/track/0HFHmQWAMbnwD2dIAye03p?si=855137dfe12a41b8' },
+        { id: 'journal_5', name: 'yayyoung - friendzone', group: 2, val: 8, content: 'saw you\nfrom afar\nyou were looking at a..\ni like the way i see you\nand i hate you\nhold my breath, played it cool\nstill i missed you\n\nbut tonight \nit was different\nyou looked at me like\ni was what you’re missing\nsaid my name and\nin that moment\ni gave you my chances\n\nyou said that you missed me\nonly as friends though\nturned down your facetime\nand we danced\nand we danced\ncalled you all night and\nout of the friendzone\nand you said you’ll mind that (?)\nmade me dance\nmade me dance \nall night long\n\nwoke up still in a daze\nI’m replaying your words\nlike a sound i can’t erase\nyour sweatshirt\nthat you gave me\ni can’t believe you’re really looking at me\nthen she came\nyou left my heart in seconds\ni was broken\nsaw you run back\nto her arms but i still really\nmiss you\n\nyou said that you need me\nonly as friends though\nturned down my facetime\nbut i’ll cry\nand i’ll cry\ncalled you that night and\nstill in the friendzone\nwhen you called her over\nmaybe i’ll cry\nmaybe cry\nall night long', date: '06/12/2025', nowPlaying: 'yayyoung', nowPlayingUrl: 'https://open.spotify.com/track/3bYKOU7T9wEQk4IkY8bRYw?si=bf322e9d618b42a0' },
+        { id: 'journal_6', name: 'yayyoung - stay by my side', group: 2, val: 8, content: 'tell me what you’re feeling babe\ndid I ever hurt your heart\nso many nights\nthe fights we wasted our time\n but i’ll always love you\n\ni know you were trying babe\nthey’re my insecurities\nthe confident you would\nprobably never understand\nhope that you’ll never feel the way i do\n\nin the moment\nin the sun\nin the summer days\nwhen we first met\ni remember how much i\nhated those goodbyes\nevery time you drove back home\n\nwon’t you stay\nwon’t you stay\nstay by my side\nif you ever need me\ni will always be here\njust hold me close\nplease don’t let go and\n\ntake my hand\ntake my hand\nand i’ll hold it tight\nthrough all the years\nemotions we’ll go through\nstay by my side\nstay by my side\nwon’t you babe', date: '06/12/2025', nowPlaying: 'yayyoung', nowPlayingUrl: 'https://open.spotify.com/track/36ET9bbClaulMsKofof8az?si=9bbe8b1ad5304b86' },
+
+        { id: 'idea_1', name: 'film: chrysanthemum', group: 3, val: 14, content: '菊花, 秋菊, Chrysanthemum of the Autumn ', date: '11/05/2025', nowPlaying: '', nowPlayingUrl: '' },
+        { id: 'idea_2', name: 'film: season', group: 3, val: 14, content: 'winter just started, but i wish spring was over', date: '11/28/2025', nowPlaying: 'chiabee', nowPlayingUrl: 'https://open.spotify.com/track/1Zpl3r5C2ivV3sZz5pUtbQ?si=a4862ac70a844890' },
+        { id: 'idea_3', name: 'film: creative minds, various ways', group: 3, val: 12, content: '- anything can be a story if you make it what you want\n- anything\n- even the most mundane moments', date: '10/22/2024', nowPlaying: 'ejean', nowPlayingUrl: 'https://open.spotify.com/track/0dg3UMW7MKz5yXQja44VSj?si=4f0138b69402447a' },
+        { id: 'idea_4', name: 'film: exploration', group: 3, val: 12, content: '- sometimes you just want to explore, walk around, run around\nmaybe youll wind up finding the photo that made your day.', date: '10/22/2024', nowPlaying: 'niko rain + ejean', nowPlayingUrl: 'https://open.spotify.com/track/3UUdUNpu5uIlnBGrndazCH?si=361fa68b87574854' },
+        { id: 'idea_5', name: 'film: a throwback to the past', group: 3, val: 12, content: 'everything, but nothing', date: '12/29/2023', nowPlaying: 'cehryl', nowPlayingUrl: 'https://open.spotify.com/track/5VWmYzMPAm3GLkYlMWT9zu?si=6172cbe29a824a88' },
+        { id: 'idea_6', name: 'film: coincidences', group: 3, val: 12, content: 'We live in a world of coincidences. the way we interact, the way we communicate, the way we carry ourselves around. Coincidences in mannerisms, in physical objects, emotional actions. written at 03:45 AM', date: '10/10/2023', nowPlaying: 'younha', nowPlayingUrl: 'https://open.spotify.com/track/2jGbpRUsuhFr6VelssN8Nq?si=796eed2db73a4422' },
+
+        { id: 'list_1', name: 'fuji kit', group: 4, val: 8, content: '1. 16-80mm f/4\n2. 35mm f/2\n3. sigma 56mm f/1.4\n4. sigma 16mm f/1.4 soon?\n5. my 3d printed thingy lol\n6. ttartisan 25mm manual\n7. maybe a fisheye...?', date: '04/01/2026', nowPlaying: '', nowPlayingUrl: '' },
+        { id: 'list_2', name: 'colours lol', group: 4, val: 8, content: 'DARK GREEN 1f2b26\nLIGHT GREEN c9e7d7\nACCENT GREEN PRIM 91b1a2\nBG GREEN ecefe8\nACCENT LIGHT e3e8d9\nACCENT DARK d0d8bb', date: '11/05/2025', nowPlaying: 'dimo rex', nowPlayingUrl: 'https://open.spotify.com/track/4IM5skV5vbLXdJTxECQBcG?si=72a6e1a76dfc4e86' },
+
+        { id: 'img_1', name: 'japan?', group: 5, val: 16, img: 'https://i.pinimg.com/736x/a5/c7/6a/a5c76a1490d10e8db68455441442fb89.jpg', content: 'i wanna go film a lily-chou-chou-esque film one day...', date: '12/30/2025', nowPlaying: 'miung', nowPlayingUrl: 'https://open.spotify.com/track/5AYMhvWl4cYGHZuEKOOoNT?si=e344a01b7d6441fb' },
+        { id: 'img_2', name: 'my+sg 2026', group: 5, val: 16, img: 'https://i.pinimg.com/736x/05/fe/0a/05fe0a751b85c7f380a94a2b0210e431.jpg', content: 'maybe i get to go home this year.', date: '04/15/2026', nowPlaying: 'jupiterkid', nowPlayingUrl: 'https://open.spotify.com/track/7ksiHsGiRjSVvgb3HurNmG?si=ac0dea27a985435b' }
       ],
       links: [
         { source: 'start', target: 'journal_1' },
         { source: 'start', target: 'idea_1' },
         { source: 'start', target: 'list_1' },
         { source: 'start', target: 'img_1' },
+        { source: 'start', target: 'journal_2' },
+        { source: 'start', target: 'idea_2' },
         { source: 'journal_1', target: 'journal_2' },
         { source: 'idea_1', target: 'idea_2' },
         { source: 'list_1', target: 'list_2' },
         { source: 'journal_1', target: 'idea_1' },
         { source: 'journal_2', target: 'list_1' },
+        { source: 'journal_3', target: 'idea_5' },
+        { source: 'idea_3', target: 'idea_4' },
+        { source: 'idea_4', target: 'idea_5' },
+        { source: 'idea_5', target: 'idea_6' },
+        { source: 'idea_6', target: 'idea_1' },
+        { source: 'idea_1', target: 'idea_2' },
+        { source: 'idea_2', target: 'idea_3' },
+        { source: 'idea_3', target: 'idea_4' },
+        { source: 'idea_4', target: 'idea_5' },
+        { source: 'idea_5', target: 'idea_6' },
+        { source: 'idea_6', target: 'idea_1' },
+        { source: 'journal_4', target: 'journal_5' },
+        { source: 'journal_5', target: 'journal_6' },
+
       ]
     };
 
     // Initialize the Force Graph
     const Graph = ForceGraph()
       (document.getElementById('graph-container'))
-        .graphData(gData)
-        .backgroundColor('rgba(0,0,0,0)')
-        .nodeColor(node => {
-          if (node.group === 1) return '#c084fc';
-          if (node.group === 2) return '#e6eef6';
-          if (node.group === 3) return '#818cf8';
-          return '#9ca3af';
-        })
-         .nodeRelSize(1.65)
-        .linkColor(() => 'rgba(255,255,255,0.15)')
-        .linkWidth(1.5)
-         .nodeLabel(function (node) {
-           return '<div style="font-family:Helvetica,Arial,sans-serif;font-size:9px;font-weight:400;letter-spacing:-0.04em;line-height:1.15;padding:3px 5px;border:1px solid rgba(192,132,252,0.25);background:rgba(8,10,18,0.92);border-radius:6px;color:#e6eef6;text-transform:lowercase;">' + node.name + '</div>';
-         })
-        .nodeCanvasObject((node, ctx, globalScale) => {
-          if (node.img) {
-            const size = node.val || 12;
-            if(!node.imgObj) {
-              node.imgObj = new Image();
-              node.imgObj.src = node.img;
-            }
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(node.x, node.y, size/2, 0, 2 * Math.PI, false);
-            ctx.clip();
-            try {
-              ctx.drawImage(node.imgObj, node.x - size/2, node.y - size/2, size, size);
-            } catch(e) {}
-            ctx.restore();
-            ctx.beginPath();
-            ctx.arc(node.x, node.y, size/2, 0, 2 * Math.PI, false);
-            ctx.strokeStyle = '#c084fc';
-            ctx.lineWidth = 1.5/globalScale;
-            ctx.stroke();
-          } else {
-             const size = node.val ? Math.sqrt(node.val) * 2 : 6;
-             ctx.beginPath();
-             ctx.arc(node.x, node.y, size, 0, 2 * Math.PI);
-             let color = '#9ca3af';
-             if (node.group === 1) color = '#c084fc';
-             if (node.group === 2) color = '#e6eef6';
-             if (node.group === 3) color = '#818cf8';
-             ctx.fillStyle = color;
-             ctx.fill();
+      .graphData(gData)
+      .backgroundColor('rgba(0,0,0,0)')
+      .nodeColor(node => {
+        if (node.group === 1) return '#c084fc';
+        if (node.group === 2) return '#e6eef6';
+        if (node.group === 3) return '#818cf8';
+        return '#9ca3af';
+      })
+      .nodeRelSize(1.65)
+      .linkColor(() => 'rgba(255,255,255,0.15)')
+      .linkWidth(1.5)
+      .nodeLabel(function (node) {
+        return '<div style="font-family:Helvetica,Arial,sans-serif;font-size:9px;font-weight:400;letter-spacing:-0.04em;line-height:1.15;padding:3px 5px;border:1px solid rgba(192,132,252,0.25);background:rgba(8,10,18,0.92);border-radius:6px;color:#e6eef6;text-transform:lowercase;">' + node.name + '</div>';
+      })
+      .nodeCanvasObject((node, ctx, globalScale) => {
+        if (node.img) {
+          const size = node.val || 12;
+          if (!node.imgObj) {
+            node.imgObj = new Image();
+            node.imgObj.src = node.img;
           }
-        })
-        .onNodeClick(node => {
-          // Open info panel
-          const panel = document.getElementById('info-panel');
-          document.getElementById('panel-title').innerText = node.name;
-          document.getElementById('panel-date').innerText = node.date || '';
-          var nowPlaying = document.getElementById('panel-now-playing');
-          var nowPlayingText = node.nowPlaying || 'add a song here';
-          if (node.nowPlayingUrl) {
-            nowPlaying.innerHTML = 'now playing: <a href="' + node.nowPlayingUrl + '" target="_blank" rel="noopener">' + nowPlayingText + '</a>';
-          } else {
-            nowPlaying.textContent = 'now playing: ' + nowPlayingText;
-          }
-          
-          let html = (node.content || '').replace(/\n/g, '<br/>');
-          if (node.img) {
-             html = `<img src="${node.img}" style="width:100%; border-radius:4px; margin-bottom:12px; border:1px solid rgba(255,255,255,0.1); object-fit:cover;">` + html;
-          }
-          document.getElementById('panel-content').innerHTML = html;
-          
-          panel.classList.add('visible');
-          panel.style.left = '';
-          panel.style.top = '';
-          panel.style.right = 'clamp(1rem, 3vw, 2rem)';
-          panel.style.bottom = '';
-          panel.style.transform = 'translateY(-50%)';
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, size / 2, 0, 2 * Math.PI, false);
+          ctx.clip();
+          try {
+            ctx.drawImage(node.imgObj, node.x - size / 2, node.y - size / 2, size, size);
+          } catch (e) { }
+          ctx.restore();
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, size / 2, 0, 2 * Math.PI, false);
+          ctx.strokeStyle = '#c084fc';
+          ctx.lineWidth = 1.5 / globalScale;
+          ctx.stroke();
+        } else {
+          const size = node.val ? Math.sqrt(node.val) * 2 : 6;
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, size, 0, 2 * Math.PI);
+          let color = '#9ca3af';
+          if (node.group === 1) color = '#c084fc';
+          if (node.group === 2) color = '#e6eef6';
+          if (node.group === 3) color = '#818cf8';
+          ctx.fillStyle = color;
+          ctx.fill();
+        }
+      })
+      .onNodeClick(node => {
+        // Open info panel
+        const panel = document.getElementById('info-panel');
+        document.getElementById('panel-title').innerText = node.name;
+        document.getElementById('panel-date').innerText = node.date || '';
+        var nowPlaying = document.getElementById('panel-now-playing');
+        var nowPlayingText = node.nowPlaying || 'add a song here';
+        if (node.nowPlayingUrl) {
+          nowPlaying.innerHTML = 'now playing: <a href="' + node.nowPlayingUrl + '" target="_blank" rel="noopener">' + nowPlayingText + '</a>';
+        } else {
+          nowPlaying.textContent = 'now playing: ' + nowPlayingText;
+        }
 
-          // Center chart on node
-          Graph.centerAt(node.x, node.y, 1000);
-           Graph.zoom(4.2, 1600);
-         });
+        let html = (node.content || '').replace(/\n/g, '<br/>');
+        if (node.img) {
+          html = `<img src="${node.img}" style="width:100%; border-radius:4px; margin-bottom:12px; border:1px solid rgba(255,255,255,0.1); object-fit:cover;">` + html;
+        }
+        document.getElementById('panel-content').innerHTML = html;
+
+        panel.classList.add('visible');
+        panel.style.left = '';
+        panel.style.top = '';
+        panel.style.right = 'clamp(1rem, 3vw, 2rem)';
+        panel.style.bottom = '';
+        panel.style.transform = 'translateY(-50%)';
+
+        // Center chart on node
+        Graph.centerAt(node.x, node.y, 1000);
+        Graph.zoom(4.2, 1600);
+      });
 
     (function () {
       var panel = document.getElementById('info-panel');
@@ -410,4 +454,5 @@
   <script src="scripts/dot-grid.js"></script>
   <script src="scripts/clocks.js"></script>
 </body>
+
 </html>

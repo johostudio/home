@@ -1027,12 +1027,12 @@
                 <div class="dot"></div>
             </div>
             <div class="step-label">Step 1 of 3</div>
-            <div class="step-heading">Choose your strip</div>
-            <p class="step-sub">Pick how many shots and a border style.</p>
+            <div class="step-heading">choose your strip</div>
+            <p class="step-sub">pick how many shots and a border style.</p>
 
             <p
                 style="font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--dr-muted);margin-bottom:.7rem;">
-                Shots</p>
+                shots</p>
             <div class="frame-options" id="frame-opts">
                 <button class="frame-opt selected" data-shots="2" onclick="selectFrame(this)">
                     <div class="frame-icon">
@@ -1086,8 +1086,8 @@
                 <div class="dot"></div>
             </div>
             <div class="step-label">Step 2 of 3</div>
-            <div class="step-heading">Pick a filter</div>
-            <p class="step-sub">Applied live to your camera and baked into the final strip.</p>
+            <div class="step-heading">pick a filter</div>
+            <p class="step-sub">applied live to your camera and baked into the final strip.</p>
             <div class="filter-options" id="filter-opts"></div>
             <div style="display:flex;justify-content:space-between;">
                 <button class="dr-btn" onclick="goStep(1)">← BACK</button>
@@ -1106,7 +1106,7 @@
                 <div class="dot active"></div>
             </div>
             <div class="step-label">Step 3 of 3</div>
-            <div class="step-heading">Add your photos</div>
+            <div class="step-heading">add your photos</div>
 
             <!-- Source tabs -->
             <div class="source-tabs">
@@ -1158,8 +1158,8 @@
                 <div class="dot done"></div>
                 <div class="dot done"></div>
             </div>
-            <div class="step-label">Developed</div>
-            <div class="step-heading">Your strip</div>
+            <div class="step-label">developed</div>
+            <div class="step-heading">your strip</div>
 
             <div id="strip-canvas-wrap">
                 <canvas id="strip-canvas"></canvas>
@@ -1189,7 +1189,7 @@
             var s = document.createElement('script');
             s.src = 'scripts/local-config.js';
             s.defer = true;
-            s.onerror = function () {};
+            s.onerror = function () { };
             document.head.appendChild(s);
         })();
     </script>
@@ -1541,7 +1541,7 @@
             canvas.toBlob(async (blob) => {
                 const filename = `strip-${Date.now()}.png`;
                 const author = (document.getElementById('author-name').value.trim() || 'anonymous').substring(0, 30);
-                
+
                 try {
                     const formData = new FormData();
                     formData.append('file', blob, filename);
@@ -1553,12 +1553,12 @@
                     });
 
                     if (!res.ok) throw new Error('Upload failed');
-                    
+
                     status.textContent = '✓ saved to the community gallery!';
                     btn.textContent = '✓ SAVED'; // leave disabled — already saved
                 } catch (err) {
-                    status.textContent = 'Save failed: ' + err.message; 
-                    btn.disabled = false; 
+                    status.textContent = 'Save failed: ' + err.message;
+                    btn.disabled = false;
                     btn.textContent = 'SAVE TO GALLERY';
                 }
             }, 'image/png');
@@ -1569,7 +1569,7 @@
             document.getElementById('gallery-loading').style.display = 'block';
             document.getElementById('gallery-empty').style.display = 'none';
             document.getElementById('gallery-grid').innerHTML = '';
-            
+
             if (!CLOUDFLARE_WORKER_URL) {
                 document.getElementById('gallery-loading').style.display = 'none';
                 document.getElementById('gallery-empty').style.display = 'block';
@@ -1581,13 +1581,13 @@
                 const res = await fetch(CLOUDFLARE_WORKER_URL + '/strips');
                 if (!res.ok) throw new Error('Failed to fetch strips');
                 const data = await res.json();
-                
+
                 document.getElementById('gallery-loading').style.display = 'none';
                 if (!data || data.length === 0) {
                     document.getElementById('gallery-empty').style.display = 'block';
                     return;
                 }
-                
+
                 const grid = document.getElementById('gallery-grid');
                 data.forEach(row => {
                     const item = document.createElement('div'); item.className = 'gallery-item';

@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>a colourful atlas — joho's studio</title>
+  <title>a colourful atlas</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <link rel="stylesheet" href="styles/tailwind-prod.css">
   <link rel="stylesheet" href="styles/dot-grid.css">
@@ -35,7 +35,7 @@
 
     .atlas-controls {
       width: 100%;
-      margin-top: 1.35rem;
+      margin-top: 0.62rem;
       letter-spacing: -0.015em;
     }
 
@@ -141,6 +141,55 @@
       padding-right: 0.12rem;
     }
 
+    body {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(192, 132, 252, 0.62) rgba(255, 255, 255, 0.08);
+    }
+
+    body::-webkit-scrollbar {
+      width: 11px;
+      height: 11px;
+    }
+
+    body::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    body::-webkit-scrollbar-thumb {
+      background: rgba(192, 132, 252, 0.62);
+      border: 2px solid rgba(5, 9, 14, 0.92);
+      border-radius: 999px;
+    }
+
+    .atlas-overlay-content,
+    .atlas-browse-list,
+    .atlas-form textarea {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(192, 132, 252, 0.62) rgba(255, 255, 255, 0.08);
+    }
+
+    .atlas-overlay-content::-webkit-scrollbar,
+    .atlas-browse-list::-webkit-scrollbar,
+    .atlas-form textarea::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    .atlas-overlay-content::-webkit-scrollbar-track,
+    .atlas-browse-list::-webkit-scrollbar-track,
+    .atlas-form textarea::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 999px;
+    }
+
+    .atlas-overlay-content::-webkit-scrollbar-thumb,
+    .atlas-browse-list::-webkit-scrollbar-thumb,
+    .atlas-form textarea::-webkit-scrollbar-thumb {
+      background: rgba(192, 132, 252, 0.62);
+      border: 2px solid rgba(8, 12, 18, 0.95);
+      border-radius: 999px;
+    }
+
     .atlas-overlay.open .atlas-overlay-panel {
       opacity: 1;
       transform: translateY(0);
@@ -164,6 +213,7 @@
         opacity: 0;
         transform: translateY(12px) scale(0.985);
       }
+
       to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -175,6 +225,7 @@
         opacity: 1;
         transform: translateY(0) scale(1);
       }
+
       to {
         opacity: 0;
         transform: translateY(10px) scale(0.986);
@@ -185,14 +236,20 @@
       from {
         opacity: 0;
       }
+
       to {
         opacity: 1;
       }
     }
 
     @keyframes atlasBlurOut {
-      from { opacity: 1; }
-      to { opacity: 0; }
+      from {
+        opacity: 1;
+      }
+
+      to {
+        opacity: 0;
+      }
     }
 
     .atlas-overlay-view {
@@ -468,6 +525,47 @@
       font-weight: 400;
     }
 
+    .atlas-form input[type="file"] {
+      padding: 0.36rem 0.38rem;
+      line-height: 1.2;
+      text-transform: lowercase;
+      letter-spacing: -0.01em;
+      color: rgba(230, 238, 246, 0.82);
+    }
+
+    .atlas-form input[type="file"]::file-selector-button {
+      margin-right: 0.55rem;
+      border: 1px solid rgba(192, 132, 252, 0.48);
+      border-radius: 999px;
+      background: rgba(192, 132, 252, 0.16);
+      color: #eed9ff;
+      padding: 0.32rem 0.66rem;
+      font-size: 0.68rem;
+      letter-spacing: -0.01em;
+      text-transform: lowercase;
+      cursor: pointer;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    .atlas-form input[type="file"]::-webkit-file-upload-button {
+      margin-right: 0.55rem;
+      border: 1px solid rgba(192, 132, 252, 0.48);
+      border-radius: 999px;
+      background: rgba(192, 132, 252, 0.16);
+      color: #eed9ff;
+      padding: 0.32rem 0.66rem;
+      font-size: 0.68rem;
+      letter-spacing: -0.01em;
+      text-transform: lowercase;
+      cursor: pointer;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    .atlas-form input[type="file"]:hover::file-selector-button,
+    .atlas-form input[type="file"]:hover::-webkit-file-upload-button {
+      background: rgba(192, 132, 252, 0.24);
+    }
+
     .atlas-form textarea {
       resize: vertical;
       min-height: 64px;
@@ -575,7 +673,7 @@
     }
 
     .atlas-shell {
-      margin-bottom: 140px;
+      margin-bottom: 16px;
     }
 
     .atlas-menu-toggle .label-short {
@@ -692,13 +790,13 @@
       aspect-ratio: 1/1;
       object-fit: cover;
       border-radius: 4px;
-      border: 1px solid rgba(255,255,255,0.12);
+      border: 1px solid rgba(255, 255, 255, 0.12);
     }
 
     .atlas-style-select {
       width: 100%;
       border-radius: 6px;
-      border: 1px solid rgba(255,255,255,0.18);
+      border: 1px solid rgba(255, 255, 255, 0.18);
       background: rgba(5, 9, 14, 0.9);
       color: #e6eef6;
       font-size: 0.76rem;
@@ -783,7 +881,7 @@
 
     @media (max-width: 520px) {
       .atlas-shell {
-        margin-bottom: 110px;
+        margin-bottom: 10px;
       }
 
       .atlas-controls-grid {
@@ -813,12 +911,17 @@
   <!-- Self-injecting site header -->
   <script src="scripts/site-header.js"></script>
 
-  <a href="archives.html" class="back-btn relative z-50 text-[13px] text-white/50 hover:text-white transition-colors" style="position:fixed; top:24px; left:24px; pointer-events:auto;">← back</a>
+  <a href="archives.html" class="back-btn relative z-50 text-[13px] text-white/50 hover:text-white transition-colors"
+    style="position:fixed; top:24px; left:24px; pointer-events:auto;">← back</a>
 
   <main class="relative z-10 pt-40 px-6 pb-24 max-w-5xl mx-auto flex flex-col items-center">
     <div class="mb-12 text-center">
-      <h1 class="text-4xl md:text-5xl font-normal tracking-tight mb-3" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:-0.07em;text-transform:lowercase;">a colourful atlas</h1>
-      <p class="text-[0.72rem] text-white/45 max-w-lg" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:-0.01em;text-transform:lowercase;">an interactive map of places that shaped me.</p>
+      <h1 class="text-4xl md:text-5xl font-normal tracking-tight mb-3"
+        style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:-0.07em;text-transform:lowercase;">
+        a colourful atlas</h1>
+      <p class="text-[0.72rem] text-white/45 max-w-lg"
+        style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:-0.01em;text-transform:lowercase;">
+        an interactive map of places that shaped me.</p>
     </div>
 
     <div style="height: 18px;"></div>
@@ -827,84 +930,86 @@
       <div id="atlas-map" aria-label="world map"></div>
 
       <div class="atlas-overlay" id="atlas-overlay" hidden>
-        <button class="atlas-overlay-blur" id="atlas-overlay-blur" type="button" aria-label="close atlas panel"></button>
+        <button class="atlas-overlay-blur" id="atlas-overlay-blur" type="button"
+          aria-label="close atlas panel"></button>
         <section class="atlas-overlay-panel">
-        <header class="atlas-overlay-header">
-          <h2 id="atlas-overlay-title">atlas menu</h2>
-          <button class="atlas-overlay-close" id="atlas-overlay-close" type="button" aria-label="close overlay">×</button>
-        </header>
+          <header class="atlas-overlay-header">
+            <h2 id="atlas-overlay-title">atlas menu</h2>
+            <button class="atlas-overlay-close" id="atlas-overlay-close" type="button"
+              aria-label="close overlay">×</button>
+          </header>
 
-        <div class="atlas-overlay-content">
+          <div class="atlas-overlay-content">
 
-        <div class="atlas-overlay-view" id="atlas-overlay-style" hidden>
-          <div class="atlas-style-stack">
-            <select class="atlas-style-select" id="atlas-style-select" aria-label="map style mode">
-              <option value="mapbox://styles/mapbox/dark-v11">dark</option>
-              <option value="mapbox://styles/mapbox/navigation-night-v1">navigation night</option>
-              <option value="mapbox://styles/mapbox/satellite-streets-v12">satellite night</option>
-              <option value="mapbox://styles/mapbox/streets-v12">streets day</option>
-              <option value="mapbox://styles/mapbox/light-v11">light</option>
-            </select>
-            <button class="atlas-action-btn" type="button" id="atlas-toggle-3d">enable 3d view</button>
-            <p class="atlas-help" id="atlas-view-toast">3d view is currently off.</p>
+            <div class="atlas-overlay-view" id="atlas-overlay-style" hidden>
+              <div class="atlas-style-stack">
+                <select class="atlas-style-select" id="atlas-style-select" aria-label="map style mode">
+                  <option value="mapbox://styles/mapbox/dark-v11">dark</option>
+                  <option value="mapbox://styles/mapbox/navigation-night-v1">navigation night</option>
+                  <option value="mapbox://styles/mapbox/satellite-streets-v12">satellite night</option>
+                  <option value="mapbox://styles/mapbox/streets-v12">streets day</option>
+                  <option value="mapbox://styles/mapbox/light-v11">light</option>
+                </select>
+                <button class="atlas-action-btn" type="button" id="atlas-toggle-3d">enable 3d view</button>
+                <p class="atlas-help" id="atlas-view-toast">3d view is currently off.</p>
+              </div>
+            </div>
+
+            <div class="atlas-overlay-view" id="atlas-overlay-jump" hidden>
+              <div class="atlas-jump-row">
+                <select id="atlas-city-jump" aria-label="jump to city"></select>
+                <button class="atlas-action-btn" type="button" id="atlas-jump-btn">jump to city</button>
+                <button class="atlas-action-btn" type="button" id="atlas-jump-3d-btn">jump + 3d view</button>
+                <p class="atlas-jump-help">quick-focus on saved dots and open a cinematic 3d angle.</p>
+              </div>
+            </div>
+
+            <div class="atlas-overlay-view" id="atlas-overlay-browse" hidden>
+              <div class="atlas-browse-list" id="atlas-browse-list"></div>
+              <p class="atlas-browse-empty" id="atlas-browse-empty" hidden>no user-added cities or stamps yet.</p>
+            </div>
+
+            <div class="atlas-overlay-view" id="atlas-overlay-add" hidden>
+              <form class="atlas-form" id="user-city-form" novalidate>
+                <input type="text" id="user-city" placeholder="city, country">
+                <textarea id="user-note" placeholder="why this city matters to you" maxlength="220"></textarea>
+                <select id="user-stamp">
+                  <option value="">stamp (optional)</option>
+                  <option value="postmark">postmark</option>
+                  <option value="star">star</option>
+                  <option value="camera">camera</option>
+                  <option value="pin">pin</option>
+                  <option value="wave">wave</option>
+                  <option value="flower">flower</option>
+                  <option value="journey">journey</option>
+                </select>
+                <input type="file" id="user-photo-file" accept="image/*">
+                <input type="url" id="user-photo" placeholder="optional photo url (comma-separated for many)">
+                <button type="submit">add a city</button>
+              </form>
+              <p class="atlas-help">share a place that matters and it will appear on the map.</p>
+              <p class="atlas-toast" id="atlas-toast"></p>
+            </div>
+
+            <div class="atlas-overlay-view" id="atlas-overlay-stamp" hidden>
+              <form class="atlas-form" id="stamp-form" novalidate>
+                <input type="text" id="stamp-city" placeholder="city, country">
+                <select id="stamp-icon">
+                  <option value="postmark">postmark</option>
+                  <option value="star">star</option>
+                  <option value="camera">camera</option>
+                  <option value="flower">flower</option>
+                  <option value="wave">wave</option>
+                </select>
+                <input type="file" id="stamp-photo-file" accept="image/*">
+                <input type="url" id="stamp-photo" placeholder="photo url (optional if file selected)">
+                <textarea id="stamp-note" placeholder="short note" maxlength="140"></textarea>
+                <button type="submit">attach stamp</button>
+              </form>
+              <p class="atlas-help">pin a photo stamp to a city with a short note.</p>
+              <p class="atlas-toast" id="stamp-toast"></p>
+            </div>
           </div>
-        </div>
-
-        <div class="atlas-overlay-view" id="atlas-overlay-jump" hidden>
-          <div class="atlas-jump-row">
-            <select id="atlas-city-jump" aria-label="jump to city"></select>
-            <button class="atlas-action-btn" type="button" id="atlas-jump-btn">jump to city</button>
-            <button class="atlas-action-btn" type="button" id="atlas-jump-3d-btn">jump + 3d view</button>
-            <p class="atlas-jump-help">quick-focus on saved dots and open a cinematic 3d angle.</p>
-          </div>
-        </div>
-
-        <div class="atlas-overlay-view" id="atlas-overlay-browse" hidden>
-          <div class="atlas-browse-list" id="atlas-browse-list"></div>
-          <p class="atlas-browse-empty" id="atlas-browse-empty" hidden>no user-added cities or stamps yet.</p>
-        </div>
-
-        <div class="atlas-overlay-view" id="atlas-overlay-add" hidden>
-          <form class="atlas-form" id="user-city-form" novalidate>
-            <input type="text" id="user-city" placeholder="city, country">
-            <textarea id="user-note" placeholder="why this city matters to you" maxlength="220"></textarea>
-            <select id="user-stamp">
-              <option value="">stamp (optional)</option>
-              <option value="postmark">postmark</option>
-              <option value="star">star</option>
-              <option value="camera">camera</option>
-              <option value="pin">pin</option>
-              <option value="wave">wave</option>
-              <option value="flower">flower</option>
-              <option value="journey">journey</option>
-            </select>
-            <input type="file" id="user-photo-file" accept="image/*">
-            <input type="url" id="user-photo" placeholder="optional photo url (comma-separated for many)">
-            <button type="submit">add permanent city</button>
-          </form>
-          <p class="atlas-help">share a place that matters and it will appear on the map.</p>
-          <p class="atlas-toast" id="atlas-toast"></p>
-        </div>
-
-        <div class="atlas-overlay-view" id="atlas-overlay-stamp" hidden>
-          <form class="atlas-form" id="stamp-form" novalidate>
-            <input type="text" id="stamp-city" placeholder="city, country">
-            <select id="stamp-icon">
-              <option value="postmark">postmark</option>
-              <option value="star">star</option>
-              <option value="camera">camera</option>
-              <option value="flower">flower</option>
-              <option value="wave">wave</option>
-            </select>
-            <input type="file" id="stamp-photo-file" accept="image/*">
-            <input type="url" id="stamp-photo" placeholder="photo url (optional if file selected)">
-            <textarea id="stamp-note" placeholder="short note" maxlength="140"></textarea>
-            <button type="submit">attach stamp</button>
-          </form>
-          <p class="atlas-help">pin a photo stamp to a city with a short note.</p>
-          <p class="atlas-toast" id="stamp-toast"></p>
-        </div>
-        </div>
         </section>
       </div>
 
@@ -919,12 +1024,18 @@
 
     <section class="atlas-controls" aria-label="atlas controls">
       <div class="atlas-controls-grid">
-        <button class="atlas-menu-toggle" type="button" data-overlay-target="style"><span class="label-full">map style</span><span class="label-short">style</span></button>
-        <button class="atlas-menu-toggle" type="button" data-overlay-target="jump"><span class="label-full">fast track</span><span class="label-short">track</span></button>
-        <button class="atlas-menu-toggle" type="button" data-overlay-target="legend"><span class="label-full">legend</span><span class="label-short">legend</span></button>
-        <button class="atlas-menu-toggle" type="button" data-overlay-target="add"><span class="label-full">add your city</span><span class="label-short">add city</span></button>
-        <button class="atlas-menu-toggle" type="button" data-overlay-target="stamp"><span class="label-full">stamp board</span><span class="label-short">stamps</span></button>
-        <button class="atlas-menu-toggle" type="button" data-overlay-target="browse"><span class="label-full">browse entries</span><span class="label-short">browse</span></button>
+        <button class="atlas-menu-toggle" type="button" data-overlay-target="style"><span class="label-full">map
+            style</span><span class="label-short">style</span></button>
+        <button class="atlas-menu-toggle" type="button" data-overlay-target="jump"><span class="label-full">fast
+            track</span><span class="label-short">track</span></button>
+        <button class="atlas-menu-toggle" type="button" data-overlay-target="legend"><span
+            class="label-full">legend</span><span class="label-short">legend</span></button>
+        <button class="atlas-menu-toggle" type="button" data-overlay-target="add"><span class="label-full">add your
+            city</span><span class="label-short">add city</span></button>
+        <button class="atlas-menu-toggle" type="button" data-overlay-target="stamp"><span class="label-full">stamp
+            board</span><span class="label-short">stamps</span></button>
+        <button class="atlas-menu-toggle" type="button" data-overlay-target="browse"><span class="label-full">browse
+            entries</span><span class="label-short">browse</span></button>
       </div>
     </section>
 
@@ -1246,17 +1357,32 @@
       var markerTypes = {
         lived: { label: 'lived', color: 'rgba(125, 211, 252, 0.68)' },
         visited: { label: 'visited', color: 'rgba(251, 191, 36, 0.62)' },
-        friends: { label: 'friends', color: 'rgba(244, 114, 182, 0.64)' },
+        friends: { label: 'friends+family', color: 'rgba(244, 114, 182, 0.64)' },
         inspiration: { label: 'inspiration', color: 'rgba(52, 211, 153, 0.62)' },
         user: { label: 'user-added city', color: 'rgba(192, 132, 252, 0.64)' }
       };
 
       var seedCities = [
-        { city: 'Vancouver, BC', type: 'lived', lat: 49.2827, lng: -123.1207, note: 'current home base and where a lot of creative work started', photos: ['https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=500&q=80'] },
-        { city: 'Nanchang, Jiangxi', type: 'lived', lat: 28.6829, lng: 115.8582, note: 'early roots and family ties', photos: [] },
-        { city: 'Kyoto, Japan', type: 'visited', lat: 35.0116, lng: 135.7681, note: 'quiet streets, old architecture, and calm creative reset', photos: ['https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&w=500&q=80'] },
-        { city: 'London, UK', type: 'friends', lat: 51.5072, lng: -0.1276, note: 'friends and collaborators', photos: [] },
-        { city: 'Stockholm, Sweden', type: 'inspiration', lat: 59.3293, lng: 18.0686, note: 'design references and systems thinking', photos: [] }
+        { city: 'Vancouver, BC', type: 'lived', lat: 49.2827, lng: -123.1207, note: 'current home, hope to stay here for a while', photos: [] },
+        { city: 'Nanchang, Jiangxi', type: 'lived', lat: 28.6829, lng: 115.8582, note: 'my birthplace (it was some village lol)', photos: [] },
+        { city: 'Miri, Malaysia', type: 'friends', lat: 4.3973, lng: 113.9945, note: 'mother', photos: [] },
+        { city: 'Singapore, Singapore', type: 'friends', lat: 1.3521, lng: 103.8198, note: 'lots of family + friends, hopefully home no.2', photos: [] },
+        { city: 'Kuala Belait, Brunei', type: 'friends', lat: 4.5747, lng: 114.2277, note: 'father', photos: [] },
+        { city: 'Espoo, Finland', type: 'friends', lat: 60.2055, lng: 24.6559, note: 'cool people + i wanna visit sometime', photos: [] },
+        { city: 'Kuala Lumpur, Malaysia', type: 'friends', lat: 3.1390, lng: 101.6869, note: 'more friends + visit soon maybe?', photos: [] },
+        { city: 'Waterloo, Ontario', type: 'friends', lat: 43.4643, lng: -80.5204, note: 'some smart people here @uwaterloo', photos: [] },
+        { city: 'Kingston, Ontario', type: 'friends', lat: 44.2248, lng: -76.4857, note: 'and some here too @queens', photos: [] },
+        { city: 'Toronto, Ontario', type: 'friends', lat: 43.651070, lng: -79.381054, note: 'and some good friends here as well @tmu @york @uoft', photos: [] },
+        { city: 'Boston, Massachusetts', type: 'friends', lat: 42.3601, lng: -71.0589, note: 'some here too @harvard', photos: [] },
+        { city: 'Los Angeles, California', type: 'friends', lat: 34.0522, lng: -118.2437, note: 'and around here too @uc', photos: [] },
+        { city: 'Manchester, UK', type: 'friends', lat: 53.4808, lng: -2.2426, note: 'and around here too @umanc', photos: [] },
+        { city: 'Juneau, Alaska', type: 'visited', lat: 58.3019, lng: -134.4197, note: 'aug 2025', photos: [] },
+        { city: 'Ketchikan, Alaska', type: 'visited', lat: 55.3429, lng: -131.6084, note: 'aug 2025', photos: [] },
+        { city: 'Victoria, BC', type: 'visited', lat: 48.4284, lng: -123.3656, note: 'aug 2024', photos: [] },
+        { city: 'Ashikaga, Japan', type: 'inspiration', lat: 36.3282, lng: 139.7042, note: 'all about lily chou chou (2001)', photos: ['https://www.filmlinc.org/cdn-cgi/image/width=1600%2Cformat=auto%2Cquality=85/https://wp.filmlinc.org/wp-content/uploads/2016/06/allaboutlily.jpg'] },
+        { city: 'Hong Kong, China', type: 'inspiration', lat: 22.3193, lng: 114.1694, note: 'chungking express (1994), fallen angels (1995)', photos: ['https://film-grab.com/wp-content/uploads/photo-gallery/23%20(244).jpg?bwg=1547204684', 'https://film-grab.com/wp-content/uploads/photo-gallery/58%20(330).jpg?bwg=1547215973'] },
+        { city: 'Suzhou, China', type: 'inspiration', lat: 31.3193, lng: 120.6194, note: 'suzhou river (2000)', photos: ['https://film-grab.com/wp-content/uploads/2024/05/Suzhou-River-61-1536x864.jpg'] },
+        { city: 'New York, USA', type: 'inspiration', lat: 40.7128, lng: -74.0060, note: '@coltkirwan, @cocoxu, @lifeofriza', photos: [] }
       ];
 
       var stampEntries = [];
@@ -1987,26 +2113,26 @@
 
     (function () {
       function bootAtlas() {
-      var runtimeWorkerBase = (window.CLOUDFLARE_WORKER_URL || '').trim().replace(/\/$/, '');
-      if (!window.MAPBOX_ACCESS_TOKEN && runtimeWorkerBase) {
-        fetch(runtimeWorkerBase + '/public-config')
-          .then(function (res) {
-            if (!res.ok) throw new Error('public config unavailable');
-            return res.json();
-          })
-          .then(function (data) {
-            if (data && data.mapboxPublicToken) {
-              window.MAPBOX_ACCESS_TOKEN = data.mapboxPublicToken;
-            }
-          })
-          .catch(function () {})
-          .then(function () {
-            window.__atlasStart();
-          });
-        return;
-      }
+        var runtimeWorkerBase = (window.CLOUDFLARE_WORKER_URL || '').trim().replace(/\/$/, '');
+        if (!window.MAPBOX_ACCESS_TOKEN && runtimeWorkerBase) {
+          fetch(runtimeWorkerBase + '/public-config')
+            .then(function (res) {
+              if (!res.ok) throw new Error('public config unavailable');
+              return res.json();
+            })
+            .then(function (data) {
+              if (data && data.mapboxPublicToken) {
+                window.MAPBOX_ACCESS_TOKEN = data.mapboxPublicToken;
+              }
+            })
+            .catch(function () { })
+            .then(function () {
+              window.__atlasStart();
+            });
+          return;
+        }
 
-      window.__atlasStart();
+        window.__atlasStart();
       }
 
       if (typeof window.__loadLocalConfig === 'function') {
@@ -2021,4 +2147,5 @@
   <script src="scripts/dot-grid.js"></script>
   <script src="scripts/clocks.js"></script>
 </body>
+
 </html>

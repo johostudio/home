@@ -8,6 +8,7 @@
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
   <link rel="stylesheet" href="styles/tailwind-prod.css">
+  <link rel="stylesheet" href="styles/dot-grid.css">
   <link rel="stylesheet" href="styles/clocks.css">
   <style>
     /* ── Home overlay ── */
@@ -23,24 +24,6 @@
       flex-direction: column;
       justify-content: flex-end;
       gap: 0;
-    }
-
-    #home-cables-frame {
-      position: fixed;
-      inset: 0;
-      width: 100vw;
-      height: 100dvh;
-      border: 0;
-      outline: 0;
-      display: block;
-      background: #000;
-      transform: none !important;
-    }
-
-    @supports not (height: 100dvh) {
-      #home-cables-frame {
-        height: 100vh;
-      }
     }
 
     .home-name {
@@ -127,13 +110,6 @@
       outline: none;
     }
 
-    .social-icon-link.tap-armed {
-      color: rgba(0, 0, 0, 0.95);
-      background: transparent !important;
-      transform: translateY(-1px);
-      outline: none;
-    }
-
     .social-icon-link::after {
       content: attr(data-label);
       position: absolute;
@@ -157,8 +133,7 @@
     }
 
     .social-icon-link:hover::after,
-    .social-icon-link:focus-visible::after,
-    .social-icon-link.tap-armed::after {
+    .social-icon-link:focus-visible::after {
       opacity: 1;
       transform: translate(-50%, 0);
     }
@@ -180,8 +155,7 @@
       display: inline-block;
     }
 
-    .home-bio-link:hover,
-    .home-bio-link.tap-armed {
+    .home-bio-link:hover {
       background: rgba(0, 0, 0, 0.13);
     }
 
@@ -196,8 +170,7 @@
     }
 
     .home-tagline-link:hover,
-    .home-tagline-link:focus-visible,
-    .home-tagline-link.tap-armed {
+    .home-tagline-link:focus-visible {
       color: rgba(0, 0, 0, 0.96) !important;
       background: rgba(0, 0, 0, 0.08) !important;
       text-decoration-thickness: 2px;
@@ -277,14 +250,14 @@
       margin: 0;
       cursor: grab;
       pointer-events: auto;
-      touch-action: none;
+      touch-action: manipulation;
       transform-origin: 50% 50%;
       transform: translate3d(var(--drag-x), var(--drag-y), 0) rotate(var(--rot));
       filter: drop-shadow(0 7px 16px rgba(0, 0, 0, 0.28));
     }
 
     .sticker-selected {
-      filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.32)) drop-shadow(0 0 0 1px rgba(255,255,255,0.55));
+      filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.32)) drop-shadow(0 0 0 1px rgba(255, 255, 255, 0.55));
     }
 
     .sticker-rotate-handle {
@@ -294,9 +267,9 @@
       width: 24px;
       height: 24px;
       border-radius: 50%;
-      border: 1px solid rgba(0,0,0,0.25);
-      background: rgba(255,255,255,0.9);
-      color: rgba(0,0,0,0.68);
+      border: 1px solid rgba(0, 0, 0, 0.25);
+      background: rgba(255, 255, 255, 0.9);
+      color: rgba(0, 0, 0, 0.68);
       font-size: 13px;
       line-height: 1;
       display: none;
@@ -350,21 +323,29 @@
       animation-delay: 0.95s;
     }
 
-    .sticker:nth-child(8) img {
-      animation-duration: 5.35s;
-      animation-delay: 0.55s;
+    .patch-debug {
+      position: fixed;
+      right: 12px;
+      top: 96px;
+      z-index: 12000;
+      width: min(360px, calc(100vw - 24px));
+      background: rgba(8, 10, 14, 0.92);
+      border: 1px solid rgba(255, 120, 120, 0.45);
+      border-radius: 10px;
+      color: #f7d7d7;
+      padding: 10px 11px;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 11px;
+      letter-spacing: -0.01em;
+      line-height: 1.4;
+      white-space: pre-line;
+      display: none;
+      pointer-events: none;
     }
 
-    .sticker:nth-child(9) img {
-      animation-duration: 6.05s;
-      animation-delay: 0.7s;
+    .patch-debug.show {
+      display: block;
     }
-
-    .sticker:nth-child(10) img {
-      animation-duration: 5.6s;
-      animation-delay: 1s;
-    }
-
 
     .sticker.sticker-hold-ready img,
     .sticker.sticker-dragging img {
@@ -374,11 +355,6 @@
     .sticker.sticker-dragging {
       cursor: grabbing;
       filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.4));
-    }
-
-    .home-snoopy-sticker {
-      z-index: 180 !important;
-      filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.45));
     }
 
     @keyframes stickerFloat {
@@ -396,40 +372,28 @@
     /* Mobile */
     @media (max-width: 600px) {
       #home-overlay {
-        padding: 0 18px 72px;
+        padding: 0 24px 94px;
       }
 
       .home-name {
-        font-size: 52px;
-        margin-bottom: 14px;
-      }
-
-      .home-tagline {
-        font-size: 12px;
-        margin-bottom: 12px;
+        font-size: 66px;
       }
 
       .home-bio-list {
-        gap: 4px;
+        gap: 6px;
       }
 
       .home-bio-list li {
-        font-size: 11px;
-        line-height: 1.4;
-      }
-
-      .home-bio-link {
-        font-size: 10px;
-        padding: 1px 4px;
+        font-size: 13px;
       }
 
       .home-socials {
-        gap: 9px;
+        gap: 10px;
       }
 
       .social-icon-link {
-        width: 30px;
-        height: 30px;
+        width: 34px;
+        height: 34px;
       }
 
       .sticker {
@@ -441,17 +405,15 @@
 
 <body class="bg-[#000] text-white m-0 overflow-hidden h-screen w-screen relative">
   <!-- Cables Patch -->
-  <iframe id="home-cables-frame" src="https://cables.gl/view/mFYiLg" loading="eager"
+  <iframe id="home-cables-frame" src="gif/patches/homepage_2/index.html" loading="eager"
+    style="position:absolute; top:0; left:0; width:100%; height:100%; border:0; outline:0;"
     allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"></iframe>
+
+  <!-- Dot grain overlay (very subtle) -->
+  <div class="dot-grid-wrapper" style="z-index:3;"></div>
 
   <!-- Self-injecting site header -->
   <script src="scripts/site-header.js"></script>
-
-  <div class="sticker-layer" data-sticker-layer data-safe-bottom="120" data-random-spawn="off">
-    <button class="sticker home-snoopy-sticker" type="button" data-sticker data-size="162" data-x="30" data-y="78" data-rotation="-8" style="--drag-x:30px;--drag-y:78px;--rot:-8deg;" aria-label="snoopy sticker">
-      <img src="gif/stickers/snoopy.png" alt="Snoopy sticker" loading="lazy">
-    </button>
-  </div>
 
   <!-- ── Home overlay ── -->
   <!--
@@ -460,6 +422,37 @@
     Use <a class="home-bio-link" href="URL" data-preview-title="Title" data-preview-desc="Short description" data-preview-img="optional-screenshot.png">label</a>
     for linked chips with hover previews.
   -->
+  <div class="sticker-layer" data-sticker-layer data-safe-bottom="0">
+    <button class="sticker" type="button" data-sticker data-size="152" data-x="52" data-y="58" data-rotation="-9"
+      aria-label="snoopy sticker">
+      <img src="https://upload.wikimedia.org/wikipedia/en/5/53/Snoopy_Peanuts.png" alt="Snoopy sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="118" data-x="284" data-y="146" data-rotation="8"
+      aria-label="piplup sticker">
+      <img src="gif/piplup1.webp" alt="Piplup sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="218" data-x="648" data-y="66" data-rotation="-6"
+      aria-label="smiski sticker">
+      <img src="gif/smiski1.png" alt="Smiski sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="208" data-x="976" data-y="176" data-rotation="5"
+      aria-label="camera sticker">
+      <img src="gif/xt4.png" alt="XT4 sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="134" data-x="156" data-y="288" data-rotation="-7"
+      aria-label="photo sticker">
+      <img src="gif/1600.jpg" alt="Photo sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="214" data-x="812" data-y="302" data-rotation="8"
+      aria-label="typhoon sticker">
+      <img src="gif/typhoon.png" alt="Typhoon sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="146" data-x="1124" data-y="96" data-rotation="-8"
+      aria-label="rotring sticker">
+      <img src="gif/rotring.png" alt="Rotring sticker" loading="lazy">
+    </button>
+  </div>
+
   <div id="home-overlay">
     <div class="home-socials mb-5">
       <a class="home-bio-link social-icon-link" href="https://www.youtube.com/channel/UCm9AkiBCwALnpblVcV7E65g"
@@ -537,13 +530,13 @@
     <p class="home-tagline pointer-events-auto">
       <a href="https://www.sfu.ca/fas/schools/sustainable-energy-engineering.html" target="_blank"
         class="home-bio-link home-tagline-link" data-preview-title="sustainable energy engineering @ sfu"
-        data-preview-desc="Program page" data-preview-img="gif/thumbnails/1600.jpg">sustainable energy engineering</a>
+        data-preview-desc="Program page" data-preview-img="gif/1600.jpg">sustainable energy engineering</a>
       +
       <a href="https://www.sfu.ca/siat.html" target="_blank" class="home-bio-link home-tagline-link"
         data-preview-title="interactive arts & technology @ sfu" data-preview-desc="SIAT program overview"
-        data-preview-img="gif/thumbnails/xt4.png">interactive arts &amp; technology</a> @ <a target="_blank"
+        data-preview-img="gif/xt4.png">interactive arts &amp; technology</a> @ <a target="_blank"
         class="home-bio-link home-tagline-link" data-preview-title="simon fraser university"
-        data-preview-desc="@ burnaby + surrey, BC" data-preview-img="gif/thumbnails/smiski1.png">sfu</a>
+        data-preview-desc="@ burnaby + surrey, BC" data-preview-img="gif/smiski1.png">sfu</a>
     </p>
 
     <ul class="home-bio-list">
@@ -576,7 +569,7 @@
           badminton</a>
       </li>
       <li>prev exp. w/
-        <a class="home-bio-link" href="https://subvision.ca/" target="_blank" data-preview-title="Subvision"
+        <a class="home-bio-link" href="https://subvision.ca/" target="_blank" data-preview-title="subvision"
           data-preview-desc="@subvision.robotics / building things" data-preview-img="">subvision</a>
         +
         <a class="home-bio-link" href="https://fbcyouthprogram.ca/ccsbc/" target="_blank" data-preview-title="CCSBC"
@@ -586,7 +579,6 @@
       <li>looking for fall 2026
         <a class="home-bio-link" href="resume.html" data-preview-title="resume"
           data-preview-desc="experience, projects, and work details" data-preview-img="">engineering opportunities</a>
-        :)
       </li>
     </ul>
   </div>
@@ -601,13 +593,93 @@
   </div>
 
   <footer class="hidden"></footer>
+  <div id="home-patch-debug" class="patch-debug" aria-live="polite"></div>
 
   <script src="scripts/page-transitions.js"></script>
+  <script src="scripts/dot-grid.js"></script>
   <script src="scripts/clocks.js"></script>
   <script src="scripts/counter.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js" onerror="this.onerror=null;this.src='https://unpkg.com/interactjs/dist/interact.min.js';"></script>
-  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" onerror="this.onerror=null;this.src='https://unpkg.com/animejs@3.2.1/lib/anime.min.js';"></script>
+  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
   <script src="scripts/stickers.js"></script>
+  <script>
+    (function () {
+      var frame = document.getElementById('home-cables-frame');
+      if (!frame) return;
+
+      var settled = false;
+      var index = 0;
+      var sources = [
+        'gif/patches/homepage_2/index.html?v=' + Date.now()
+      ];
+      var debug = document.getElementById('home-patch-debug');
+      var verifyTimer = null;
+
+      function setDebug(message) {
+        if (!debug) return;
+        debug.textContent = message;
+        debug.classList.add('show');
+      }
+
+      function clearDebug() {
+        if (!debug) return;
+        debug.classList.remove('show');
+      }
+
+      function patchLooksReady() {
+        try {
+          var cw = frame.contentWindow;
+          if (!cw) return false;
+          if (cw.location && cw.location.origin !== window.location.origin) return false;
+          var ok = !!(cw.__cablesPatchStarted || (cw.CABLES && cw.CABLES.patch));
+          if (!ok) {
+            setDebug('home patch not started yet\nsource: ' + frame.src + '\nlast error: ' + (cw.__cablesLastError || 'none') + '\ninit tried: ' + (!!cw.__cablesPatchInitTried));
+          }
+          return ok;
+        } catch (_e) {
+          setDebug('home patch frame access error\nsource: ' + frame.src + '\nerror: ' + _e.message);
+          return false;
+        }
+      }
+
+      function loadNextSource() {
+        if (settled) return;
+        if (index >= sources.length) {
+          setDebug('home patch failed\nlast source: ' + frame.src + '\ncheck console for WebGL/script errors');
+          return;
+        }
+        frame.src = sources[index];
+        setDebug('trying home patch source ' + (index + 1) + '/' + sources.length + '\n' + sources[index]);
+        index += 1;
+      }
+
+      function verifyOrFallback() {
+        if (settled) return;
+        if (patchLooksReady()) {
+          settled = true;
+          clearDebug();
+          if (verifyTimer) clearInterval(verifyTimer);
+          return;
+        }
+        loadNextSource();
+      }
+
+      window.addEventListener('load', function () {
+        loadNextSource();
+        window.setTimeout(verifyOrFallback, 900);
+        verifyTimer = window.setInterval(verifyOrFallback, 800);
+      });
+
+      frame.addEventListener('load', function () {
+        window.setTimeout(verifyOrFallback, 450);
+      });
+
+      frame.addEventListener('error', function () {
+        setDebug('home patch iframe load error\nsource: ' + frame.src);
+      });
+    })();
+  </script>
+
   <script>
     /* ── Hover preview logic ── */
     (function () {
@@ -673,53 +745,6 @@
         });
         link.addEventListener('blur', hidePreview);
       });
-
-      var isCoarsePointer = window.matchMedia && (
-        window.matchMedia('(hover: none)').matches ||
-        window.matchMedia('(pointer: coarse)').matches
-      );
-
-      if (!isCoarsePointer) return;
-
-      var armedLink = null;
-
-      function clearTapArmed() {
-        if (armedLink) {
-          armedLink.classList.remove('tap-armed');
-          armedLink = null;
-        }
-        hidePreview();
-      }
-
-      document.querySelectorAll('.home-bio-link').forEach(function (link) {
-        link.addEventListener('click', function (event) {
-          var hasPreview = !!(link.getAttribute('data-preview-title') || link.getAttribute('data-preview-desc'));
-          if (!hasPreview) return;
-
-          if (armedLink === link) {
-            clearTapArmed();
-            return; // second tap proceeds to link navigation
-          }
-
-          event.preventDefault();
-          clearTapArmed();
-          armedLink = link;
-          link.classList.add('tap-armed');
-
-          var rect = link.getBoundingClientRect();
-          showPreview(link, rect.left + (rect.width / 2), rect.top + (rect.height / 2));
-        });
-      });
-
-      document.addEventListener('click', function (event) {
-        if (!armedLink) return;
-        var tappedLink = event.target && event.target.closest ? event.target.closest('.home-bio-link') : null;
-        if (tappedLink === armedLink) return;
-        clearTapArmed();
-      });
-
-      window.addEventListener('scroll', clearTapArmed, { passive: true });
-      window.addEventListener('resize', clearTapArmed, { passive: true });
     })();
   </script>
 </body>

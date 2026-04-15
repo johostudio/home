@@ -77,30 +77,30 @@
       filter: saturate(1.06);
     }
 
-      .book-title {
-        font-size: 13px;
-        font-weight: 400;
-        line-height: 1.3;
-        margin: 0 0 0.25rem;
-        color: #fff;
-        transition: color 0.2s ease;
-        text-transform: lowercase;
-        letter-spacing: -0.02em;
-      }
+    .book-title {
+      font-size: 13px;
+      font-weight: 400;
+      line-height: 1.3;
+      margin: 0 0 0.25rem;
+      color: #fff;
+      transition: color 0.2s ease;
+      text-transform: lowercase;
+      letter-spacing: -0.02em;
+    }
 
-      .book-card:hover .book-title,
-      .book-card:focus-visible .book-title {
-        color: #e6eef6;
-      }
+    .book-card:hover .book-title,
+    .book-card:focus-visible .book-title {
+      color: #e6eef6;
+    }
 
-      .book-authors {
-        font-size: 11px;
-        color: rgba(230, 238, 246, 0.5);
-        letter-spacing: -0.01em;
-        text-transform: lowercase;
-        margin: 0;
-        line-height: 1.35;
-      }
+    .book-authors {
+      font-size: 11px;
+      color: rgba(230, 238, 246, 0.5);
+      letter-spacing: -0.01em;
+      text-transform: lowercase;
+      margin: 0;
+      line-height: 1.35;
+    }
 
     .books-status {
       font-size: 0.72rem;
@@ -180,7 +180,7 @@
       margin: 0 auto;
     }
 
-    #books-grid > * {
+    #books-grid>* {
       min-width: 0;
     }
 
@@ -401,6 +401,7 @@
       color: rgba(230, 238, 246, 0.78);
       letter-spacing: -0.01em;
       text-transform: lowercase;
+      white-space: pre-wrap;
     }
 
     .book-modal-link {
@@ -451,12 +452,17 @@
   <!-- Self-injecting site header -->
   <script src="scripts/site-header.js"></script>
 
-  <a href="archives.html" class="back-btn relative z-50 text-[13px] text-white/50 hover:text-white transition-colors" style="position:fixed; top:24px; left:24px;">← back</a>
+  <a href="archives.html" class="back-btn relative z-50 text-[13px] text-white/50 hover:text-white transition-colors"
+    style="position:fixed; top:24px; left:24px;">← back</a>
 
   <main class="relative z-10 pt-40 px-6 pb-24 max-w-5xl mx-auto text-center">
     <div class="mb-16 text-center">
-      <h1 class="text-4xl md:text-5xl font-normal tracking-tight mb-4" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:-0.082em;text-transform:lowercase;">my bookshelf</h1>
-      <p class="text-[0.72rem] text-white/45" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:-0.01em;text-transform:lowercase;">a cluttered shelf</p>
+      <h1 class="text-4xl md:text-5xl font-normal tracking-tight mb-4"
+        style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:-0.082em;text-transform:lowercase;">
+        my bookshelf</h1>
+      <p class="text-[0.72rem] text-white/45"
+        style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:-0.01em;text-transform:lowercase;">
+        a cluttered shelf</p>
     </div>
 
     <p class="books-status" id="books-status">loading shelf...</p>
@@ -519,32 +525,61 @@
     };
 
     window.JOHO_BOOK_NOTES = window.JOHO_BOOK_NOTES || [
-      { title: '101 things i learned in product design school', author: 'sung jang', rating: 0, review: '', status: 'reading', year: 2020 },
-      { title: 'battle hymn of the tiger mother', author: 'amy chua', rating: 0, review: '', status: 'finished', year: 2011 },
-      { title: 'permission to come home', author: 'jenny wang', rating: 0, review: '', status: 'reading', year: 2022 },
-      { title: 'the book thief', author: 'markus zusak', rating: 0, review: '', status: 'finished', year: 2006 },
-      { title: 'atomic habits', author: 'james clear', rating: 0, review: '', status: 'finished', year: 2018 },
-      { title: '101 things i learned in architecture school', author: 'matthew frederick', rating: 0, review: '', status: 'finished', year: 2007 },
-      { title: 'the creative act', author: 'rick rubin', rating: 0, review: '', status: 'reading', year: 2023 },
-      { title: 'the convenience store by the sea', author: 'sonoko machida', rating: 0, review: '', status: 'reading', year: 2025 },
-      { title: 'we\'ll prescribe you a cat', author: 'syou ishida', rating: 0, review: '', status: 'reading', year: 2024 },
-      { title: 'goodnight tokyo', author: 'atsuhiro yoshida', rating: 0, review: '', status: 'reading', year: 2024 },
-      { title: 'the lantern of lost memories', author: 'sanaka hiiragi', rating: 0, review: '', status: 'reading', year: 2024 },
-      { title: 'ikigai', author: 'hector garcia', rating: 0, review: '', status: 'finished', year: 2017 },
-      { title: 'more days at the morisaki bookshop', author: 'satoshi yagisawa', rating: 0, review: '', status: 'reading', year: 2023 },
-      { title: 'days at the morisaki bookshop', author: 'satoshi yagisawa', rating: 0, review: '', status: 'finished', year: 2023 },
-      { title: 'the restaurant of lost recipes', author: 'hisashi kashiwai', rating: 0, review: '', status: 'reading', year: 2024 },
-      { title: 'welcome to the hyunam-dong bookshop', author: 'hwang bo-reum', rating: 0, review: '', status: 'reading', year: 2024 },
-      { title: 'the second chance convenience store', author: 'kim ho-yeon', rating: 0, review: '', status: 'reading', year: 2025 },
-      { title: 'the 99% invisible city', author: 'roman mars', rating: 0, review: '', status: 'reading', year: 2020 },
-      { title: 'in praise of shadows', author: 'junichiro tanizaki', rating: 0, review: '', status: 'finished', year: 1991 },
-      { title: 'snowglobe', author: 'soyoung park', rating: 0, review: '', status: 'reading', year: 2024 },
-      { title: 'snowglobe 2', author: 'soyoung park', rating: 0, review: '', status: 'reading', year: 2025 },
-      { title: 'the passengers on the hankyu line', author: 'hiro arikawa', rating: 0, review: '', status: 'reading', year: 2025 },
-      { title: 'the travelling cat chronicles', author: 'hiro arikawa', rating: 0, review: '', status: 'finished', year: 2018 },
-      { title: 'break room', author: 'miye lee', rating: 0, review: '', status: 'reading', year: 2025 },
-      { title: 'i want to die but i want to eat tteokbokki', author: 'baek sehee', rating: 0, review: '', status: 'reading', year: 2022 },
-      { title: 'i want to die but i still want to eat tteokbokki', author: '', rating: 0, review: '', status: 'reading', year: 2024 }
+      // You can write long reviews with normal line breaks.
+      // Use `+` to join multiple lines for readability, like:
+      // {
+      //   title: 'example book',
+      //   author: 'example author',
+      //   rating: 8.8,
+      //   status: 'reading',
+      //   year: 2024,
+      //   review:
+      //     'first paragraph of your review.\n\n' +
+      //     'second paragraph with more thoughts.\n' +
+      //     '- bullet-like note one\n' +
+      //     '- bullet-like note two'
+      // },
+      { title: '101 things i learned in product design school', author: 'sung jang', rating: 8.5, review: `a good read so far, lots of points to pick up from..`, status: 'reading', year: 2020 },
+      {
+        title: 'battle hymn of the tiger mother', author: 'amy chua', rating: 8.0, review: `ib english reading; quite resonating with my own life lol.
+it really brought an interesting argument, often pushed myself to compare to my current life and uppbringing.
+`, status: 'finished', year: 2011
+      },
+      { title: 'permission to come home', author: 'jenny wang', rating: 7.0, review: ``, status: 'reading', year: 2022 },
+      { title: 'the book thief', author: 'markus zusak', rating: 7.1, review: `ib eng book reading; a decent read.`, status: 'finished', year: 2006 },
+      { title: 'atomic habits', author: 'james clear', rating: 8.0, review: ``, status: 'finished', year: 2018 },
+      { title: '101 things i learned in architecture school', author: 'matthew frederick', rating: 9.2, review: ``, status: 'finished', year: 2007 },
+      { title: 'the creative act', author: 'rick rubin', rating: 7.5, review: ``, status: 'reading', year: 2023 },
+      { title: 'the convenience store by the sea', author: 'sonoko machida', rating: 7.2, review: ``, status: 'finished', year: 2025 },
+      { title: 'we\'ll prescribe you a cat', author: 'syou ishida', rating: 7.3, review: ``, status: 'reading', year: 2024 },
+      { title: 'goodnight tokyo', author: 'atsuhiro yoshida', rating: 7.0, review: ``, status: 'finished', year: 2024 },
+      { title: 'the lantern of lost memories', author: 'sanaka hiiragi', rating: 8.1, review: ``, status: 'finished', year: 2024 },
+      { title: 'ikigai', author: 'hector garcia', rating: 8.5, review: ``, status: 'finished', year: 2017 },
+      { title: 'more days at the morisaki bookshop', author: 'satoshi yagisawa', rating: 7.6, review: ``, status: 'finished', year: 2023 },
+      { title: 'days at the morisaki bookshop', author: 'satoshi yagisawa', rating: 8.0, review: ``, status: 'finished', year: 2023 },
+      { title: 'the restaurant of lost recipes', author: 'hisashi kashiwai', rating: 8.5, review: ``, status: 'finished', year: 2024 },
+      { title: 'welcome to the hyunam-dong bookshop', author: 'hwang bo-reum', rating: 7.9, review: ``, status: 'finished', year: 2024 },
+      { title: 'the second chance convenience store', author: 'kim ho-yeon', rating: 7.1, review: ``, status: 'finished', year: 2025 },
+      { title: 'the 99% invisible city', author: 'roman mars', rating: 8.5, review: ``, status: 'reading', year: 2020 },
+      { title: 'in praise of shadows', author: 'junichiro tanizaki', rating: 9.5, review: ``, status: 'finished', year: 1991 },
+      { title: 'snowglobe', author: 'soyoung park', rating: 9.1, review: ``, status: 'finished', year: 2024 },
+      { title: 'snowglobe 2', author: 'soyoung park', rating: 8.2, review: ``, status: 'finished', year: 2025 },
+      { title: 'the passengers on the hankyu line', author: 'hiro arikawa', rating: 9.6, review: `really fun read lol, got me smiling on the transit rides home`, status: 'finished', year: 2025 },
+      { title: 'the travelling cat chronicles', author: 'hiro arikawa', rating: 9.7, review: ``, status: 'finished', year: 2018 },
+      { title: 'break room', author: 'miye lee', rating: 8.0, review: `fun read rn`, status: 'reading', year: 2025 },
+      {
+        title: 'i want to die but i want to eat tteokbokki', author: 'baek sehee', rating: 9.0, review: `i picked this up hoping to learn
+      more about the author, but i ended up relating to her on a level i didn't really expect...
+      nonetheless, the message here can really change how smo would think because of the deep nature of the conversations. 
+      on surface level, it seems like just a transcript of therapy sessions, but her added insight and the timeline of the story 
+      adds to the depth.`, status: 'finished', year: 2022
+      },
+      {
+        title: 'i want to die but i still want to eat tteokbokki', author: 'baek sehee', rating: 8.3, review: `i thought the firs one
+      was quite representative of the way i carried my thoughts, so i thought to give this a try.
+      it often felt like a loop, but it was an insightful read nonetheless. i wish baek sehee could see the
+      audience that she helped through her writing. `, status: 'finished', year: 2024
+      }
     ];
   </script>
 
@@ -974,7 +1009,7 @@
           });
         });
 
-        return Promise.all(tasks).then(function () {});
+        return Promise.all(tasks).then(function () { });
       }
 
       function wireCoverFallbacks() {
@@ -1033,7 +1068,8 @@
       function hasNoteContent(noteMeta) {
         if (!noteMeta) return false;
         var ratingValue = Number(noteMeta.rating);
-        return !!(noteMeta.review || (Number.isFinite(ratingValue) && ratingValue > 0));
+        var reviewText = noteMeta.review == null ? '' : String(noteMeta.review).trim();
+        return !!(reviewText || (Number.isFinite(ratingValue) && ratingValue > 0));
       }
 
       function finishCloseModal() {
@@ -1089,8 +1125,9 @@
           bookModalRating.textContent = 'rating: — / 10';
         }
 
-        if (noteMeta && noteMeta.review) {
-          bookModalReview.textContent = String(noteMeta.review);
+        var reviewText = noteMeta && noteMeta.review != null ? String(noteMeta.review).trim() : '';
+        if (reviewText) {
+          bookModalReview.textContent = reviewText;
         } else {
           bookModalReview.textContent = 'no review added yet.';
         }
@@ -1138,7 +1175,7 @@
             if (!raw) return;
             try {
               openBookModal(JSON.parse(raw));
-            } catch (_e) {}
+            } catch (_e) { }
           });
         });
       }
@@ -1240,4 +1277,5 @@
   <script src="scripts/dot-grid.js"></script>
   <script src="scripts/clocks.js"></script>
 </body>
+
 </html>
