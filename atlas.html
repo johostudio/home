@@ -827,7 +827,10 @@
       seedCities.forEach(addPoint);
 
       var USER_KEY = 'joho-atlas-user-cities-v1';
+      var workerBase = (window.CLOUDFLARE_WORKER_URL || '').trim().replace(/\/$/, '');
+      var useCloudStorage = !!workerBase;
       function readUserCities() {
+        if (useCloudStorage) return [];
         try {
           var raw = localStorage.getItem(USER_KEY);
           if (!raw) return [];
@@ -839,11 +842,25 @@
       }
 
       function writeUserCities(items) {
+        if (useCloudStorage) return;
         localStorage.setItem(USER_KEY, JSON.stringify(items));
       }
 
       var userCities = readUserCities();
       userCities.forEach(addPoint);
+
+      loadCloudAtlasPoints().then(function (points) {
+        points.forEach(function (entry) {
+          if (!entry || typeof entry.lat !== 'number' || typeof entry.lng !== 'number') return;
+          addPoint(entry);
+          if (entry.stamp) {
+            stampEntries.push(entry);
+          } else {
+            userCities.push(entry);
+          }
+        });
+        updateJumpList();
+      });
 
       var toast = document.getElementById('atlas-toast');
       function showToast(msg) {
@@ -980,6 +997,60 @@
         });
       }
 
+      function uploadStampFile(file) {
+        if (!file) return Promise.resolve('');
+        if (!useCloudStorage) {
+          return readFileAsDataUrl(file);
+        }
+
+        var formData = new FormData();
+        formData.append('file', file, file.name || ('atlas-stamp-' + Date.now() + '.png'));
+
+        return fetch(workerBase + '/atlas-stamp-upload', {
+          method: 'POST',
+          body: formData
+        })
+          .then(function (response) {
+            if (!response.ok) throw new Error('upload failed');
+            return response.json();
+          })
+          .then(function (payload) {
+            return payload && payload.url ? payload.url : '';
+          });
+      }
+
+      function saveAtlasPoint(entry) {
+        if (!useCloudStorage) {
+          return Promise.resolve(entry);
+        }
+
+        return fetch(workerBase + '/atlas-points', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(entry)
+        })
+          .then(function (response) {
+            if (!response.ok) throw new Error('save failed');
+            return response.json();
+          });
+      }
+
+      function loadCloudAtlasPoints() {
+        if (!useCloudStorage) return Promise.resolve([]);
+
+        return fetch(workerBase + '/atlas-points')
+          .then(function (response) {
+            if (!response.ok) throw new Error('load failed');
+            return response.json();
+          })
+          .then(function (rows) {
+            return Array.isArray(rows) ? rows : [];
+          })
+          .catch(function () {
+            return [];
+          });
+      }
+
       styleSelect.addEventListener('change', function () {
         map.setStyle(styleSelect.value);
       });
@@ -1036,7 +1107,7 @@
         showToast('finding city...');
         var url = 'https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(query);
         var uploadedFile = photoFileInput.files && photoFileInput.files[0];
-        var filePromise = uploadedFile ? readFileAsDataUrl(uploadedFile) : Promise.resolve('');
+        var filePromise = uploadedFile ? uploadStampFile(uploadedFile) : Promise.resolve('');
 
         filePromise.then(function (fileDataUrl) {
           return fetch(url, { headers: { 'Accept': 'application/json' } }).then(function (response) {
@@ -1069,14 +1140,20 @@
               entry.photos.unshift(fileDataUrl);
             }
 
-            addPoint(entry);
-            map.flyTo({ center: [entry.lng, entry.lat], zoom: Math.max(map.getZoom(), 3.4), essential: true });
+            saveAtlasPoint(entry)
+              .then(function (savedEntry) {
+                addPoint(savedEntry);
+                map.flyTo({ center: [savedEntry.lng, savedEntry.lat], zoom: Math.max(map.getZoom(), 3.4), essential: true });
 
-            userCities.push(entry);
-            writeUserCities(userCities);
-            updateJumpList();
-            form.reset();
-            showToast('city saved permanently on this browser.');
+                userCities.push(savedEntry);
+                writeUserCities(userCities);
+                updateJumpList();
+                form.reset();
+                showToast('city saved permanently.');
+              })
+              .catch(function () {
+                showToast('could not save city right now.');
+              });
           })
           .catch(function () {
             showToast('could not add city right now. try again in a moment.');
@@ -1105,7 +1182,7 @@
         stampToast.textContent = 'finding city...';
 
         var url = 'https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(query);
-        var stampFilePromise = photoFile ? readFileAsDataUrl(photoFile) : Promise.resolve('');
+        var stampFilePromise = photoFile ? uploadStampFile(photoFile) : Promise.resolve('');
         stampFilePromise.then(function (fileDataUrl) {
           return fetch(url, { headers: { 'Accept': 'application/json' } }).then(function (response) {
             if (!response.ok) throw new Error('lookup failed');
@@ -1133,13 +1210,19 @@
               photos: [fileDataUrl || photo]
             };
 
-            stampEntries.push(entry);
-            addPoint(entry);
-            updateJumpList();
-            map.flyTo({ center: [entry.lng, entry.lat], zoom: Math.max(map.getZoom(), 3.6), essential: true });
-            stampForm.reset();
-            clearFields([stampCityInput, stampPhotoInput, stampPhotoFileInput]);
-            stampToast.textContent = 'stamp linked to city';
+            saveAtlasPoint(entry)
+              .then(function (savedEntry) {
+                stampEntries.push(savedEntry);
+                addPoint(savedEntry);
+                updateJumpList();
+                map.flyTo({ center: [savedEntry.lng, savedEntry.lat], zoom: Math.max(map.getZoom(), 3.6), essential: true });
+                stampForm.reset();
+                clearFields([stampCityInput, stampPhotoInput, stampPhotoFileInput]);
+                stampToast.textContent = 'stamp linked to city';
+              })
+              .catch(function () {
+                stampToast.textContent = 'could not save stamp right now';
+              });
           })
           .catch(function () {
             stampToast.textContent = 'could not add stamp right now';
@@ -1149,9 +1232,9 @@
     };
 
     (function () {
-      var workerBase = (window.CLOUDFLARE_WORKER_URL || '').trim().replace(/\/$/, '');
-      if (!window.MAPBOX_ACCESS_TOKEN && workerBase) {
-        fetch(workerBase + '/public-config')
+      var runtimeWorkerBase = (window.CLOUDFLARE_WORKER_URL || '').trim().replace(/\/$/, '');
+      if (!window.MAPBOX_ACCESS_TOKEN && runtimeWorkerBase) {
+        fetch(runtimeWorkerBase + '/public-config')
           .then(function (res) {
             if (!res.ok) throw new Error('public config unavailable');
             return res.json();

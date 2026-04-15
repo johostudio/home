@@ -132,19 +132,16 @@
 
   <script>
     window.JOHO_BOOKS_CONFIG = window.JOHO_BOOKS_CONFIG || {
-      apiKey: '',
-      userId: '',
-      shelfId: '',
-      maxResults: 40
+      query: 'design engineering art photography architecture film typography',
+      maxResults: 40,
+      language: 'en'
     };
   </script>
 
   <script>
     (function () {
       var cfg = window.JOHO_BOOKS_CONFIG || {
-        apiKey: '',
-        userId: '',
-        shelfId: '',
+        query: 'design engineering art photography architecture film typography',
         maxResults: 40
       };
 
@@ -161,20 +158,22 @@
           .replace(/'/g, '&#39;');
       }
 
-      function renderBook(item) {
-        var volume = item.volumeInfo || {};
-        var title = volume.title || 'Untitled';
-        var authors = Array.isArray(volume.authors) ? volume.authors.join(', ') : 'Unknown author';
-        var cover = '';
-        if (volume.imageLinks) {
-          cover = volume.imageLinks.thumbnail || volume.imageLinks.smallThumbnail || '';
+      function openLibraryCover(item) {
+        if (!item) return 'https://via.placeholder.com/300x450/111111/777777?text=No+Cover';
+        if (item.cover_i) {
+          return 'https://covers.openlibrary.org/b/id/' + encodeURIComponent(item.cover_i) + '-L.jpg';
         }
-        if (!cover) {
-          cover = 'https://via.placeholder.com/300x450/111111/777777?text=No+Cover';
+        if (Array.isArray(item.isbn) && item.isbn.length) {
+          return 'https://covers.openlibrary.org/b/isbn/' + encodeURIComponent(item.isbn[0]) + '-L.jpg';
         }
-        cover = cover.replace(/^http:\/\//i, 'https://');
+        return 'https://via.placeholder.com/300x450/111111/777777?text=No+Cover';
+      }
 
-        var infoLink = volume.infoLink || '#';
+      function renderBook(item) {
+        var title = item.title || 'Untitled';
+        var authors = Array.isArray(item.author_name) ? item.author_name.join(', ') : 'Unknown author';
+        var cover = openLibraryCover(item);
+        var infoLink = item.key ? ('https://openlibrary.org' + item.key) : '#';
 
         return [
           '<a class="book-card" href="', escapeHtml(infoLink), '" target="_blank" rel="noopener">',
@@ -188,13 +187,13 @@
       }
 
       function setMissingConfigMessage() {
-        status.textContent = 'add google books api details to load this shelf';
+        status.textContent = 'add an open library query to load this shelf';
         empty.classList.remove('hidden');
       }
 
       function fetchPublicConfig() {
         var workerBase = (window.CLOUDFLARE_WORKER_URL || '').trim().replace(/\/$/, '');
-        if (!workerBase) return Promise.resolve();
+        if (!workerBase) return Promise.resolve(cfg);
 
         return fetch(workerBase + '/public-config')
           .then(function (res) {
@@ -202,29 +201,25 @@
             return res.json();
           })
           .then(function (data) {
-            if (!cfg.apiKey && data && data.googleBooksApiKey) {
-              cfg.apiKey = data.googleBooksApiKey;
+            if (data && data.openLibraryQuery && !cfg.query) {
+              cfg.query = data.openLibraryQuery;
             }
-            if (!cfg.userId && data && data.googleBooksUserId) {
-              cfg.userId = data.googleBooksUserId;
-            }
-            if (!cfg.shelfId && data && data.googleBooksShelfId) {
-              cfg.shelfId = data.googleBooksShelfId;
-            }
+            return cfg;
           })
-          .catch(function () {});
+          .catch(function () {
+            return cfg;
+          });
       }
 
       function loadShelf() {
-        if (!cfg.apiKey || !cfg.userId || !cfg.shelfId) {
+        if (!cfg.query) {
           setMissingConfigMessage();
           return;
         }
 
-        var endpoint = 'https://www.googleapis.com/books/v1/users/' + encodeURIComponent(cfg.userId) +
-          '/bookshelves/' + encodeURIComponent(cfg.shelfId) +
-          '/volumes?maxResults=' + encodeURIComponent(cfg.maxResults || 40) +
-          '&key=' + encodeURIComponent(cfg.apiKey);
+        var endpoint = 'https://openlibrary.org/search.json?q=' + encodeURIComponent(cfg.query) +
+          '&language=' + encodeURIComponent(cfg.language || 'en') +
+          '&limit=' + encodeURIComponent(cfg.maxResults || 40);
 
         fetch(endpoint)
           .then(function (response) {
@@ -232,7 +227,7 @@
             return response.json();
           })
           .then(function (data) {
-            var items = Array.isArray(data.items) ? data.items : [];
+            var items = Array.isArray(data.docs) ? data.docs : [];
             if (!items.length) {
               status.textContent = 'shelf loaded, but no books returned';
               empty.classList.remove('hidden');
@@ -244,7 +239,7 @@
             empty.classList.add('hidden');
           })
           .catch(function () {
-            status.textContent = 'unable to load google books shelf';
+            status.textContent = 'unable to load open library shelf';
             empty.classList.remove('hidden');
           });
       }

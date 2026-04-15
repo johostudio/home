@@ -3,6 +3,8 @@
 This worker powers:
 - Global HSOH song recommendations (`/song-recs`)
 - Darkroom gallery uploads and listing (`/upload`, `/strips`)
+- Atlas saved cities + stamps (`/atlas-points`)
+- Atlas stamp image uploads to R2 (`/atlas-stamp-upload`)
 
 ## 1) Prereqs
 
@@ -19,8 +21,8 @@ wrangler login
 From `cloudflare-worker/`:
 
 ```bash
-wrangler d1 create joho_global
-wrangler r2 bucket create joho-media
+wrangler d1 create database1
+wrangler r2 bucket create atlas-stamps
 ```
 
 Copy the D1 `database_id` from command output.
@@ -31,7 +33,7 @@ Edit `cloudflare-worker/wrangler.toml`:
 - Set `database_id` in `[[d1_databases]]`
 - Set `R2_PUBLIC_BASE_URL` to your public R2 URL (for example `https://media.joho.studio`)
 - Set `MAPBOX_PUBLIC_TOKEN` (public `pk...` token used by atlas)
-- Set `GOOGLE_BOOKS_API_KEY`, `GOOGLE_BOOKS_USER_ID`, and `GOOGLE_BOOKS_SHELF_ID` for bookshelf page
+- Set `OPEN_LIBRARY_QUERY` for bookshelf page (Open Library search query)
 
 If you do not have a custom domain for R2 yet, create a public bucket domain in Cloudflare and use that URL.
 
@@ -40,7 +42,7 @@ If you do not have a custom domain for R2 yet, create a public bucket domain in 
 Run migration:
 
 ```bash
-wrangler d1 execute joho_global --file=schema.sql
+wrangler d1 execute database1 --file=schema.sql
 ```
 
 ## 5) Deploy worker
@@ -61,7 +63,7 @@ window.MAPBOX_ACCESS_TOKEN = '';
 ```
 
 Atlas will auto-fetch the token from Worker endpoint `GET /public-config` when local token is empty.
-Bookshelf will auto-fetch Google Books config from the same endpoint when local values are empty.
+Bookshelf will auto-fetch Open Library query from the same endpoint when local values are empty.
 
 This URL is consumed by both:
 - `hoshii.html` song catalogue
@@ -70,11 +72,15 @@ This URL is consumed by both:
 ## 7) API overview
 
 - `GET /health` -> plain `ok`
+- `GET /public-config` -> runtime map/config values for frontend
 - `GET /song-recs` -> list of songs
 - `POST /song-recs` body `{ "song": "..." }` and header `x-client-id`
 - `DELETE /song-recs/:id` with header `x-client-id` (only creator can remove)
 - `POST /upload` multipart (`file`, `author`) for darkroom strip image
 - `GET /strips` -> latest strip entries
+- `GET /atlas-points` -> list atlas saved city/stamp points
+- `POST /atlas-points` -> save atlas city/stamp point
+- `POST /atlas-stamp-upload` -> upload atlas stamp image to R2
 
 ## Notes
 

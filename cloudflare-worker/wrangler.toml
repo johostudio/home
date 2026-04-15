@@ -4,17 +4,15 @@ compatibility_date = "2026-04-14"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "joho_global"
-database_id = "YOUR_D1_DATABASE_ID"
+database_name = "database1"
+database_id = "170f70f6-090c-4211-b6b7-d195861c5069"
 
 [[r2_buckets]]
 binding = "STRIPS_BUCKET"
-bucket_name = "joho-media"
-preview_bucket_name = "joho-media"
+bucket_name = "atlas-stamps"
+preview_bucket_name = "atlas-stamps"
 
 [vars]
-R2_PUBLIC_BASE_URL = "https://YOUR_PUBLIC_BUCKET_URL"
+R2_PUBLIC_BASE_URL = "https://fbb8d28006d9a107c7451259eb560a45.r2.cloudflarestorage.com/atlas-stamps"
 MAPBOX_PUBLIC_TOKEN = ""
-GOOGLE_BOOKS_API_KEY = ""
-GOOGLE_BOOKS_USER_ID = ""
-GOOGLE_BOOKS_SHELF_ID = ""
+OPEN_LIBRARY_QUERY = "design engineering art photography architecture film typography"
