@@ -31,12 +31,10 @@
       inset: 0;
       z-index: 46;
       border: 0;
-      background: rgba(4, 6, 12, 0.42);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      background: rgba(4, 6, 12, 0.22);
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+      transition: opacity 0.24s ease;
     }
 
     #panel-backdrop.visible {
@@ -57,15 +55,15 @@
       max-height: 76vh;
       overflow-y: auto;
       background: rgba(6, 8, 16, 0.92);
-      backdrop-filter: blur(12px);
       border: 1px solid rgba(192, 132, 252, 0.26);
       border-radius: 10px;
       padding: 1rem 1rem 0.95rem;
       z-index: 60;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.36s cubic-bezier(0.22, 1, 0.36, 1), transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+      transition: opacity 0.24s ease, transform 0.24s ease;
       cursor: default;
+      will-change: opacity, transform;
     }
 
     #info-panel.panel-has-image {
@@ -255,14 +253,8 @@
       right: 0;
       bottom: 0;
       z-index: 12;
-      text-align: center;
-      font-size: 0.66rem;
-      letter-spacing: -0.01em;
-      text-transform: lowercase;
-      color: rgba(230, 238, 246, 0.42);
-      padding: 0.45rem 0 1.1rem;
+      padding: 0.1rem 0 0.9rem;
       pointer-events: none;
-      background: linear-gradient(to top, rgba(0, 0, 0, 0.62), transparent);
     }
   </style>
 </head>
@@ -293,7 +285,7 @@
   <div id="graph-container"></div>
 
   <!-- FOOTER -->
-  <footer class="archive-footer text-center mt-6 w-full mb-10">
+  <footer class="archive-footer text-center mt-0 w-full mb-3" aria-label="copyright notice">
     <small>© <span id="year"></span> joho's studio 昌栢</small>
     <div class="text-sm mt-2">ALL RIGHTS RESERVED. ®</div>
   </footer>
@@ -462,7 +454,7 @@
         closeTimer = window.setTimeout(function () {
           panel.classList.remove('closing');
           closeTimer = null;
-        }, 360);
+        }, 240);
       }
 
       closeBtn.addEventListener('click', function (event) {
