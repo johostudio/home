@@ -536,7 +536,7 @@
         });
       }
 
-      var CLOUDFLARE_WORKER_URL = (window.CLOUDFLARE_WORKER_URL || '').trim();
+      var CLOUDFLARE_WORKER_URL = '';
       var CLIENT_KEY = 'hsoh-song-client-id-v1';
       var form = document.getElementById('song-rec-form');
       var input = document.getElementById('song-rec-input');
@@ -545,9 +545,43 @@
 
       if (!form || !input || !list || !note) return;
 
+      function resolveWorkerUrl() {
+        if (CLOUDFLARE_WORKER_URL) return CLOUDFLARE_WORKER_URL;
+
+        var fromWindow = (window.CLOUDFLARE_WORKER_URL || '').trim();
+        if (fromWindow) {
+          CLOUDFLARE_WORKER_URL = fromWindow;
+          return CLOUDFLARE_WORKER_URL;
+        }
+
+        return '';
+      }
+
+      function hasWorkerUrl() {
+        return !!resolveWorkerUrl();
+      }
+
       function workerPath(path) {
-        if (!CLOUDFLARE_WORKER_URL) return '';
-        return CLOUDFLARE_WORKER_URL.replace(/\/$/, '') + path;
+        var base = resolveWorkerUrl();
+        if (!base) return '';
+        return base.replace(/\/$/, '') + path;
+      }
+
+      function normalizeSongs(data) {
+        var listLike = [];
+        if (Array.isArray(data)) listLike = data;
+        else if (data && Array.isArray(data.items)) listLike = data.items;
+        else if (data && Array.isArray(data.results)) listLike = data.results;
+
+        return listLike.map(function (item, idx) {
+          return {
+            id: item.id || item._id || ('legacy-' + idx),
+            song: item.song || item.title || '',
+            client_id: item.client_id || item.clientId || ''
+          };
+        }).filter(function (item) {
+          return !!item.song;
+        });
       }
 
       function makeClientId() {
@@ -590,7 +624,7 @@
           text.textContent = item.song;
 
           li.appendChild(text);
-          if (item.client_id && item.client_id === clientId) {
+          if (item.client_id && item.client_id === clientId && !String(item.id).startsWith('legacy-')) {
             var removeButton = document.createElement('button');
             removeButton.type = 'button';
             removeButton.className = 'song-rec-remove';
@@ -605,7 +639,7 @@
       }
 
       async function loadSongs() {
-        if (!CLOUDFLARE_WORKER_URL) {
+        if (!hasWorkerUrl()) {
           note.textContent = 'set CLOUDFLARE_WORKER_URL in scripts/cloudflare-config.js to enable global recommendations.';
           renderSongs([]);
           return;
@@ -615,7 +649,7 @@
           var res = await fetch(workerPath('/song-recs'));
           if (!res.ok) throw new Error('failed to load');
           var data = await res.json();
-          renderSongs(Array.isArray(data) ? data : []);
+          renderSongs(normalizeSongs(data));
           note.textContent = 'shared globally on this page.';
         } catch (_e) {
           note.textContent = 'could not load recommendations right now.';
@@ -624,7 +658,7 @@
       }
 
       async function removeSong(id) {
-        if (!id || !CLOUDFLARE_WORKER_URL) return;
+        if (!id || !hasWorkerUrl()) return;
         try {
           var res = await fetch(workerPath('/song-recs/' + encodeURIComponent(id)), {
             method: 'DELETE',
@@ -652,7 +686,7 @@
           note.textContent = 'please type a song recommendation first.';
           return;
         }
-        if (!CLOUDFLARE_WORKER_URL) {
+        if (!hasWorkerUrl()) {
           note.textContent = 'set CLOUDFLARE_WORKER_URL in scripts/cloudflare-config.js to enable global recommendations.';
           return;
         }

@@ -221,7 +221,7 @@
 /* ── Responsive ── */
 @media (max-width: 600px) {
   .gallery-main {
-    padding-top: 172px;
+    padding-top: calc(var(--clocks-top-mobile, 160px) + 118px) !important;
     padding-left: 16px;
     padding-right: 16px;
   }
@@ -282,5 +282,11 @@
 
   .project-read-more {
     font-size: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .gallery-main {
+    padding-top: calc(var(--clocks-top-mobile, 160px) + 108px) !important;
   }
 }
