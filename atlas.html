@@ -1,0 +1,1004 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>a colourful atlas — joho's studio</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="stylesheet" href="styles/tailwind-prod.css">
+  <link rel="stylesheet" href="styles/dot-grid.css">
+  <link rel="stylesheet" href="styles/clocks.css">
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css" rel="stylesheet" />
+  <style>
+    body {
+      background: #000;
+      color: #e6eef6;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      overflow-x: hidden;
+    }
+
+    #atlas-map {
+      width: 100%;
+      min-height: 560px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      overflow: hidden;
+      background: #040507;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    .atlas-controls {
+      width: 100%;
+      margin-top: 1.35rem;
+      letter-spacing: -0.015em;
+    }
+
+    .atlas-controls-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(150px, 1fr));
+      gap: 1rem;
+      align-items: start;
+    }
+
+    .atlas-menu {
+      position: relative;
+    }
+
+    .atlas-menu-toggle {
+      width: 100%;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(11, 14, 20, 0.78);
+      color: rgba(230, 238, 246, 0.92);
+      padding: 0.62rem 0.86rem;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 0.74rem;
+      letter-spacing: -0.015em;
+      text-transform: lowercase;
+      font-weight: 400;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease;
+      text-align: center;
+    }
+
+    .atlas-menu-toggle:hover {
+      background: rgba(16, 20, 30, 0.9);
+      border-color: rgba(255, 255, 255, 0.24);
+    }
+
+    .atlas-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 560;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.2rem;
+      background: rgba(4, 6, 10, 0.72);
+      backdrop-filter: blur(6px);
+    }
+
+    .atlas-overlay[hidden] {
+      display: none;
+    }
+
+    .atlas-overlay-panel {
+      width: min(740px, calc(100vw - 2.4rem));
+      max-height: calc(100vh - 2.4rem);
+      overflow: auto;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(9, 12, 18, 0.96);
+      border-radius: 10px;
+      padding: 1rem;
+      box-shadow: 0 26px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .atlas-overlay-view {
+      display: grid;
+      gap: 0.86rem;
+      padding-top: 0.2rem;
+    }
+
+    .atlas-overlay-view[hidden] {
+      display: none;
+    }
+
+    .atlas-overlay-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+      margin-bottom: 0.65rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .atlas-overlay-header h2 {
+      margin: 0;
+      font-size: 0.96rem;
+      letter-spacing: -0.02em;
+      color: #fff;
+      text-transform: lowercase;
+      font-weight: 400;
+    }
+
+    .atlas-overlay-close {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(230, 238, 246, 0.85);
+      font-size: 15px;
+      line-height: 1;
+      cursor: pointer;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    .atlas-overlay-close:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .atlas-style-stack {
+      display: grid;
+      gap: 0.72rem;
+      align-items: start;
+    }
+
+    .atlas-form input[aria-invalid="true"],
+    .atlas-form textarea[aria-invalid="true"],
+    .atlas-form select[aria-invalid="true"] {
+      border-color: rgba(255, 132, 132, 0.52);
+      box-shadow: 0 0 0 1px rgba(255, 132, 132, 0.12);
+    }
+
+    .atlas-form input[aria-invalid="true"]:focus,
+    .atlas-form textarea[aria-invalid="true"]:focus,
+    .atlas-form select[aria-invalid="true"]:focus {
+      outline: none;
+      border-color: rgba(255, 162, 162, 0.7);
+      box-shadow: 0 0 0 2px rgba(255, 132, 132, 0.15);
+    }
+
+    .legend-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.48rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-size: 0.78rem;
+      color: rgba(230, 238, 246, 0.84);
+      letter-spacing: -0.01em;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.16);
+      flex-shrink: 0;
+    }
+
+    .atlas-form {
+      margin-top: 0.85rem;
+      display: grid;
+      gap: 0.62rem;
+    }
+
+    .atlas-form select {
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(5, 9, 14, 0.9);
+      color: #e6eef6;
+      font-size: 0.78rem;
+      padding: 0.6rem 0.7rem;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-weight: 400;
+      text-transform: lowercase;
+      color-scheme: dark;
+    }
+
+    .atlas-form input,
+    .atlas-form textarea {
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(5, 9, 14, 0.9);
+      color: #e6eef6;
+      font-size: 0.78rem;
+      padding: 0.6rem 0.7rem;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-weight: 400;
+    }
+
+    .atlas-form textarea {
+      resize: vertical;
+      min-height: 64px;
+    }
+
+    .atlas-form button {
+      border-radius: 999px;
+      border: 1px solid rgba(192, 132, 252, 0.5);
+      color: #eed9ff;
+      background: rgba(192, 132, 252, 0.18);
+      font-size: 0.75rem;
+      text-transform: lowercase;
+      letter-spacing: -0.01em;
+      padding: 0.64rem 0.9rem;
+      cursor: pointer;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-weight: 400;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .atlas-action-btn {
+      width: 100%;
+      border-radius: 999px;
+      border: 1px solid rgba(192, 132, 252, 0.5);
+      color: #eed9ff;
+      background: rgba(192, 132, 252, 0.18);
+      font-size: 0.75rem;
+      text-transform: lowercase;
+      letter-spacing: -0.01em;
+      padding: 0.64rem 0.9rem;
+      cursor: pointer;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-weight: 400;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .atlas-action-btn:hover {
+      background: rgba(192, 132, 252, 0.24);
+      transform: translateY(-1px);
+    }
+
+    .atlas-jump-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.62rem;
+    }
+
+    .atlas-overlay-view .legend-list {
+      margin-top: 0.15rem;
+    }
+
+    .atlas-jump-help {
+      font-size: 0.68rem;
+      color: rgba(230, 238, 246, 0.5);
+      line-height: 1.3;
+      letter-spacing: -0.01em;
+      margin-top: -0.1rem;
+    }
+
+    .atlas-overlay-panel,
+    .atlas-overlay-panel input,
+    .atlas-overlay-panel textarea,
+    .atlas-overlay-panel select,
+    .atlas-overlay-panel button,
+    .atlas-overlay-panel p,
+    .atlas-overlay-panel li {
+      letter-spacing: -0.015em;
+    }
+
+    .atlas-form button:hover {
+      background: rgba(192, 132, 252, 0.24);
+      transform: translateY(-1px);
+    }
+
+    .atlas-help {
+      font-size: 0.7rem;
+      color: rgba(230, 238, 246, 0.55);
+      line-height: 1.48;
+      letter-spacing: -0.01em;
+    }
+
+    .atlas-toast {
+      margin-top: 0.45rem;
+      font-size: 0.72rem;
+      color: rgba(230, 238, 246, 0.7);
+      min-height: 1.1em;
+      letter-spacing: -0.01em;
+    }
+
+    .atlas-popup h3 {
+      margin: 0 0 0.25rem;
+      font-size: 1.04rem;
+      color: #fff;
+      font-weight: 400;
+      text-transform: lowercase;
+      letter-spacing: -0.03em;
+    }
+
+    .atlas-popup .meta {
+      font-size: 0.63rem;
+      letter-spacing: -0.01em;
+      text-transform: lowercase;
+      color: rgba(232, 217, 255, 0.85);
+      margin-bottom: 0.38rem;
+      font-weight: 400;
+    }
+
+    .atlas-popup p {
+      margin: 0;
+      font-size: 0.72rem;
+      line-height: 1.45;
+      color: rgba(230, 238, 246, 0.84);
+      font-weight: 400;
+    }
+
+    .mapboxgl-popup-content,
+    .mapboxgl-popup-tip,
+    .mapboxgl-ctrl {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    .mapboxgl-popup-content,
+    .mapboxgl-popup-tip {
+      background: rgba(8, 10, 16, 0.94);
+      color: #e6eef6;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.4);
+    }
+
+    .atlas-city-photos {
+      margin-top: 0.45rem;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 4px;
+    }
+
+    .atlas-city-photos img {
+      width: 100%;
+      aspect-ratio: 1/1;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .atlas-style-select {
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(5, 9, 14, 0.9);
+      color: #e6eef6;
+      font-size: 0.76rem;
+      letter-spacing: -0.01em;
+      text-transform: lowercase;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      padding: 0.6rem 0.7rem;
+      color-scheme: dark;
+    }
+
+    .atlas-style-select option,
+    .atlas-form select option,
+    #atlas-city-jump option {
+      background: #0c1119;
+      color: #e6eef6;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      text-transform: lowercase;
+    }
+
+    @media (max-width: 980px) {
+      #atlas-map {
+        min-height: 460px;
+      }
+
+      .atlas-controls-grid {
+        grid-template-columns: repeat(3, minmax(180px, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      #atlas-map {
+        min-height: 390px;
+      }
+
+      .atlas-controls-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 520px) {
+      .atlas-controls-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen relative">
+  <!-- Dot Grid Background -->
+  <div class="dot-grid-wrapper"></div>
+  <!-- Self-injecting site header -->
+  <script src="scripts/site-header.js"></script>
+
+  <a href="archives.html" class="back-btn relative z-50 text-[13px] text-white/50 hover:text-white transition-colors" style="position:fixed; top:24px; left:24px; pointer-events:auto;">← back</a>
+
+  <main class="relative z-10 pt-40 px-6 pb-24 max-w-5xl mx-auto flex flex-col items-center">
+    <div class="mb-12 text-center">
+      <h1 class="text-4xl md:text-5xl font-normal tracking-tight mb-3" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:-0.07em;text-transform:lowercase;">a colourful atlas</h1>
+      <p class="text-[0.72rem] text-white/45 max-w-lg" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:-0.01em;text-transform:lowercase;">an interactive map of places that shaped me.</p>
+    </div>
+
+    <div style="height: 18px;"></div>
+
+    <div id="atlas-map" aria-label="world map"></div>
+    <section class="atlas-controls" aria-label="atlas controls">
+      <div class="atlas-controls-grid">
+        <button class="atlas-menu-toggle" type="button" data-overlay-target="style">map style</button>
+        <button class="atlas-menu-toggle" type="button" data-overlay-target="jump">fast track</button>
+        <button class="atlas-menu-toggle" type="button" data-overlay-target="legend">legend</button>
+        <button class="atlas-menu-toggle" type="button" data-overlay-target="add">add your city</button>
+        <button class="atlas-menu-toggle" type="button" data-overlay-target="stamp">stamp board</button>
+      </div>
+    </section>
+
+    <div class="atlas-overlay" id="atlas-overlay" hidden>
+      <section class="atlas-overlay-panel">
+        <header class="atlas-overlay-header">
+          <h2 id="atlas-overlay-title">atlas menu</h2>
+          <button class="atlas-overlay-close" id="atlas-overlay-close" type="button" aria-label="close overlay">×</button>
+        </header>
+
+        <div class="atlas-overlay-view" id="atlas-overlay-style" hidden>
+          <div class="atlas-style-stack">
+            <select class="atlas-style-select" id="atlas-style-select" aria-label="map style mode">
+              <option value="mapbox://styles/mapbox/dark-v11">dark</option>
+              <option value="mapbox://styles/mapbox/navigation-night-v1">navigation night</option>
+              <option value="mapbox://styles/mapbox/satellite-streets-v12">satellite night</option>
+              <option value="mapbox://styles/mapbox/streets-v12">streets day</option>
+              <option value="mapbox://styles/mapbox/light-v11">light</option>
+            </select>
+            <button class="atlas-action-btn" type="button" id="atlas-toggle-3d">enable 3d view</button>
+            <p class="atlas-help" id="atlas-view-toast">3d view is currently off.</p>
+          </div>
+        </div>
+
+        <div class="atlas-overlay-view" id="atlas-overlay-jump" hidden>
+          <div class="atlas-jump-row">
+            <select id="atlas-city-jump" aria-label="jump to city"></select>
+            <button class="atlas-action-btn" type="button" id="atlas-jump-btn">jump to city</button>
+            <button class="atlas-action-btn" type="button" id="atlas-jump-3d-btn">jump + 3d view</button>
+            <p class="atlas-jump-help">quick-focus on saved dots and open a cinematic 3d angle.</p>
+          </div>
+        </div>
+
+        <div class="atlas-overlay-view" id="atlas-overlay-legend" hidden>
+          <ul class="legend-list" id="atlas-legend"></ul>
+        </div>
+
+        <div class="atlas-overlay-view" id="atlas-overlay-add" hidden>
+          <form class="atlas-form" id="user-city-form" novalidate>
+            <input type="text" id="user-city" placeholder="city, country">
+            <textarea id="user-note" placeholder="why this city matters to you" maxlength="220"></textarea>
+            <select id="user-stamp">
+              <option value="">stamp (optional)</option>
+              <option value="⭐">star</option>
+              <option value="📸">camera</option>
+              <option value="📍">pin</option>
+              <option value="🌊">wave</option>
+              <option value="🌸">flower</option>
+              <option value="🛤️">journey</option>
+            </select>
+            <input type="file" id="user-photo-file" accept="image/*">
+            <input type="url" id="user-photo" placeholder="optional photo url (comma-separated for many)">
+            <button type="submit">add permanent city</button>
+          </form>
+          <p class="atlas-help">stored in your browser via local storage so it stays on reload for this device.</p>
+          <p class="atlas-toast" id="atlas-toast"></p>
+        </div>
+
+        <div class="atlas-overlay-view" id="atlas-overlay-stamp" hidden>
+          <form class="atlas-form" id="stamp-form" novalidate>
+            <input type="text" id="stamp-city" placeholder="city, country">
+            <select id="stamp-icon">
+              <option value="📮">postmark</option>
+              <option value="⭐">star</option>
+              <option value="📸">camera</option>
+              <option value="🌸">flower</option>
+              <option value="🌊">wave</option>
+            </select>
+            <input type="file" id="stamp-photo-file" accept="image/*">
+            <input type="url" id="stamp-photo" placeholder="photo url (optional if file selected)">
+            <textarea id="stamp-note" placeholder="short note" maxlength="140"></textarea>
+            <button type="submit">attach stamp</button>
+          </form>
+          <p class="atlas-help">figma-style stamp flow. full image upload/persistence will be wired via cloudflare worker + r2.</p>
+          <p class="atlas-toast" id="stamp-toast"></p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
+  <script>
+    window.MAPBOX_ACCESS_TOKEN = window.MAPBOX_ACCESS_TOKEN || '';
+  </script>
+  <script>
+    (function () {
+      mapboxgl.accessToken = window.MAPBOX_ACCESS_TOKEN || '';
+      if (!mapboxgl.accessToken) {
+        var mapRoot = document.getElementById('atlas-map');
+        mapRoot.style.display = 'flex';
+        mapRoot.style.alignItems = 'center';
+        mapRoot.style.justifyContent = 'center';
+        mapRoot.style.padding = '1rem';
+        mapRoot.innerHTML = '<div style="font-family:Helvetica,Arial,sans-serif;font-size:12px;letter-spacing:0.03em;color:rgba(230,238,246,0.72);text-transform:lowercase;text-align:center;line-height:1.6;">mapbox token missing.<br>set <code style="font-family:inherit;color:#c084fc;">window.MAPBOX_ACCESS_TOKEN</code> in this page.</div>';
+        return;
+      }
+
+      var markerTypes = {
+        lived: { label: 'lived', color: 'rgba(125, 211, 252, 0.68)' },
+        visited: { label: 'visited', color: 'rgba(251, 191, 36, 0.62)' },
+        friends: { label: 'friends', color: 'rgba(244, 114, 182, 0.64)' },
+        inspiration: { label: 'inspiration', color: 'rgba(52, 211, 153, 0.62)' },
+        user: { label: 'user-added city', color: 'rgba(192, 132, 252, 0.64)' }
+      };
+
+      var seedCities = [
+        { city: 'Vancouver, BC', type: 'lived', lat: 49.2827, lng: -123.1207, note: 'current home base and where a lot of creative work started', photos: ['https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=500&q=80'] },
+        { city: 'Nanchang, Jiangxi', type: 'lived', lat: 28.6829, lng: 115.8582, note: 'early roots and family ties', photos: [] },
+        { city: 'Kyoto, Japan', type: 'visited', lat: 35.0116, lng: 135.7681, note: 'quiet streets, old architecture, and calm creative reset', photos: ['https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&w=500&q=80'] },
+        { city: 'London, UK', type: 'friends', lat: 51.5072, lng: -0.1276, note: 'friends and collaborators', photos: [] },
+        { city: 'Stockholm, Sweden', type: 'inspiration', lat: 59.3293, lng: 18.0686, note: 'design references and systems thinking', photos: [] }
+      ];
+
+      var stampEntries = [];
+
+      var map = new mapboxgl.Map({
+        container: 'atlas-map',
+        style: 'mapbox://styles/mapbox/dark-v11',
+        center: [8, 24],
+        zoom: 1.8,
+        attributionControl: true
+      });
+
+      var mapReady = false;
+
+      map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+
+      function markerElement(color) {
+        var el = document.createElement('div');
+        el.style.width = '12px';
+        el.style.height = '12px';
+        el.style.borderRadius = '50%';
+        el.style.background = color;
+        el.style.boxShadow = '0 0 0 2px rgba(8,10,16,0.85), 0 0 12px ' + color;
+        return el;
+      }
+
+      var allMarkers = [];
+      var markerById = {};
+
+      function entryId(entry) {
+        return entry.city + '|' + entry.lat.toFixed(4) + '|' + entry.lng.toFixed(4);
+      }
+
+      function renderCityPhotos(entry) {
+        var photos = Array.isArray(entry.photos) ? entry.photos.filter(Boolean) : [];
+        if (!photos.length) return '';
+        return '<div class="atlas-city-photos">' + photos.slice(0, 6).map(function (src) {
+          return '<img src="' + src + '" alt="city photo" loading="lazy">';
+        }).join('') + '</div>';
+      }
+
+      function renderStampLine(entry) {
+        if (!entry.stamp) return '';
+        return '<div class="meta" style="margin-top:0.3rem;color:rgba(255,255,255,0.72);">stamp: ' + entry.stamp + '</div>';
+      }
+
+      function popupHtml(entry) {
+        var type = markerTypes[entry.type] || markerTypes.visited;
+        var stamp = entry.stamp ? (' <span style="font-size:0.95em;">' + entry.stamp + '</span>') : '';
+        return '<div class="atlas-popup"><h3>' + entry.city + stamp + '</h3><div class="meta" style="color:' + type.color + '">' + type.label + '</div><p>' + entry.note + '</p>' + renderStampLine(entry) + renderCityPhotos(entry) + '</div>';
+      }
+
+      function addPoint(entry) {
+        var type = markerTypes[entry.type] || markerTypes.visited;
+        var marker = new mapboxgl.Marker({ element: markerElement(type.color) })
+          .setLngLat([entry.lng, entry.lat])
+          .setPopup(new mapboxgl.Popup({ offset: 12 }).setHTML(popupHtml(entry)))
+          .addTo(map);
+        allMarkers.push(marker);
+        markerById[entryId(entry)] = marker;
+      }
+
+      var legend = document.getElementById('atlas-legend');
+      Object.keys(markerTypes).forEach(function (key) {
+        var item = markerTypes[key];
+        var li = document.createElement('li');
+        li.className = 'legend-item';
+        li.innerHTML = '<span class="legend-dot" style="background:' + item.color + '"></span>' + item.label;
+        legend.appendChild(li);
+      });
+
+      seedCities.forEach(addPoint);
+
+      var USER_KEY = 'joho-atlas-user-cities-v1';
+      function readUserCities() {
+        try {
+          var raw = localStorage.getItem(USER_KEY);
+          if (!raw) return [];
+          var data = JSON.parse(raw);
+          return Array.isArray(data) ? data : [];
+        } catch (_e) {
+          return [];
+        }
+      }
+
+      function writeUserCities(items) {
+        localStorage.setItem(USER_KEY, JSON.stringify(items));
+      }
+
+      var userCities = readUserCities();
+      userCities.forEach(addPoint);
+
+      var toast = document.getElementById('atlas-toast');
+      function showToast(msg) {
+        toast.textContent = msg;
+      }
+
+      var form = document.getElementById('user-city-form');
+      var cityInput = document.getElementById('user-city');
+      var noteInput = document.getElementById('user-note');
+      var photoInput = document.getElementById('user-photo');
+      var photoFileInput = document.getElementById('user-photo-file');
+      var stampInput = document.getElementById('user-stamp');
+      var stampForm = document.getElementById('stamp-form');
+      var stampCityInput = document.getElementById('stamp-city');
+      var stampIconInput = document.getElementById('stamp-icon');
+      var stampPhotoInput = document.getElementById('stamp-photo');
+      var stampPhotoFileInput = document.getElementById('stamp-photo-file');
+      var stampNoteInput = document.getElementById('stamp-note');
+      var stampToast = document.getElementById('stamp-toast');
+      var styleSelect = document.getElementById('atlas-style-select');
+      var viewToast = document.getElementById('atlas-view-toast');
+      var toggle3dBtn = document.getElementById('atlas-toggle-3d');
+      var cityJumpSelect = document.getElementById('atlas-city-jump');
+      var cityJumpBtn = document.getElementById('atlas-jump-btn');
+      var cityJump3dBtn = document.getElementById('atlas-jump-3d-btn');
+      var overlay = document.getElementById('atlas-overlay');
+      var overlayClose = document.getElementById('atlas-overlay-close');
+      var overlayTitle = document.getElementById('atlas-overlay-title');
+
+      var is3D = false;
+
+      function apply3D(enabled, duration) {
+        is3D = !!enabled;
+        if (toggle3dBtn) {
+          toggle3dBtn.textContent = is3D ? 'disable 3d view' : 'enable 3d view';
+        }
+        if (viewToast) {
+          viewToast.textContent = is3D
+            ? '3d view enabled. map pitch and terrain depth are active.'
+            : '3d view is currently off.';
+        }
+
+        var nextPitch = is3D ? 58 : 0;
+        var nextBearing = is3D ? -18 : 0;
+        map.easeTo({ pitch: nextPitch, bearing: nextBearing, duration: duration || 700 });
+
+        if (!mapReady) {
+          return;
+        }
+
+        if (!map.getSource('mapbox-dem')) {
+          map.addSource('mapbox-dem', {
+            type: 'raster-dem',
+            url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
+            tileSize: 512,
+            maxzoom: 14
+          });
+        }
+
+        map.setTerrain(is3D ? { source: 'mapbox-dem', exaggeration: 1.15 } : null);
+      }
+
+      function updateJumpList() {
+        if (!cityJumpSelect) return;
+        cityJumpSelect.innerHTML = '';
+        var all = seedCities.concat(userCities).concat(stampEntries);
+        var seen = {};
+        all.forEach(function (entry) {
+          if (!entry || typeof entry.lat !== 'number' || typeof entry.lng !== 'number') return;
+          var id = entryId(entry);
+          if (seen[id]) return;
+          seen[id] = true;
+          var option = document.createElement('option');
+          option.value = JSON.stringify({ id: id, lat: entry.lat, lng: entry.lng, city: entry.city });
+          option.textContent = entry.city;
+          cityJumpSelect.appendChild(option);
+        });
+      }
+
+      function jumpToSelection(with3D) {
+        if (!cityJumpSelect || !cityJumpSelect.value) return;
+        var parsed;
+        try {
+          parsed = JSON.parse(cityJumpSelect.value);
+        } catch (_e) {
+          return;
+        }
+        if (!parsed) return;
+
+        if (with3D) {
+          apply3D(true, 500);
+        }
+
+        map.flyTo({
+          center: [parsed.lng, parsed.lat],
+          zoom: with3D ? 10.6 : 8.8,
+          pitch: with3D ? 60 : map.getPitch(),
+          bearing: with3D ? -22 : map.getBearing(),
+          speed: 0.86,
+          essential: true
+        });
+
+        var marker = parsed.id ? markerById[parsed.id] : null;
+        if (marker && marker.getPopup()) {
+          window.setTimeout(function () {
+            marker.togglePopup();
+          }, 650);
+        }
+      }
+
+      function closeOverlay() {
+        if (!overlay) return;
+        overlay.setAttribute('hidden', 'hidden');
+        document.querySelectorAll('.atlas-overlay-view').forEach(function (view) {
+          view.setAttribute('hidden', 'hidden');
+        });
+      }
+
+      function openOverlay(section) {
+        if (!overlay) return;
+        var target = document.getElementById('atlas-overlay-' + section);
+        if (!target) return;
+
+        document.querySelectorAll('.atlas-overlay-view').forEach(function (view) {
+          view.setAttribute('hidden', 'hidden');
+        });
+        target.removeAttribute('hidden');
+        overlay.removeAttribute('hidden');
+
+        if (overlayTitle) {
+          var labels = {
+            style: 'map style',
+            jump: 'fast track',
+            legend: 'legend',
+            add: 'add your city',
+            stamp: 'stamp board'
+          };
+          overlayTitle.textContent = labels[section] || 'atlas menu';
+        }
+      }
+
+      document.querySelectorAll('[data-overlay-target]').forEach(function (button) {
+        button.addEventListener('click', function () {
+          openOverlay(button.getAttribute('data-overlay-target'));
+        });
+      });
+
+      if (overlayClose) {
+        overlayClose.addEventListener('click', closeOverlay);
+      }
+
+      if (overlay) {
+        overlay.addEventListener('click', function (event) {
+          if (event.target === overlay) {
+            closeOverlay();
+          }
+        });
+      }
+
+      function markInvalid(field) {
+        if (!field) return;
+        field.setAttribute('aria-invalid', 'true');
+      }
+
+      function clearInvalid(field) {
+        if (!field) return;
+        field.removeAttribute('aria-invalid');
+      }
+
+      function clearFields(fields) {
+        fields.forEach(clearInvalid);
+      }
+
+      [cityInput, noteInput, stampCityInput, stampPhotoInput, stampPhotoFileInput].forEach(function (field) {
+        if (!field) return;
+        field.addEventListener('input', function () { clearInvalid(field); });
+        field.addEventListener('change', function () { clearInvalid(field); });
+      });
+
+      function readFileAsDataUrl(file) {
+        return new Promise(function (resolve, reject) {
+          var reader = new FileReader();
+          reader.onload = function () { resolve(reader.result); };
+          reader.onerror = function () { reject(new Error('file read failed')); };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      styleSelect.addEventListener('change', function () {
+        map.setStyle(styleSelect.value);
+      });
+
+      map.on('style.load', function () {
+        mapReady = true;
+        map.setFog({
+          color: 'rgb(16, 18, 24)',
+          'high-color': 'rgb(36, 42, 56)',
+          'horizon-blend': 0.09,
+          'space-color': 'rgb(4, 5, 9)',
+          'star-intensity': 0.32
+        });
+        if (!is3D) {
+          map.easeTo({ pitch: 42, bearing: -10, duration: 900 });
+        }
+        if (is3D) {
+          apply3D(true, 0);
+        }
+      });
+
+      if (toggle3dBtn) {
+        toggle3dBtn.addEventListener('click', function () {
+          apply3D(!is3D, 650);
+        });
+      }
+
+      if (cityJumpBtn) {
+        cityJumpBtn.addEventListener('click', function () {
+          jumpToSelection(false);
+        });
+      }
+
+      if (cityJump3dBtn) {
+        cityJump3dBtn.addEventListener('click', function () {
+          jumpToSelection(true);
+        });
+      }
+
+      updateJumpList();
+
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        var query = cityInput.value.trim();
+        var note = noteInput.value.trim();
+        clearFields([cityInput, noteInput]);
+        if (!query || !note) {
+          if (!query) markInvalid(cityInput);
+          if (!note) markInvalid(noteInput);
+          showToast('please fill in city + note');
+          return;
+        }
+
+        showToast('finding city...');
+        var url = 'https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(query);
+        var uploadedFile = photoFileInput.files && photoFileInput.files[0];
+        var filePromise = uploadedFile ? readFileAsDataUrl(uploadedFile) : Promise.resolve('');
+
+        filePromise.then(function (fileDataUrl) {
+          return fetch(url, { headers: { 'Accept': 'application/json' } }).then(function (response) {
+            if (!response.ok) throw new Error('lookup failed');
+            return response.json();
+          }).then(function (results) {
+            return { results: results, fileDataUrl: fileDataUrl };
+          });
+        })
+          .then(function (response) {
+            var results = response.results;
+            var fileDataUrl = response.fileDataUrl;
+            if (!results || !results.length) {
+              showToast('city not found. try adding country too.');
+              return;
+            }
+
+            var first = results[0];
+            var entry = {
+              city: query,
+              type: 'user',
+              lat: parseFloat(first.lat),
+              lng: parseFloat(first.lon),
+              note: note,
+              stamp: (stampInput.value || '').trim(),
+              photos: (photoInput.value || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean)
+            };
+
+            if (fileDataUrl) {
+              entry.photos.unshift(fileDataUrl);
+            }
+
+            addPoint(entry);
+            map.flyTo({ center: [entry.lng, entry.lat], zoom: Math.max(map.getZoom(), 3.4), essential: true });
+
+            userCities.push(entry);
+            writeUserCities(userCities);
+            updateJumpList();
+            form.reset();
+            showToast('city saved permanently on this browser.');
+          })
+          .catch(function () {
+            showToast('could not add city right now. try again in a moment.');
+          });
+      });
+
+      stampForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        var query = stampCityInput.value.trim();
+        var photo = stampPhotoInput.value.trim();
+        var note = stampNoteInput.value.trim() || 'stamp entry';
+        var icon = (stampIconInput.value || '📮').trim();
+        var photoFile = stampPhotoFileInput.files && stampPhotoFileInput.files[0];
+        clearFields([stampCityInput, stampPhotoInput, stampPhotoFileInput]);
+
+        if (!query || (!photo && !photoFile)) {
+          if (!query) markInvalid(stampCityInput);
+          if (!photo && !photoFile) {
+            markInvalid(stampPhotoInput);
+            markInvalid(stampPhotoFileInput);
+          }
+          stampToast.textContent = 'city + photo needed';
+          return;
+        }
+
+        stampToast.textContent = 'finding city...';
+
+        var url = 'https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(query);
+        var stampFilePromise = photoFile ? readFileAsDataUrl(photoFile) : Promise.resolve('');
+        stampFilePromise.then(function (fileDataUrl) {
+          return fetch(url, { headers: { 'Accept': 'application/json' } }).then(function (response) {
+            if (!response.ok) throw new Error('lookup failed');
+            return response.json();
+          }).then(function (results) {
+            return { results: results, fileDataUrl: fileDataUrl };
+          });
+        })
+          .then(function (response) {
+            var results = response.results;
+            var fileDataUrl = response.fileDataUrl;
+            if (!results || !results.length) {
+              stampToast.textContent = 'city not found';
+              return;
+            }
+
+            var first = results[0];
+            var entry = {
+              city: query,
+              type: 'user',
+              lat: parseFloat(first.lat),
+              lng: parseFloat(first.lon),
+              note: note,
+              stamp: icon,
+              photos: [fileDataUrl || photo]
+            };
+
+            stampEntries.push(entry);
+            addPoint(entry);
+            updateJumpList();
+            map.flyTo({ center: [entry.lng, entry.lat], zoom: Math.max(map.getZoom(), 3.6), essential: true });
+            stampForm.reset();
+            clearFields([stampCityInput, stampPhotoInput, stampPhotoFileInput]);
+            stampToast.textContent = 'stamp linked to city';
+          })
+          .catch(function () {
+            stampToast.textContent = 'could not add stamp right now';
+          });
+      });
+
+    })();
+  </script>
+
+  <script src="scripts/page-transitions.js"></script>
+  <script src="scripts/dot-grid.js"></script>
+  <script src="scripts/clocks.js"></script>
+</body>
+</html>

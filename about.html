@@ -10,6 +10,249 @@
   <link rel="stylesheet" href="styles/tailwind-prod.css">
   <link rel="stylesheet" href="styles/dot-grid.css">
   <link rel="stylesheet" href="styles/clocks.css">
+  <style>
+    .about-socials {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .about-social-link {
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      background: transparent;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(230, 238, 246, 0.72);
+      text-decoration: none;
+      position: relative;
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+
+    .about-social-link:hover,
+    .about-social-link:focus-visible {
+      color: #fff;
+      background: transparent;
+      transform: translateY(-1px);
+      outline: none;
+    }
+
+    .about-social-link::after {
+      content: attr(data-label);
+      position: absolute;
+      bottom: calc(100% + 9px);
+      left: 50%;
+      transform: translate(-50%, 4px);
+      font-size: 10px;
+      line-height: 1;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #fff;
+      background: rgba(7, 16, 33, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 999px;
+      padding: 5px 8px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.16s ease, transform 0.16s ease;
+    }
+
+    .about-social-link:hover::after,
+    .about-social-link:focus-visible::after {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    .link-preview {
+      display: none;
+      position: fixed;
+      z-index: 9000;
+      width: 260px;
+      background: rgba(10, 10, 15, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+      overflow: hidden;
+      pointer-events: none;
+      backdrop-filter: blur(8px);
+      transform: translateY(6px);
+      opacity: 0;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      color: #e6eef6;
+    }
+
+    .link-preview.visible {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .link-preview-body {
+      padding: 10px 12px 12px;
+    }
+
+    .link-preview-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 3px;
+    }
+
+    .link-preview-desc {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.6);
+      line-height: 1.4;
+    }
+
+    .sticker-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .sticker {
+      --sticker-size: 120px;
+      --drag-x: 0px;
+      --drag-y: 0px;
+      --rot: 0deg;
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: clamp(70px, 15vw, var(--sticker-size));
+      background: transparent;
+      border: 0;
+      padding: 0;
+      margin: 0;
+      cursor: grab;
+      pointer-events: auto;
+      touch-action: manipulation;
+      transform-origin: 50% 50%;
+      transform: translate3d(var(--drag-x), var(--drag-y), 0) rotate(var(--rot));
+      filter: drop-shadow(0 7px 16px rgba(0, 0, 0, 0.28));
+    }
+
+    .sticker-selected {
+      filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.32)) drop-shadow(0 0 0 1px rgba(255,255,255,0.55));
+    }
+
+    .sticker-rotate-handle {
+      position: absolute;
+      right: -8px;
+      bottom: -8px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,0.25);
+      background: rgba(255,255,255,0.9);
+      color: rgba(0,0,0,0.68);
+      font-size: 13px;
+      line-height: 1;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      pointer-events: auto;
+      padding: 0;
+    }
+
+    .sticker-selected .sticker-rotate-handle,
+    .sticker-rotating .sticker-rotate-handle {
+      display: inline-flex;
+    }
+
+    .sticker img {
+      width: 100%;
+      height: auto;
+      display: block;
+      pointer-events: none;
+      animation: stickerFloat 4.2s ease-in-out infinite;
+    }
+
+    .sticker:nth-child(2) img {
+      animation-duration: 5.1s;
+      animation-delay: 0.5s;
+    }
+
+    .sticker:nth-child(3) img {
+      animation-duration: 4.9s;
+      animation-delay: 0.8s;
+    }
+
+    .sticker:nth-child(4) img {
+      animation-duration: 5.5s;
+      animation-delay: 0.35s;
+    }
+
+    .sticker:nth-child(5) img {
+      animation-duration: 5.8s;
+      animation-delay: 0.9s;
+    }
+
+    .sticker:nth-child(6) img {
+      animation-duration: 5.35s;
+      animation-delay: 0.55s;
+    }
+
+    .sticker:nth-child(7) img {
+      animation-duration: 6.05s;
+      animation-delay: 0.7s;
+    }
+
+    .sticker:nth-child(8) img {
+      animation-duration: 5.6s;
+      animation-delay: 1s;
+    }
+
+    .sticker:nth-child(9) img {
+      animation-duration: 5.35s;
+      animation-delay: 0.55s;
+    }
+
+    .sticker:nth-child(10) img {
+      animation-duration: 6.05s;
+      animation-delay: 0.7s;
+    }
+
+    .sticker.sticker-hold-ready img,
+    .sticker.sticker-dragging img {
+      animation-play-state: paused;
+    }
+
+    .sticker.sticker-dragging {
+      cursor: grabbing;
+      filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.4));
+    }
+
+    @keyframes stickerFloat {
+      0%,
+      100% {
+        transform: translateY(0px);
+      }
+
+      50% {
+        transform: translateY(-6px);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .about-social-link {
+        width: 32px;
+        height: 32px;
+      }
+
+      .sticker {
+        width: clamp(62px, 21vw, var(--sticker-size));
+      }
+    }
+  </style>
 </head>
 
 <body class="min-h-screen bg-[#071021] text-[#e6eef6]">
@@ -18,6 +261,48 @@
 
   <!-- Self-injecting site header -->
   <script src="scripts/site-header.js"></script>
+
+  <div class="sticker-layer" data-sticker-layer data-safe-bottom="0">
+    <button class="sticker" type="button" data-sticker data-size="148" data-x="24" data-y="24" data-rotation="-8" aria-label="snoopy sticker">
+      <img src="https://upload.wikimedia.org/wikipedia/en/5/53/Snoopy_Peanuts.png" alt="Snoopy sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="112" data-x="300" data-y="200" data-rotation="7" aria-label="piplup sticker">
+      <img src="gif/piplup1.webp" alt="Piplup sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="316" data-x="620" data-y="36" data-rotation="-6" aria-label="smiski sticker">
+      <img src="gif/smiski1.png" alt="Smiski sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="196" data-x="960" data-y="232" data-rotation="5" aria-label="camera sticker">
+      <img src="gif/xt4.png" alt="XT4 sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="126" data-x="88" data-y="370" data-rotation="-7" aria-label="photo sticker">
+      <img src="gif/1600.jpg" alt="Photo sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="206" data-x="760" data-y="360" data-rotation="8" aria-label="typhoon sticker">
+      <img src="gif/typhoon.png" alt="Typhoon sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="138" data-x="1160" data-y="44" data-rotation="-7" aria-label="rotring sticker">
+      <img src="gif/rotring.png" alt="Rotring sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="118" data-x="1310" data-y="206" data-rotation="6" aria-label="pepero sticker">
+      <img src="gif/pepero.png" alt="Pepero sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="156" data-x="1470" data-y="30" data-rotation="-6" aria-label="crt tv sticker">
+      <img src="gif/crttv.png" alt="CRT TV sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="130" data-x="1368" data-y="390" data-rotation="7" aria-label="n3ds sticker">
+      <img src="gif/n3ds.png" alt="N3DS sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="194" data-x="470" data-y="430" data-rotation="-5" aria-label="stick sticker">
+      <img src="gif/stick.png" alt="Stick sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="134" data-x="1040" data-y="420" data-rotation="6" aria-label="disc sticker">
+      <img src="gif/disc.png" alt="Disc sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="128" data-x="1600" data-y="220" data-rotation="-6" aria-label="yakult sticker">
+      <img src="gif/yakult.png" alt="Yakult sticker" loading="lazy">
+    </button>
+  </div>
 
   <a href="index.html" class="back-btn relative z-10">← back</a>
 
@@ -40,18 +325,18 @@
       </div>
 
       <!-- Social Icons -->
-      <div class="flex gap-5 mt-6 items-center justify-center">
-        <!-- YouTube -->
+      <div class="about-socials mt-6">
         <a href="https://www.youtube.com/channel/UCm9AkiBCwALnpblVcV7E65g" target="_blank" rel="noopener"
-          aria-label="YouTube" class="text-white opacity-60 hover:opacity-100 hover:text-[#c084fc] transition-all">
+          aria-label="YouTube" data-label="YouTube" data-preview-title="YouTube" data-preview-desc="My YouTube channel"
+          class="about-social-link">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
             <path
               d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
           </svg>
         </a>
-        <!-- Instagram -->
         <a href="https://instagram.com/96joho" target="_blank" rel="noopener" aria-label="Instagram"
-          class="text-white opacity-60 hover:opacity-100 hover:text-[#c084fc] transition-all">
+          data-label="Personal IG" data-preview-title="IG: Personal" data-preview-desc="@96joho"
+          class="about-social-link">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
             <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
@@ -59,20 +344,20 @@
             <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
           </svg>
         </a>
-        <!-- TikTok -->
         <a href="https://www.tiktok.com/@lifeofjoho" target="_blank" rel="noopener" aria-label="TikTok"
-          class="text-white opacity-60 hover:opacity-100 hover:text-[#c084fc] transition-all">
+          data-label="TikTok" data-preview-title="TikTok" data-preview-desc="@lifeofjoho"
+          class="about-social-link">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
             <path
               d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
           </svg>
         </a>
-        <!-- GitHub -->
-        <a href="https://github.com/johostudio" target="_blank" rel="noopener" aria-label="GitHub"
-          class="text-white opacity-60 hover:opacity-100 hover:text-[#c084fc] transition-all">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path
-              d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z" />
+        <a href="https://instagram.com/hosh.autumn" target="_blank" rel="noopener" aria-label="Hosh Autumn Instagram"
+          data-label="Hosh Autumn" data-preview-title="Hosh Autumn" data-preview-desc="@hosh.autumn"
+          class="about-social-link">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+            <circle cx="12" cy="13" r="4"></circle>
           </svg>
         </a>
       </div>
@@ -84,9 +369,66 @@
     </section>
   </main>
 
+  <div class="link-preview" id="link-preview">
+    <div class="link-preview-body">
+      <div class="link-preview-title" id="preview-title"></div>
+      <div class="link-preview-desc" id="preview-desc"></div>
+    </div>
+  </div>
+
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
+
+    (function () {
+      var preview = document.getElementById('link-preview');
+      var previewTitle = document.getElementById('preview-title');
+      var previewDesc = document.getElementById('preview-desc');
+      var hideTimer = null;
+
+      function showPreview(link, clientX, clientY) {
+        var title = link.getAttribute('data-preview-title') || '';
+        var desc = link.getAttribute('data-preview-desc') || '';
+        if (!title && !desc) return;
+
+        previewTitle.textContent = title;
+        previewDesc.textContent = desc;
+
+        var x = Math.min(clientX + 16, window.innerWidth - 276);
+        var y = clientY + 24;
+        if (y + 120 > window.innerHeight) y = clientY - 120;
+
+        preview.style.left = x + 'px';
+        preview.style.top = y + 'px';
+        preview.style.display = 'block';
+        clearTimeout(hideTimer);
+        requestAnimationFrame(function () {
+          preview.classList.add('visible');
+        });
+      }
+
+      function hidePreview() {
+        preview.classList.remove('visible');
+        hideTimer = setTimeout(function () {
+          preview.style.display = 'none';
+        }, 200);
+      }
+
+      document.querySelectorAll('.about-social-link').forEach(function (link) {
+        link.addEventListener('mouseenter', function (e) { showPreview(link, e.clientX, e.clientY); });
+        link.addEventListener('mousemove', function (e) { showPreview(link, e.clientX, e.clientY); });
+        link.addEventListener('mouseleave', hidePreview);
+        link.addEventListener('focus', function () {
+          var rect = link.getBoundingClientRect();
+          showPreview(link, rect.left + (rect.width / 2), rect.top);
+        });
+        link.addEventListener('blur', hidePreview);
+      });
+    })();
   </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+  <script src="scripts/stickers.js"></script>
   <script src="scripts/page-transitions.js"></script>
   <script src="scripts/dot-grid.js"></script>
   <script src="scripts/clocks.js"></script>

@@ -1,4 +1,4 @@
-// Dual Clocks: Nanchang (left) & PST (right)
+// Dual Clocks: Vancouver (left) & Nanchang (right)
 (function () {
   'use strict';
 
@@ -41,14 +41,21 @@
   wrapper.className = 'clocks-wrapper';
   document.body.appendChild(wrapper);
 
-  var nanchangEl = createClock('left', 'Nanchang', wrapper);
-  var pstEl = createClock('right', 'Vancouver', wrapper);
+  // Apply dark (black) clock text on home page only
+  var clockPath = window.location.pathname;
+  var clockIsHome = (clockPath === '/' || clockPath.endsWith('/index.html') || clockPath.endsWith('/index') || clockPath === '');
+  if (clockIsHome) {
+    document.body.classList.add('home-dark-clocks');
+  }
+
+  var pstEl = createClock('left', 'vancouver · yvr', wrapper);
+  var nanchangEl = createClock('right', 'nanchang · khn', wrapper);
 
   function formatDate(date) {
     var m = date.getMonth() + 1;
     var d = date.getDate();
     var y = date.getFullYear();
-    return m + '/' + d + '/' + y;
+    return pad(m) + '.' + pad(d) + '.' + y;
   }
 
   function tick() {
@@ -59,7 +66,7 @@
     var utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
     var nanchangDate = new Date(utcMs + nanchangOffset * 60000);
     nanchangEl.time.textContent = formatTime(nanchangDate);
-    nanchangEl.date.textContent = formatDate(nanchangDate);
+    nanchangEl.date.textContent = formatDate(nanchangDate) + ' · cst';
 
     // PST: UTC-8 (standard) / PDT: UTC-7 (daylight)
     // Use America/Los_Angeles to handle DST automatically
@@ -78,13 +85,13 @@
         day: '2-digit',
         year: 'numeric'
       });
-      pstEl.date.textContent = pstDateStr;
+      pstEl.date.textContent = pstDateStr.replace(/\//g, '.') + ' · pst';
     } catch (e) {
       // Fallback: assume PST (UTC-8)
       var pstOffset = -8 * 60;
       var pstDate = new Date(utcMs + pstOffset * 60000);
       pstEl.time.textContent = formatTime(pstDate);
-      pstEl.date.textContent = formatDate(pstDate);
+      pstEl.date.textContent = formatDate(pstDate) + ' · pst';
     }
   }
 

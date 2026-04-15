@@ -10,6 +10,313 @@
   <link rel="stylesheet" href="styles/tailwind-prod.css">
   <link rel="stylesheet" href="styles/dot-grid.css">
   <link rel="stylesheet" href="styles/clocks.css">
+  <style>
+    /* ──────────────────────────────────────────
+       Hover-preview chip (from index.html)
+    ────────────────────────────────────────── */
+    .home-bio-link {
+      font-weight: 400;
+      text-decoration: none;
+      position: relative;
+      transition: background 0.18s, color 0.18s;
+      display: inline-block;
+    }
+
+    .hsoh-link {
+      white-space: nowrap;
+    }
+
+    .hsoh-link svg {
+      display: inline-block;
+      vertical-align: middle;
+      flex-shrink: 0;
+      margin-top: 0;
+    }
+
+    .hsoh-main-title {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-weight: 400;
+      text-transform: lowercase;
+      letter-spacing: -0.082em;
+      font-size: clamp(2.2rem, 4.7vw, 3.35rem);
+      line-height: 0.94;
+    }
+
+    .hsoh-subtitle {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-weight: 400;
+      text-transform: lowercase;
+      letter-spacing: -0.02em;
+      font-size: 0.72rem;
+      color: rgba(230, 238, 246, 0.42);
+      line-height: 1.45;
+      margin-top: 0.45rem;
+      margin-bottom: 0;
+    }
+
+    .sticker-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .sticker {
+      --sticker-size: 212px;
+      --drag-x: 0px;
+      --drag-y: 0px;
+      --rot: 0deg;
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: clamp(84px, 17vw, var(--sticker-size));
+      background: transparent;
+      border: 0;
+      padding: 0;
+      margin: 0;
+      cursor: grab;
+      pointer-events: auto;
+      touch-action: manipulation;
+      transform-origin: 50% 50%;
+      transform: translate3d(var(--drag-x), var(--drag-y), 0) rotate(var(--rot));
+      filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.3));
+    }
+
+    .sticker-selected {
+      filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 0 1px rgba(255, 255, 255, 0.52));
+    }
+
+    .sticker-rotate-handle {
+      position: absolute;
+      right: -8px;
+      bottom: -8px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 1px solid rgba(0, 0, 0, 0.25);
+      background: rgba(255, 255, 255, 0.9);
+      color: rgba(0, 0, 0, 0.68);
+      font-size: 13px;
+      line-height: 1;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      pointer-events: auto;
+      padding: 0;
+    }
+
+    .sticker-selected .sticker-rotate-handle,
+    .sticker-rotating .sticker-rotate-handle {
+      display: inline-flex;
+    }
+
+    .sticker.sticker-hold-ready img,
+    .sticker.sticker-dragging img {
+      animation-play-state: paused;
+    }
+
+    .sticker.sticker-dragging {
+      cursor: grabbing;
+      filter: drop-shadow(0 11px 24px rgba(0, 0, 0, 0.42));
+    }
+
+    .sticker img {
+      width: 100%;
+      height: auto;
+      display: block;
+      pointer-events: none;
+      animation: stickerFloat 4.9s ease-in-out infinite;
+    }
+
+    @keyframes stickerFloat {
+      0%,
+      100% {
+        transform: translateY(0px);
+      }
+
+      50% {
+        transform: translateY(-6px);
+      }
+    }
+
+    .song-catalogue {
+      margin-top: 1.6rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 0.9rem;
+      background: rgba(255, 255, 255, 0.03);
+      letter-spacing: -0.015em;
+    }
+
+    .song-catalogue h3 {
+      margin: 0 0 0.45rem;
+      font-size: 0.86rem;
+      font-weight: 400;
+      text-transform: lowercase;
+      letter-spacing: -0.02em;
+      color: rgba(230, 238, 246, 0.92);
+    }
+
+    .song-rec-form {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.45rem;
+      align-items: center;
+    }
+
+    .song-rec-form input {
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 999px;
+      padding: 0.45rem 0.75rem;
+      font-size: 0.73rem;
+      background: rgba(7, 16, 33, 0.66);
+      color: #e6eef6;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      text-transform: lowercase;
+      letter-spacing: -0.015em;
+    }
+
+    .song-rec-form input[aria-invalid="true"] {
+      border-color: rgba(255, 132, 132, 0.7);
+    }
+
+    .song-rec-form button {
+      border: 1px solid rgba(192, 132, 252, 0.52);
+      border-radius: 999px;
+      padding: 0.45rem 0.75rem;
+      font-size: 0.72rem;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      text-transform: lowercase;
+      letter-spacing: -0.01em;
+      color: #eed9ff;
+      background: rgba(192, 132, 252, 0.16);
+      cursor: pointer;
+    }
+
+    .song-rec-note {
+      margin-top: 0.4rem;
+      font-size: 0.67rem;
+      color: rgba(230, 238, 246, 0.58);
+      line-height: 1.32;
+      letter-spacing: -0.01em;
+    }
+
+    .song-rec-list {
+      margin: 0.6rem 0 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 0.3rem;
+    }
+
+    .song-rec-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+    }
+
+    .song-rec-text {
+      font-size: 0.72rem;
+      color: rgba(230, 238, 246, 0.78);
+      line-height: 1.34;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .song-rec-text::before {
+      content: '›';
+      color: rgba(192, 132, 252, 0.62);
+      margin-right: 0.35rem;
+    }
+
+    .song-rec-remove {
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+      color: rgba(230, 238, 246, 0.72);
+      font-size: 0.66rem;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      letter-spacing: -0.01em;
+      text-transform: lowercase;
+      padding: 0.2rem 0.52rem;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .song-rec-remove:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.35);
+    }
+
+    .song-rec-list li.song-rec-empty {
+      color: rgba(230, 238, 246, 0.5);
+      font-size: 0.64rem;
+      letter-spacing: -0.01em;
+    }
+
+    @media (max-width: 520px) {
+      .song-rec-form {
+        grid-template-columns: 1fr;
+      }
+
+      .sticker {
+        width: clamp(74px, 21vw, var(--sticker-size));
+      }
+    }
+
+    .link-preview {
+      display: none;
+      position: fixed;
+      z-index: 9000;
+      width: 260px;
+      background: rgba(10, 10, 15, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+      overflow: hidden;
+      pointer-events: none;
+      backdrop-filter: blur(8px);
+      transform: translateY(6px);
+      opacity: 0;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      color: #e6eef6;
+    }
+
+    .link-preview.visible {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .link-preview-img {
+      width: 100%;
+      height: 130px;
+      object-fit: cover;
+      background: #111;
+      display: block;
+    }
+
+    .link-preview-body {
+      padding: 10px 12px 12px;
+    }
+
+    .link-preview-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 3px;
+    }
+
+    .link-preview-desc {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.5);
+      line-height: 1.4;
+    }
+  </style>
 </head>
 
 <body class="min-h-screen bg-[#071021] text-[#e6eef6] flex flex-col">
@@ -19,46 +326,292 @@
   <!-- Self-injecting site header -->
   <script src="scripts/site-header.js"></script>
 
+  <div class="sticker-layer" data-sticker-layer data-safe-bottom="260">
+    <button class="sticker" type="button" data-sticker data-size="208" data-x="1240" data-y="102" data-rotation="7"
+      aria-label="typhoon sticker">
+      <img src="gif/typhoon.png" alt="Typhoon sticker" loading="lazy">
+    </button>
+  </div>
+
   <a href="index.html" class="back-btn relative z-10">← back</a>
 
   <main class="flex-grow flex items-start justify-center pt-40 px-6 relative z-10">
     <section class="max-w-3xl w-full">
-      <h1 class="text-2xl font-bold mb-4 text-center">studio</h1>
+      <h1 class="text-2xl font-normal mb-4 text-center"
+        style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:-0.06em;text-transform:lowercase;">
+        studio</h1>
+      <p class="text-sm text-center text-white/55 mb-7 tracking-normal"
+        style="font-family:'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight:400;">a music production project,
+        @hsoh.wav / 2026 q2+3</p>
 
       <!-- Weekly Pick (embedded Spotify player) -->
       <div class="mt-6 p-6">
-        <h2 class="text-xl font-semibold mb-3 text-center">monthly pick</h2>
+        <h2 class="text-xl font-normal mb-3 text-center"
+          style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:-0.045em;text-transform:lowercase;">
+          monthly pick</h2>
 
         <div id="playerWrap" class="mt-5 flex justify-center">
           <iframe src="https://open.spotify.com/embed/track/2wuDmnNqQeFKBHg7H4rY9f?si=e449ca52fda94e17" width="100%"
-            height="100" frameborder="0" allow="encrypted-media" class="max-w-lg rounded"
+            height="100" frameborder="0" allow="encrypted-media" class="max-w-lg rounded" style="border:0;"
             title="Weekly pick - Spotify"></iframe>
         </div>
 
-        <p class="mt-3 text-sm text-center text-[#9aa4b2]">halo</p>
+        <p class="mt-3 text-sm text-center text-[#9aa4b2] font-normal tracking-normal">halo !!! album of the summer</p>
+
       </div>
 
       <!-- hsoh.tech link -->
-      <div class="mt-6 p-6">
-        <h2 class="text-xl font-semibold mb-3 text-center">hsoh's studio</h2>
-        <div class="mt-3 text-center">
+      <div class="mt-8 p-2 text-center relative">
+        <h2 class="hsoh-main-title mb-2 relative z-10">+86.</h2>
+        <p class="hsoh-subtitle relative z-10">@hsoh.wav</p>
+        <div class="relative z-10 inline-block mt-3">
           <a href="http://www.hsoh.tech" target="_blank" rel="noopener"
-            class="text-[#e6eef6] hover:text-[#a8b2c0] transition-colors">
-            visit hsoh.tech →
+            class="home-bio-link hsoh-link bg-white/10 hover:bg-[#c084fc]/20 px-6 py-3 rounded-full text-sm font-normal tracking-normal text-white transition-all shadow-[0_0_15px_rgba(192,132,252,0.15)] hover:shadow-[0_0_25px_rgba(192,132,252,0.3)] inline-flex items-center gap-2"
+            data-preview-title="hsoh.tech" data-preview-desc="Music production project portal"
+            data-preview-img="gif/hsoh-preview.gif">
+            visit hsoh.tech
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
           </a>
         </div>
       </div>
+
+      <section class="song-catalogue">
+        <h3>song recommendations</h3>
+        <form id="song-rec-form" class="song-rec-form" novalidate>
+          <input id="song-rec-input" type="text" maxlength="120" placeholder="type a song recommendation">
+          <button type="submit">add song</button>
+        </form>
+        <p class="song-rec-note" id="song-rec-note">shared globally on this page.</p>
+        <ul class="song-rec-list" id="song-rec-list"></ul>
+      </section>
     </section>
   </main>
 
-  <footer class="text-center mt-6 w-full mb-10">
+  <footer class="text-center mt-0 w-full mb-3">
     <small>© <span id="year"></span> joho's studio 昌栢</small>
     <div class="text-sm mt-2">ALL RIGHTS RESERVED. ®</div>
   </footer>
 
+  <!-- Hover link preview card -->
+  <div class="link-preview" id="link-preview">
+    <img class="link-preview-img" id="preview-img" src="" alt="">
+    <div class="link-preview-body">
+      <div class="link-preview-title" id="preview-title"></div>
+      <div class="link-preview-desc" id="preview-desc"></div>
+    </div>
+  </div>
+
+  <script src="scripts/cloudflare-config.js"></script>
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
+
+    (function () {
+      var CLOUDFLARE_WORKER_URL = (window.CLOUDFLARE_WORKER_URL || '').trim();
+      var CLIENT_KEY = 'hsoh-song-client-id-v1';
+      var form = document.getElementById('song-rec-form');
+      var input = document.getElementById('song-rec-input');
+      var list = document.getElementById('song-rec-list');
+      var note = document.getElementById('song-rec-note');
+
+      if (!form || !input || !list || !note) return;
+
+      function workerPath(path) {
+        if (!CLOUDFLARE_WORKER_URL) return '';
+        return CLOUDFLARE_WORKER_URL.replace(/\/$/, '') + path;
+      }
+
+      function makeClientId() {
+        if (window.crypto && window.crypto.randomUUID) {
+          return window.crypto.randomUUID();
+        }
+        return Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+      }
+
+      function getClientId() {
+        try {
+          var existing = localStorage.getItem(CLIENT_KEY);
+          if (existing) return existing;
+          var created = makeClientId();
+          localStorage.setItem(CLIENT_KEY, created);
+          return created;
+        } catch (_e) {
+          return makeClientId();
+        }
+      }
+
+      var clientId = getClientId();
+
+      function renderSongs(items) {
+        list.innerHTML = '';
+        if (!items.length) {
+          var empty = document.createElement('li');
+          empty.className = 'song-rec-empty';
+          empty.textContent = 'no recommendations yet. add the first one.';
+          list.appendChild(empty);
+          return;
+        }
+
+        items.forEach(function (item) {
+          var li = document.createElement('li');
+          li.className = 'song-rec-item';
+
+          var text = document.createElement('span');
+          text.className = 'song-rec-text';
+          text.textContent = item.song;
+
+          li.appendChild(text);
+          if (item.client_id && item.client_id === clientId) {
+            var removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.className = 'song-rec-remove';
+            removeButton.textContent = 'remove';
+            removeButton.addEventListener('click', function () {
+              removeSong(item.id);
+            });
+            li.appendChild(removeButton);
+          }
+          list.appendChild(li);
+        });
+      }
+
+      async function loadSongs() {
+        if (!CLOUDFLARE_WORKER_URL) {
+          note.textContent = 'set CLOUDFLARE_WORKER_URL in scripts/cloudflare-config.js to enable global recommendations.';
+          renderSongs([]);
+          return;
+        }
+
+        try {
+          var res = await fetch(workerPath('/song-recs'));
+          if (!res.ok) throw new Error('failed to load');
+          var data = await res.json();
+          renderSongs(Array.isArray(data) ? data : []);
+          note.textContent = 'shared globally on this page.';
+        } catch (_e) {
+          note.textContent = 'could not load recommendations right now.';
+          renderSongs([]);
+        }
+      }
+
+      async function removeSong(id) {
+        if (!id || !CLOUDFLARE_WORKER_URL) return;
+        try {
+          var res = await fetch(workerPath('/song-recs/' + encodeURIComponent(id)), {
+            method: 'DELETE',
+            headers: {
+              'x-client-id': clientId
+            }
+          });
+          if (!res.ok) throw new Error('failed to remove');
+          note.textContent = 'recommendation removed.';
+          await loadSongs();
+        } catch (_e) {
+          note.textContent = 'could not remove recommendation.';
+        }
+      }
+
+      input.addEventListener('input', function () {
+        input.removeAttribute('aria-invalid');
+      });
+
+      form.addEventListener('submit', async function (event) {
+        event.preventDefault();
+        var value = input.value.trim();
+        if (!value) {
+          input.setAttribute('aria-invalid', 'true');
+          note.textContent = 'please type a song recommendation first.';
+          return;
+        }
+        if (!CLOUDFLARE_WORKER_URL) {
+          note.textContent = 'set CLOUDFLARE_WORKER_URL in scripts/cloudflare-config.js to enable global recommendations.';
+          return;
+        }
+
+        try {
+          var res = await fetch(workerPath('/song-recs'), {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-client-id': clientId
+            },
+            body: JSON.stringify({ song: value })
+          });
+          if (!res.ok) throw new Error('failed to save');
+          form.reset();
+          input.removeAttribute('aria-invalid');
+          note.textContent = 'saved to global catalogue.';
+          await loadSongs();
+        } catch (_e) {
+          note.textContent = 'could not save recommendation.';
+        }
+      });
+
+      loadSongs();
+    })();
+
+    /* ── Hover preview logic ── */
+    (function () {
+      var preview = document.getElementById('link-preview');
+      var previewImg = document.getElementById('preview-img');
+      var previewTitle = document.getElementById('preview-title');
+      var previewDesc = document.getElementById('preview-desc');
+      var hideTimer = null;
+
+      function showPreview(link, clientX, clientY) {
+        var title = link.getAttribute('data-preview-title') || '';
+        var desc = link.getAttribute('data-preview-desc') || '';
+        var img = link.getAttribute('data-preview-img') || '';
+        if (!title && !desc) return;
+
+        previewTitle.textContent = title;
+        previewDesc.textContent = desc;
+        if (img) {
+          previewImg.src = img;
+          previewImg.style.display = 'block';
+        } else {
+          previewImg.style.display = 'none';
+        }
+
+        var x = Math.min(clientX + 16, window.innerWidth - 276);
+        var y = clientY + 24;
+        if (y + 160 > window.innerHeight) y = clientY - 160;
+
+        preview.style.left = x + 'px';
+        preview.style.top = y + 'px';
+        preview.style.display = 'block';
+        clearTimeout(hideTimer);
+        requestAnimationFrame(function () {
+          preview.classList.add('visible');
+        });
+      }
+
+      function hidePreview() {
+        preview.classList.remove('visible');
+        hideTimer = setTimeout(function () {
+          preview.style.display = 'none';
+        }, 200);
+      }
+
+      document.querySelectorAll('.home-bio-link').forEach(function (link) {
+        link.addEventListener('mouseenter', function (e) { showPreview(link, e.clientX, e.clientY); });
+        link.addEventListener('mousemove', function (e) {
+          var y = e.clientY + 24;
+          if (y + 160 > window.innerHeight) y = e.clientY - 160;
+          var x = Math.min(e.clientX + 16, window.innerWidth - 276);
+          preview.style.left = x + 'px';
+          preview.style.top = y + 'px';
+        });
+        link.addEventListener('mouseleave', hidePreview);
+      });
+    })();
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+  <script src="scripts/stickers.js"></script>
   <script src="scripts/page-transitions.js"></script>
   <script src="scripts/dot-grid.js"></script>
   <script src="scripts/clocks.js"></script>

@@ -10,16 +10,604 @@
   <link rel="stylesheet" href="styles/tailwind-prod.css">
   <link rel="stylesheet" href="styles/dot-grid.css">
   <link rel="stylesheet" href="styles/clocks.css">
+  <style>
+    /* ── Home overlay ── */
+    #home-overlay {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 20;
+      padding: 0 58px 62px;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      gap: 0;
+    }
+
+    .home-name {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: clamp(70px, 12.5vw, 162px);
+      font-weight: 800;
+      letter-spacing: -0.085em;
+      line-height: 0.9;
+      color: #000;
+      margin: 0 0 24px;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .home-tagline {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 15px;
+      font-weight: 400;
+      color: rgba(0, 0, 0, 0.6);
+      letter-spacing: -0.015em;
+      margin-bottom: 20px;
+      pointer-events: auto;
+    }
+
+    .home-tagline a {
+      pointer-events: auto;
+    }
+
+    .home-bio-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      pointer-events: auto;
+    }
+
+    .home-bio-list li {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 15px;
+      color: rgba(0, 0, 0, 0.7);
+      line-height: 1.58;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      letter-spacing: -0.014em;
+    }
+
+    .home-bio-list li::before {
+      content: "›";
+      color: rgba(0, 0, 0, 0.35);
+      font-size: 11px;
+    }
+
+    .home-socials {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      pointer-events: auto;
+    }
+
+    .social-icon-link {
+      width: 38px;
+      height: 38px;
+      padding: 0 !important;
+      background: transparent !important;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(0, 0, 0, 0.68);
+      text-decoration: none;
+      position: relative;
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+
+    .social-icon-link:hover,
+    .social-icon-link:focus-visible {
+      color: rgba(0, 0, 0, 0.95);
+      background: transparent !important;
+      transform: translateY(-1px);
+      outline: none;
+    }
+
+    .social-icon-link::after {
+      content: attr(data-label);
+      position: absolute;
+      bottom: calc(100% + 9px);
+      left: 50%;
+      transform: translate(-50%, 4px);
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 10px;
+      line-height: 1;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #101010;
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 999px;
+      padding: 5px 8px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.16s ease, transform 0.16s ease;
+    }
+
+    .social-icon-link:hover::after,
+    .social-icon-link:focus-visible::after {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    /* ──────────────────────────────────────────
+       Hover-preview chip
+    ────────────────────────────────────────── */
+    .home-bio-link {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.85);
+      text-decoration: none;
+      border-radius: 4px;
+      padding: 1px 6px;
+      background: rgba(0, 0, 0, 0.07);
+      position: relative;
+      transition: background 0.18s;
+      display: inline-block;
+    }
+
+    .home-bio-link:hover {
+      background: rgba(0, 0, 0, 0.13);
+    }
+
+    .home-tagline-link {
+      padding: 0 2px;
+      background: transparent !important;
+      color: rgba(0, 0, 0, 0.66) !important;
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
+      transition: color 0.18s ease, text-decoration-thickness 0.18s ease, background 0.18s ease;
+    }
+
+    .home-tagline-link:hover,
+    .home-tagline-link:focus-visible {
+      color: rgba(0, 0, 0, 0.96) !important;
+      background: rgba(0, 0, 0, 0.08) !important;
+      text-decoration-thickness: 2px;
+      outline: none;
+    }
+
+    /* Hover preview card */
+    .link-preview {
+      display: none;
+      position: fixed;
+      z-index: 9000;
+      width: 260px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+      overflow: hidden;
+      pointer-events: none;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      backdrop-filter: blur(8px);
+      transform: translateY(6px);
+      opacity: 0;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+
+    .link-preview.visible {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .link-preview-img {
+      width: 100%;
+      height: 130px;
+      object-fit: cover;
+      background: #eee;
+      display: block;
+    }
+
+    .link-preview-body {
+      padding: 10px 12px 12px;
+    }
+
+    .link-preview-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #111;
+      margin-bottom: 3px;
+    }
+
+    .link-preview-desc {
+      font-size: 11px;
+      color: rgba(0, 0, 0, 0.45);
+      line-height: 1.4;
+    }
+
+    .sticker-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .sticker {
+      --sticker-size: 120px;
+      --drag-x: 0px;
+      --drag-y: 0px;
+      --rot: 0deg;
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: clamp(72px, 15vw, var(--sticker-size));
+      background: transparent;
+      border: 0;
+      padding: 0;
+      margin: 0;
+      cursor: grab;
+      pointer-events: auto;
+      touch-action: manipulation;
+      transform-origin: 50% 50%;
+      transform: translate3d(var(--drag-x), var(--drag-y), 0) rotate(var(--rot));
+      filter: drop-shadow(0 7px 16px rgba(0, 0, 0, 0.28));
+    }
+
+    .sticker-selected {
+      filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.32)) drop-shadow(0 0 0 1px rgba(255,255,255,0.55));
+    }
+
+    .sticker-rotate-handle {
+      position: absolute;
+      right: -8px;
+      bottom: -8px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,0.25);
+      background: rgba(255,255,255,0.9);
+      color: rgba(0,0,0,0.68);
+      font-size: 13px;
+      line-height: 1;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      pointer-events: auto;
+      padding: 0;
+    }
+
+    .sticker-selected .sticker-rotate-handle,
+    .sticker-rotating .sticker-rotate-handle {
+      display: inline-flex;
+    }
+
+    .sticker img {
+      width: 100%;
+      height: auto;
+      display: block;
+      pointer-events: none;
+      animation: stickerFloat 4.2s ease-in-out infinite;
+    }
+
+    .sticker:nth-child(2) img {
+      animation-duration: 5.1s;
+      animation-delay: 0.5s;
+    }
+
+    .sticker:nth-child(3) img {
+      animation-duration: 4.8s;
+      animation-delay: 0.9s;
+    }
+
+    .sticker:nth-child(4) img {
+      animation-duration: 5.4s;
+      animation-delay: 0.35s;
+    }
+
+    .sticker:nth-child(5) img {
+      animation-duration: 5.7s;
+      animation-delay: 0.8s;
+    }
+
+    .sticker:nth-child(6) img {
+      animation-duration: 5.2s;
+      animation-delay: 0.4s;
+    }
+
+    .sticker:nth-child(7) img {
+      animation-duration: 5.9s;
+      animation-delay: 0.95s;
+    }
+
+    .sticker:nth-child(8) img {
+      animation-duration: 5.35s;
+      animation-delay: 0.55s;
+    }
+
+    .sticker:nth-child(9) img {
+      animation-duration: 6.05s;
+      animation-delay: 0.7s;
+    }
+
+    .sticker:nth-child(10) img {
+      animation-duration: 5.6s;
+      animation-delay: 1s;
+    }
+
+
+    .sticker.sticker-hold-ready img,
+    .sticker.sticker-dragging img {
+      animation-play-state: paused;
+    }
+
+    .sticker.sticker-dragging {
+      cursor: grabbing;
+      filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.4));
+    }
+
+    @keyframes stickerFloat {
+
+      0%,
+      100% {
+        transform: translateY(0px);
+      }
+
+      50% {
+        transform: translateY(-6px);
+      }
+    }
+
+    /* Mobile */
+    @media (max-width: 600px) {
+      #home-overlay {
+        padding: 0 24px 94px;
+      }
+
+      .home-name {
+        font-size: 66px;
+      }
+
+      .home-bio-list {
+        gap: 6px;
+      }
+
+      .home-bio-list li {
+        font-size: 13px;
+      }
+
+      .home-socials {
+        gap: 10px;
+      }
+
+      .social-icon-link {
+        width: 34px;
+        height: 34px;
+      }
+
+      .sticker {
+        width: clamp(62px, 21vw, var(--sticker-size));
+      }
+    }
+  </style>
 </head>
 
 <body class="bg-[#000] text-white m-0 overflow-hidden h-screen w-screen relative">
   <!-- Cables Patch -->
-  <iframe src="https://cables.gl/view/VKm0Fb"
+  <iframe id="home-cables-frame" src="https://dev.cables.gl/view/mFYiLg" loading="eager"
     style="position:absolute; top:0; left:0; width:100%; height:100%; border:0; outline:0;"
     allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"></iframe>
 
+  <!-- Dot grain overlay (very subtle) -->
+  <div class="dot-grid-wrapper" style="z-index:3;"></div>
+
   <!-- Self-injecting site header -->
   <script src="scripts/site-header.js"></script>
+
+  <!-- ── Home overlay ── -->
+  <!--
+    ✏️ EDIT YOUR BIO HERE:
+    Each <li> is one bullet point.
+    Use <a class="home-bio-link" href="URL" data-preview-title="Title" data-preview-desc="Short description" data-preview-img="optional-screenshot.png">label</a>
+    for linked chips with hover previews.
+  -->
+  <div class="sticker-layer" data-sticker-layer data-safe-bottom="0">
+    <button class="sticker" type="button" data-sticker data-size="148" data-x="24" data-y="24" data-rotation="-8"
+      aria-label="snoopy sticker">
+      <img src="https://upload.wikimedia.org/wikipedia/en/5/53/Snoopy_Peanuts.png" alt="Snoopy sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="112" data-x="300" data-y="200" data-rotation="7"
+      aria-label="piplup sticker">
+      <img src="gif/piplup1.webp" alt="Piplup sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="316" data-x="620" data-y="36" data-rotation="-6"
+      aria-label="smiski sticker">
+      <img src="gif/smiski1.png" alt="Smiski sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="196" data-x="960" data-y="232" data-rotation="5"
+      aria-label="camera sticker">
+      <img src="gif/xt4.png" alt="XT4 sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="126" data-x="88" data-y="370" data-rotation="-7"
+      aria-label="photo sticker">
+      <img src="gif/1600.jpg" alt="Photo sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="206" data-x="760" data-y="360" data-rotation="8"
+      aria-label="typhoon sticker">
+      <img src="gif/typhoon.png" alt="Typhoon sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="138" data-x="1160" data-y="44" data-rotation="-7"
+      aria-label="rotring sticker">
+      <img src="gif/rotring.png" alt="Rotring sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="118" data-x="1310" data-y="206" data-rotation="6"
+      aria-label="pepero sticker">
+      <img src="gif/pepero.png" alt="Pepero sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="156" data-x="1470" data-y="30" data-rotation="-6"
+      aria-label="crt tv sticker">
+      <img src="gif/crttv.png" alt="CRT TV sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="130" data-x="1368" data-y="390" data-rotation="7"
+      aria-label="n3ds sticker">
+      <img src="gif/n3ds.png" alt="N3DS sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="194" data-x="470" data-y="430" data-rotation="-5"
+      aria-label="stick sticker">
+      <img src="gif/stick.png" alt="Stick sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="134" data-x="1040" data-y="420" data-rotation="6"
+      aria-label="disc sticker">
+      <img src="gif/disc.png" alt="Disc sticker" loading="lazy">
+    </button>
+    <button class="sticker" type="button" data-sticker data-size="128" data-x="1600" data-y="220" data-rotation="-6"
+      aria-label="yakult sticker">
+      <img src="gif/yakult.png" alt="Yakult sticker" loading="lazy">
+    </button>
+  </div>
+
+  <div id="home-overlay">
+    <div class="home-socials mb-5">
+      <a class="home-bio-link social-icon-link" href="https://www.youtube.com/channel/UCm9AkiBCwALnpblVcV7E65g"
+        target="_blank" data-preview-title="youtube" data-preview-desc="@lifeofjoho / films+v-logs" data-label="youtube"
+        aria-label="youtube">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+          <path
+            d="M21.582 6.186a2.6 2.6 0 0 0-1.826-1.84C18.145 3.9 12 3.9 12 3.9s-6.145 0-7.756.446a2.6 2.6 0 0 0-1.826 1.84C2 7.82 2 12 2 12s0 4.18.418 5.814a2.6 2.6 0 0 0 1.826 1.84C5.855 20.1 12 20.1 12 20.1s6.145 0 7.756-.446a2.6 2.6 0 0 0 1.826-1.84C22 16.18 22 12 22 12s0-4.18-.418-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+        </svg>
+      </a>
+      <a class="home-bio-link social-icon-link" href="https://www.tiktok.com/@lifeofjoho" target="_blank"
+        data-preview-title="tiktok" data-preview-desc="@lifeofjoho" data-label="tiktok" aria-label="tiktok">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+          <path
+            d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 2.23-1.13 4.41-2.9 5.61-1.61 1.09-3.69 1.43-5.59 1.01-1.99-.44-3.71-1.8-4.52-3.66-.54-1.25-.66-2.67-.4-4.01.27-1.39 1.05-2.66 2.19-3.51 1.17-.87 2.64-1.22 4.07-1.11.11 1.34.02 2.68.04 4.02-.75-.08-1.55.05-2.22.42-.51.28-.9.76-1.07 1.32-.19.64-.1 1.35.25 1.91.43.68 1.18 1.1 1.99 1.16.8.06 1.62-.2 2.2-.74.62-.57.99-1.4.98-2.28-.05-5.91-.01-11.82-.03-17.73h4.04z" />
+        </svg>
+      </a>
+      <a class="home-bio-link social-icon-link" href="https://instagram.com/96joho" target="_blank"
+        data-preview-title="find me!" data-preview-desc="@96joho" data-label=":o" aria-label="personal ig">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+        </svg>
+      </a>
+      <a class="home-bio-link social-icon-link" href="https://instagram.com/joho.studio" target="_blank"
+        data-preview-title="@joho.studio" data-preview-desc="creative archive @joho.studio"
+        data-label="creative archive" aria-label="my creative archive">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 21c3 0 4-1 4-4 0-1 1-2 2-2h2l8-8a2.5 2.5 0 1 0-3.5-3.5l-8 8v2c0 1-1 2-2 2-3 0-4 1-4 4z"></path>
+          <path d="m14.5 5.5 4 4"></path>
+        </svg>
+      </a>
+      <a class="home-bio-link social-icon-link" href="https://instagram.com/hosh.autumn" target="_blank"
+        data-preview-title="hosh's autumn" data-preview-desc="photography archive @hosh.autumn"
+        data-label="hosh's autumn" aria-label="photography archive">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+          <circle cx="12" cy="13" r="4"></circle>
+        </svg>
+      </a>
+      <a class="home-bio-link social-icon-link" href="https://ko-fi.com/johostudio" target="_blank"
+        data-preview-title="ko-fi" data-preview-desc="ko-fi / tba shop / support my work" data-label="ko-fi"
+        aria-label="ko-fi">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+          <path
+            d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.034-3.954-.709-.965-1.041-2.7-.091-3.71.951-1.01 3.005-1.086 4.363.407 0 0 1.565-1.782 3.468-.963 1.904.82 1.832 3.011.723 4.311zm6.173.478c-.928.116-1.682.028-1.682.028V7.284h1.77s1.971.551 1.971 2.638c0 1.913-.985 2.667-2.059 3.015z" />
+        </svg>
+      </a>
+      <a class="home-bio-link social-icon-link" href="https://www.buymeacoffee.com/johostudio" target="_blank"
+        data-preview-title="buymeacoffee" data-preview-desc="buy me a matcha latte!" data-label="matcha latte"
+        aria-label="matcha latte">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+          <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+          <line x1="6" y1="1" x2="6" y2="4"></line>
+          <line x1="10" y1="1" x2="10" y2="4"></line>
+          <line x1="14" y1="1" x2="14" y2="4"></line>
+        </svg>
+      </a>
+      <a class="home-bio-link social-icon-link" href="mailto:contact@joho.studio" target="_blank"
+        data-preview-title="Email" data-preview-desc="contact@joho.studio" data-label="Email" aria-label="Email">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+          <polyline points="22,6 12,13 2,6"></polyline>
+        </svg>
+      </a>
+    </div>
+
+    <p class="home-tagline pointer-events-auto">
+      <a href="https://www.sfu.ca/fas/schools/sustainable-energy-engineering.html" target="_blank"
+        class="home-bio-link home-tagline-link" data-preview-title="sustainable energy engineering @ sfu"
+        data-preview-desc="Program page" data-preview-img="gif/1600.jpg">sustainable energy engineering</a>
+      +
+      <a href="https://www.sfu.ca/siat.html" target="_blank" class="home-bio-link home-tagline-link"
+        data-preview-title="interactive arts & technology @ sfu" data-preview-desc="SIAT program overview"
+        data-preview-img="gif/xt4.png">interactive arts &amp; technology</a> @ <a target="_blank"
+        class="home-bio-link home-tagline-link" data-preview-title="simon fraser university"
+        data-preview-desc="@ burnaby + surrey, BC" data-preview-img="gif/smiski1.png">sfu</a>
+    </p>
+
+    <ul class="home-bio-list">
+      <li>designing and building things across engineering, design + art</li>
+      <li>creative lead + graphic design
+        <a class="home-bio-link" href="https://www.instagram.com/theforumsfu/" target="_blank"
+          data-preview-title="The Forum @ SFU"
+          data-preview-desc="Making cool graphics and taking cool photos for student events."
+          data-preview-img="">@theforumsfu</a>
+      </li>
+      <li>mechanical team @
+        <a class="home-bio-link" href="https://www.instagram.com/ewb.sfu/" target="_blank"
+          data-preview-title="EWB SFU — Sustain-EE"
+          data-preview-desc="Developing and prototyping mechanical parts for a sustainable wind energy project."
+          data-preview-img="">ewb sfu</a>
+      </li>
+      <li>multimedia work for
+        <a class="home-bio-link" href="https://www.youtube.com/@johostudio" target="_blank"
+          data-preview-title="joho's studio on YouTube"
+          data-preview-desc="Short films, memoirs, and creative video work." data-preview-img="">@johostudio</a>
+        and
+        <a class="home-bio-link" href="https://www.instagram.com/joho.studio/" target="_blank"
+          data-preview-title="@joho.studio on Instagram" data-preview-desc="Photography, design, and creative work."
+          data-preview-img="">@joho.studio</a>
+      </li>
+      <li>photographer &amp; videographer @
+        <a class="home-bio-link" href="https://www.instagram.com/sfu_badmintonclub/" target="_blank"
+          data-preview-title="SFU Badminton Team + Club"
+          data-preview-desc="Capturing videos and photos of the SFU badminton team." data-preview-img="">sfu
+          badminton</a>
+      </li>
+      <li>prev exp. w/
+        <a class="home-bio-link" href="https://subvision.ca/" target="_blank" data-preview-title="Subvision"
+          data-preview-desc="@subvision.robotics / building things" data-preview-img="">subvision</a>
+        +
+        <a class="home-bio-link" href="https://fbcyouthprogram.ca/ccsbc/" target="_blank" data-preview-title="CCSBC"
+          data-preview-desc="youth-led and designed sustainability-based community projects" data-preview-img="">fraser
+          basin council: ccsbc</a>
+      </li>
+      <li>looking for fall 2026
+        <a class="home-bio-link" href="resume.html" data-preview-title="resume"
+          data-preview-desc="experience, projects, and work details" data-preview-img="">engineering opportunities</a>
+        :)
+      </li>
+    </ul>
+  </div>
+
+  <!-- Hover link preview card -->
+  <div class="link-preview" id="link-preview">
+    <img class="link-preview-img" id="preview-img" src="" alt="">
+    <div class="link-preview-body">
+      <div class="link-preview-title" id="preview-title"></div>
+      <div class="link-preview-desc" id="preview-desc"></div>
+    </div>
+  </div>
 
   <footer class="hidden"></footer>
 
@@ -27,6 +615,76 @@
   <script src="scripts/dot-grid.js"></script>
   <script src="scripts/clocks.js"></script>
   <script src="scripts/counter.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+  <script src="scripts/stickers.js"></script>
+  <script>
+    /* ── Hover preview logic ── */
+    (function () {
+      var preview = document.getElementById('link-preview');
+      var previewImg = document.getElementById('preview-img');
+      var previewTitle = document.getElementById('preview-title');
+      var previewDesc = document.getElementById('preview-desc');
+      var hideTimer = null;
+
+      function showPreview(link, clientX, clientY) {
+        var title = link.getAttribute('data-preview-title') || '';
+        var desc = link.getAttribute('data-preview-desc') || '';
+        var img = link.getAttribute('data-preview-img') || '';
+
+        if (!title && !desc) return;
+
+        previewTitle.textContent = title;
+        previewDesc.textContent = desc;
+
+        if (img) {
+          previewImg.src = img;
+          previewImg.style.display = 'block';
+        } else {
+          previewImg.style.display = 'none';
+        }
+
+        // Position: next to cursor nicely
+        var rx = Math.min(clientX + 16, window.innerWidth - 276);
+        var ry = clientY + 24;
+        if (ry + 160 > window.innerHeight) ry = clientY - 160;
+
+        preview.style.left = rx + 'px';
+        preview.style.top = ry + 'px';
+        preview.style.display = 'block';
+        clearTimeout(hideTimer);
+        requestAnimationFrame(function () {
+          preview.classList.add('visible');
+        });
+      }
+
+      function hidePreview() {
+        preview.classList.remove('visible');
+        hideTimer = setTimeout(function () {
+          preview.style.display = 'none';
+        }, 200);
+      }
+
+      document.querySelectorAll('.home-bio-link').forEach(function (link) {
+        link.addEventListener('mouseenter', function (e) {
+          showPreview(link, e.clientX, e.clientY);
+        });
+        link.addEventListener('mousemove', function (e) {
+          var y = e.clientY + 24;
+          if (y + 160 > window.innerHeight) y = e.clientY - 160;
+          var x = Math.min(e.clientX + 16, window.innerWidth - 276);
+          preview.style.left = x + 'px';
+          preview.style.top = y + 'px';
+        });
+        link.addEventListener('mouseleave', hidePreview);
+        link.addEventListener('focus', function (e) {
+          var rect = link.getBoundingClientRect();
+          showPreview(link, rect.left + (rect.width / 2), rect.top);
+        });
+        link.addEventListener('blur', hidePreview);
+      });
+    })();
+  </script>
 </body>
 
 </html>

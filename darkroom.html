@@ -8,8 +8,7 @@
     <meta name="description" content="Vintage digital photobooth — capture, filter, and download your photo strip." />
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
     <link rel="stylesheet" href="styles/tailwind-prod.css">
-    <!-- Supabase CDN (for worldwide gallery) -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Removed Supabase -->
     <style>
         /* ── Darkroom palette ── */
         :root {
@@ -38,7 +37,7 @@
 
         /* tighten letter-spacing to match site */
         body {
-            letter-spacing: -0.04rem;
+            letter-spacing: -0.025rem;
         }
 
         /* Film grain */
@@ -128,8 +127,8 @@
 
         .dr-nav h1 {
             font-size: 1.15rem;
-            font-weight: 700;
-            letter-spacing: -0.12em;
+            font-weight: 400;
+            letter-spacing: -0.09em;
             color: var(--dr-amber2);
             display: flex;
             align-items: center;
@@ -154,7 +153,8 @@
             font-size: 0.72rem;
             color: var(--dr-amber);
             text-decoration: none;
-            letter-spacing: 0.04em;
+            letter-spacing: -0.01em;
+            text-transform: lowercase;
             transition: opacity .18s;
         }
 
@@ -206,19 +206,19 @@
 
         .step-label {
             font-size: 0.68rem;
-            letter-spacing: .2em;
+            letter-spacing: .04em;
             color: var(--dr-muted);
-            text-transform: uppercase;
+            text-transform: lowercase;
             margin-bottom: .4rem;
         }
 
         .step-heading {
             font-size: 2rem;
-            font-weight: 700;
+            font-weight: 400;
             color: var(--dr-amber2);
             line-height: 1.1;
             margin-bottom: 1.4rem;
-            letter-spacing: -.06em;
+            letter-spacing: -.09em;
         }
 
         .step-sub {
@@ -236,8 +236,8 @@
             border: 1px solid var(--dr-amber);
             color: var(--dr-amber);
             font-size: 0.8rem;
-            letter-spacing: .1em;
-            text-transform: uppercase;
+            letter-spacing: -0.01em;
+            text-transform: lowercase;
             cursor: pointer;
             border-radius: 2px;
             transition: background .2s, color .2s, border-color .2s;
@@ -306,20 +306,21 @@
 
         .bigTitle {
             font-size: clamp(3.5rem, 14vw, 8rem);
-            font-weight: 900;
-            letter-spacing: -0.13em;
+            font-weight: 400;
+            letter-spacing: -0.11em;
             color: var(--dr-amber2);
             line-height: .9;
             margin-bottom: .5rem;
             text-shadow: 0 0 80px rgba(200, 169, 110, .18);
+            text-transform: lowercase;
         }
 
         .subtitle {
             font-size: .8rem;
-            letter-spacing: .22em;
+            letter-spacing: .02em;
             color: var(--dr-muted);
             margin-bottom: 2.8rem;
-            text-transform: uppercase;
+            text-transform: lowercase;
         }
 
         .divider {
@@ -391,8 +392,8 @@
 
         .frame-label {
             font-size: .68rem;
-            letter-spacing: .1em;
-            text-transform: uppercase;
+            letter-spacing: .02em;
+            text-transform: lowercase;
             color: var(--dr-muted);
         }
 
@@ -410,8 +411,8 @@
             cursor: pointer;
             font-family: inherit;
             font-size: .7rem;
-            letter-spacing: .1em;
-            text-transform: uppercase;
+            letter-spacing: .02em;
+            text-transform: lowercase;
             color: var(--dr-amber);
             transition: border-color .18s, background .18s;
             background: transparent;
@@ -461,8 +462,8 @@
             display: block;
             text-align: center;
             font-size: .64rem;
-            letter-spacing: .1em;
-            text-transform: uppercase;
+            letter-spacing: .02em;
+            text-transform: lowercase;
             color: var(--dr-muted);
             padding: .3rem 0;
             background: var(--dr-surface);
@@ -607,9 +608,9 @@
         #shot-info {
             text-align: center;
             font-size: .72rem;
-            letter-spacing: .1em;
+            letter-spacing: .02em;
             color: var(--dr-muted);
-            text-transform: uppercase;
+            text-transform: lowercase;
             margin-bottom: .8rem;
         }
 
@@ -643,8 +644,8 @@
             color: rgba(200, 169, 110, .55);
             font-family: inherit;
             font-size: .72rem;
-            letter-spacing: .1em;
-            text-transform: uppercase;
+            letter-spacing: .02em;
+            text-transform: lowercase;
             cursor: pointer;
             border-radius: 2px;
             transition: all .18s;
@@ -765,7 +766,7 @@
 
         .gallery-modal-header h2 {
             font-size: 1.5rem;
-            font-weight: 700;
+            font-weight: 400;
             letter-spacing: -.06em;
             color: var(--dr-amber2);
         }
@@ -998,7 +999,7 @@
                 <div class="sprocket"></div>
                 <div class="sprocket"></div>
             </div>
-            <div class="bigTitle">DARKROOM</div>
+            <div class="bigTitle">darkroom</div>
             <div class="subtitle">vintage digital photobooth</div>
             <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;">
                 <button class="dr-btn primary" onclick="goStep(1)">ENTER THE DARKROOM</button>
@@ -1182,39 +1183,14 @@
     <!-- Hidden capture canvas -->
     <canvas id="capture-canvas" style="display:none;"></canvas>
 
+    <script src="scripts/cloudflare-config.js"></script>
     <script>
         /* ════════════════════════════════════════════
-           SUPABASE CONFIG
+           CLOUDFLARE STORAGE CONFIG
            ── Setup instructions ──
-           1. Go to https://supabase.com → create a free project
-           2. In the SQL editor, run:
-              create table public.strips (
-                id uuid default gen_random_uuid() primary key,
-                image_url text not null,
-                author text default 'anonymous',
-                created_at timestamptz default now()
-              );
-              create policy "public read"  on strips for select to anon using (true);
-              create policy "public write" on strips for insert to anon with check (true);
-              alter table strips enable row level security;
-           3. In Storage → create a bucket named "darkroom" (set to PUBLIC)
-           4. In Storage → Policies → create these policies on the darkroom bucket:
-              • SELECT for anon: allow read
-              • INSERT for anon: allow upload
-              Or run this SQL:
-              create policy "anon can upload" on storage.objects
-                for insert to anon with check (bucket_id = 'darkroom');
-              create policy "anon can read" on storage.objects
-                for select to anon using (bucket_id = 'darkroom');
-           5. Replace the two values below with your Project URL and anon key
+           Set your Cloudflare Worker endpoint below.
         ════════════════════════════════════════════ */
-        const SUPABASE_URL = 'https://hhogbehqsjzxkicbrkid.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhob2diZWhxc2p6eGtpY2Jya2lkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0NjY4NzUsImV4cCI6MjA4NzA0Mjg3NX0.4lHYGs15PpULCf0gD1_yI-QGkJOmZ-Ui3whsuxJecv0';
-
-        const _supabaseReady = SUPABASE_URL.includes('supabase.co') && !SUPABASE_URL.includes('YOUR_PROJECT');
-        const db = _supabaseReady
-            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-            : null;
+        const CLOUDFLARE_WORKER_URL = (window.CLOUDFLARE_WORKER_URL || '').trim();
 
         /* ── State ── */
         const state = {
@@ -1544,8 +1520,8 @@
         /* ── Community gallery ── */
         async function saveToGallery() {
             const status = document.getElementById('save-status');
-            if (!db) {
-                status.textContent = 'Gallery not configured yet — see SUPABASE_URL in the source.';
+            if (!CLOUDFLARE_WORKER_URL) {
+                status.textContent = 'Gallery not configured yet — set CLOUDFLARE_WORKER_URL in scripts/cloudflare-config.js.';
                 return;
             }
             const btn = document.getElementById('btn-save-gallery');
@@ -1555,15 +1531,27 @@
             const canvas = document.getElementById('strip-canvas');
             canvas.toBlob(async (blob) => {
                 const filename = `strip-${Date.now()}.png`;
-                const { error: upErr } = await db.storage
-                    .from('darkroom').upload(filename, blob, { contentType: 'image/png', upsert: false });
-                if (upErr) { status.textContent = 'Upload failed: ' + upErr.message; btn.disabled = false; btn.textContent = 'SAVE TO GALLERY'; return; }
-                const { data: { publicUrl } } = db.storage.from('darkroom').getPublicUrl(filename);
                 const author = (document.getElementById('author-name').value.trim() || 'anonymous').substring(0, 30);
-                const { error: dbErr } = await db.from('strips').insert({ image_url: publicUrl, author });
-                if (dbErr) { status.textContent = 'Save failed: ' + dbErr.message; btn.disabled = false; btn.textContent = 'SAVE TO GALLERY'; return; }
-                status.textContent = '✓ saved to the community gallery!';
-                btn.textContent = '✓ SAVED'; // leave disabled — already saved
+                
+                try {
+                    const formData = new FormData();
+                    formData.append('file', blob, filename);
+                    formData.append('author', author);
+
+                    const res = await fetch(CLOUDFLARE_WORKER_URL + '/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!res.ok) throw new Error('Upload failed');
+                    
+                    status.textContent = '✓ saved to the community gallery!';
+                    btn.textContent = '✓ SAVED'; // leave disabled — already saved
+                } catch (err) {
+                    status.textContent = 'Save failed: ' + err.message; 
+                    btn.disabled = false; 
+                    btn.textContent = 'SAVE TO GALLERY';
+                }
             }, 'image/png');
         }
 
@@ -1572,31 +1560,43 @@
             document.getElementById('gallery-loading').style.display = 'block';
             document.getElementById('gallery-empty').style.display = 'none';
             document.getElementById('gallery-grid').innerHTML = '';
-            if (!db) {
+            
+            if (!CLOUDFLARE_WORKER_URL) {
                 document.getElementById('gallery-loading').style.display = 'none';
                 document.getElementById('gallery-empty').style.display = 'block';
-                document.getElementById('gallery-empty').textContent = 'Gallery not configured yet — fill in SUPABASE_URL in darkroom.html.';
+                document.getElementById('gallery-empty').textContent = 'Gallery not configured yet — set CLOUDFLARE_WORKER_URL in scripts/cloudflare-config.js.';
                 return;
             }
-            const { data, error } = await db.from('strips').select('*').order('created_at', { ascending: false }).limit(60);
-            document.getElementById('gallery-loading').style.display = 'none';
-            if (error || !data || data.length === 0) {
+
+            try {
+                const res = await fetch(CLOUDFLARE_WORKER_URL + '/strips');
+                if (!res.ok) throw new Error('Failed to fetch strips');
+                const data = await res.json();
+                
+                document.getElementById('gallery-loading').style.display = 'none';
+                if (!data || data.length === 0) {
+                    document.getElementById('gallery-empty').style.display = 'block';
+                    return;
+                }
+                
+                const grid = document.getElementById('gallery-grid');
+                data.forEach(row => {
+                    const item = document.createElement('div'); item.className = 'gallery-item';
+                    const rawAuthor = (row.author || 'anonymous').trim();
+                    const isHandle = rawAuthor.startsWith('@');
+                    const handle = isHandle ? rawAuthor.slice(1) : rawAuthor;
+                    const authorHtml = isHandle
+                        ? `<a class="gallery-author" href="https://instagram.com/${encodeURIComponent(handle)}" target="_blank" rel="noopener">${rawAuthor}</a>`
+                        : `<span class="gallery-author">${rawAuthor}</span>`;
+                    item.innerHTML = `<img src="${row.image_url}" alt="strip" loading="lazy">${authorHtml}`;
+                    item.querySelector('img').addEventListener('click', () => openLb(row.image_url));
+                    grid.appendChild(item);
+                });
+            } catch (err) {
+                document.getElementById('gallery-loading').style.display = 'none';
                 document.getElementById('gallery-empty').style.display = 'block';
-                return;
+                document.getElementById('gallery-empty').textContent = 'Error loading gallery: ' + err.message;
             }
-            const grid = document.getElementById('gallery-grid');
-            data.forEach(row => {
-                const item = document.createElement('div'); item.className = 'gallery-item';
-                const rawAuthor = (row.author || 'anonymous').trim();
-                const isHandle = rawAuthor.startsWith('@');
-                const handle = isHandle ? rawAuthor.slice(1) : rawAuthor;
-                const authorHtml = isHandle
-                    ? `<a class="gallery-author" href="https://instagram.com/${encodeURIComponent(handle)}" target="_blank" rel="noopener">${rawAuthor}</a>`
-                    : `<span class="gallery-author">${rawAuthor}</span>`;
-                item.innerHTML = `<img src="${row.image_url}" alt="strip" loading="lazy">${authorHtml}`;
-                item.querySelector('img').addEventListener('click', () => openLb(row.image_url));
-                grid.appendChild(item);
-            });
         }
 
         function closeGallery() { document.getElementById('gallery-modal').classList.remove('open'); }

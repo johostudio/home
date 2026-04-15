@@ -1,0 +1,16 @@
+name = "joho-studio-api"
+main = "src/index.js"
+compatibility_date = "2026-04-14"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "joho_global"
+database_id = "YOUR_D1_DATABASE_ID"
+
+[[r2_buckets]]
+binding = "STRIPS_BUCKET"
+bucket_name = "joho-media"
+preview_bucket_name = "joho-media"
+
+[vars]
+R2_PUBLIC_BASE_URL = "https://YOUR_PUBLIC_BUCKET_URL"
