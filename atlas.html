@@ -1385,12 +1385,14 @@
         { city: 'New York, USA', type: 'inspiration', lat: 40.7128, lng: -74.0060, note: '@coltkirwan, @cocoxu, @lifeofriza', photos: [] }
       ];
 
+      var initialAtlasCenter = [-123.1207, 49.2827];
+
       var stampEntries = [];
 
       var map = new mapboxgl.Map({
         container: 'atlas-map',
         style: 'mapbox://styles/mapbox/dark-v11',
-        center: [8, 24],
+        center: initialAtlasCenter,
         zoom: 1.8,
         attributionControl: true
       });
