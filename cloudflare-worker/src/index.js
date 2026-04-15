@@ -160,6 +160,12 @@ async function listStrips(env) {
   return json(result.results || []);
 }
 
+function publicConfig(env) {
+  return json({
+    mapboxPublicToken: (env.MAPBOX_PUBLIC_TOKEN || '').trim()
+  });
+}
+
 export default {
   async fetch(request, env) {
     var url = new URL(request.url);
@@ -171,6 +177,10 @@ export default {
 
     if (request.method === 'GET' && path === '/health') {
       return text('ok');
+    }
+
+    if (request.method === 'GET' && path === '/public-config') {
+      return publicConfig(env);
     }
 
     if (request.method === 'GET' && path === '/song-recs') {

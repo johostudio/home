@@ -30,6 +30,7 @@ Copy the D1 `database_id` from command output.
 Edit `cloudflare-worker/wrangler.toml`:
 - Set `database_id` in `[[d1_databases]]`
 - Set `R2_PUBLIC_BASE_URL` to your public R2 URL (for example `https://media.joho.studio`)
+- Set `MAPBOX_PUBLIC_TOKEN` (public `pk...` token used by atlas)
 
 If you do not have a custom domain for R2 yet, create a public bucket domain in Cloudflare and use that URL.
 
@@ -55,8 +56,10 @@ Edit `scripts/cloudflare-config.js`:
 
 ```js
 window.CLOUDFLARE_WORKER_URL = 'https://joho-studio-api.<subdomain>.workers.dev';
-window.MAPBOX_ACCESS_TOKEN = 'pk.your_mapbox_public_token';
+window.MAPBOX_ACCESS_TOKEN = '';
 ```
+
+Atlas will auto-fetch the token from Worker endpoint `GET /public-config` when local token is empty.
 
 This URL is consumed by both:
 - `hoshii.html` song catalogue

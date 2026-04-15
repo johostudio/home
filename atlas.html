@@ -625,7 +625,10 @@
     window.MAPBOX_ACCESS_TOKEN = window.MAPBOX_ACCESS_TOKEN || '';
   </script>
   <script>
-    (function () {
+    window.__atlasStart = function () {
+      if (window.__atlasBooted) return;
+      window.__atlasBooted = true;
+
       var overlay = document.getElementById('atlas-overlay');
       var overlayBlur = document.getElementById('atlas-overlay-blur');
       var overlayClose = document.getElementById('atlas-overlay-close');
@@ -1121,6 +1124,29 @@
           });
       });
 
+    };
+
+    (function () {
+      var workerBase = (window.CLOUDFLARE_WORKER_URL || '').trim().replace(/\/$/, '');
+      if (!window.MAPBOX_ACCESS_TOKEN && workerBase) {
+        fetch(workerBase + '/public-config')
+          .then(function (res) {
+            if (!res.ok) throw new Error('public config unavailable');
+            return res.json();
+          })
+          .then(function (data) {
+            if (data && data.mapboxPublicToken) {
+              window.MAPBOX_ACCESS_TOKEN = data.mapboxPublicToken;
+            }
+          })
+          .catch(function () {})
+          .then(function () {
+            window.__atlasStart();
+          });
+        return;
+      }
+
+      window.__atlasStart();
     })();
   </script>
 
