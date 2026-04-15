@@ -11,6 +11,8 @@
   var path = window.location.pathname;
   var inSub = path.indexOf('/projects/') !== -1;
   var base = inSub ? '../' : '';
+  var isArchivePage = path.indexOf('archives') !== -1 || path.indexOf('atlas') !== -1 || path.indexOf('bookshelf') !== -1 || path.indexOf('scrambled') !== -1;
+  var isDarkroomPage = path.indexOf('darkroom') !== -1;
   
   var isHome = (path === '/' || path.endsWith('/index.html') || path.endsWith('/index') || path === '' || path.indexOf('index') !== -1);
 
@@ -22,8 +24,8 @@
   else if (path.indexOf('vancouver') !== -1 || path.indexOf('project') !== -1) cur = 'vancouver';
   else if (path.indexOf('hoshii') !== -1) cur = 'hoshii';
   else if (path.indexOf('resume') !== -1) cur = 'resume';
-  else if (path.indexOf('archives') !== -1) cur = 'archives';
-  else if (path.indexOf('darkroom') !== -1) cur = 'darkroom';
+  else if (isArchivePage) cur = 'archives';
+  else if (isDarkroomPage) cur = 'darkroom';
 
   /* ── 3. Inject styles into <head> synchronously ── */
   var style = document.createElement('style');
@@ -70,6 +72,13 @@
     '.jh-home-header .jh-nav a:hover, .jh-home-header .jh-nav a.jh-cur { color: #000 !important; }',
     '.jh-home-header .jh-hamburger { color: #000 !important; }',
     '.jh-home-header.jh-scrolled { background: rgba(214, 214, 214, 0.62) !important; transition: background 0.42s cubic-bezier(0.22, 1, 0.36, 1), backdrop-filter 0.42s cubic-bezier(0.22, 1, 0.36, 1); }',
+    '.jh-archives-header.jh-scrolled { background: rgba(0, 0, 0, 0.78) !important; }',
+    '.jh-archives-header .jh-nav { background: rgba(0, 0, 0, 0.7); border: 1px solid rgba(255, 255, 255, 0.14); }',
+    '.jh-archives-header .jh-nav a:hover, .jh-archives-header .jh-nav a.jh-cur { color: #fff !important; }',
+    '.jh-darkroom-header.jh-scrolled { background: rgba(24, 17, 11, 0.84) !important; }',
+    '.jh-darkroom-header .jh-nav { background: rgba(31, 22, 14, 0.82); border: 1px solid rgba(200, 169, 110, 0.26); }',
+    '.jh-darkroom-header .jh-nav a { color: rgba(230, 210, 176, 0.64); }',
+    '.jh-darkroom-header .jh-nav a:hover, .jh-darkroom-header .jh-nav a.jh-cur { color: #e6c98a !important; }',
     '',
     '/* Home page: black clocks */',
     '.home-dark-clocks .clock-container { color: rgba(0, 0, 0, 0.5) !important; }',
@@ -236,6 +245,34 @@
     '    color: #000;',
     '    background: rgba(0, 0, 0, 0.07);',
     '  }',
+
+    '  .jh-archives-header .jh-mobile-dropdown-inner {',
+    '    background: rgba(0, 0, 0, 0.95);',
+    '    border-bottom: 1px solid rgba(255, 255, 255, 0.14);',
+    '  }',
+
+    '  .jh-archives-header .jh-mobile-dropdown-inner a:hover,',
+    '  .jh-archives-header .jh-mobile-dropdown-inner a:active,',
+    '  .jh-archives-header .jh-mobile-dropdown-inner a.jh-cur {',
+    '    color: #fff;',
+    '    background: rgba(255, 255, 255, 0.08);',
+    '  }',
+
+    '  .jh-darkroom-header .jh-mobile-dropdown-inner {',
+    '    background: rgba(23, 15, 9, 0.96);',
+    '    border-bottom: 1px solid rgba(200, 169, 110, 0.24);',
+    '  }',
+
+    '  .jh-darkroom-header .jh-mobile-dropdown-inner a {',
+    '    color: rgba(230, 210, 176, 0.64);',
+    '  }',
+
+    '  .jh-darkroom-header .jh-mobile-dropdown-inner a:hover,',
+    '  .jh-darkroom-header .jh-mobile-dropdown-inner a:active,',
+    '  .jh-darkroom-header .jh-mobile-dropdown-inner a.jh-cur {',
+    '    color: #e6c98a;',
+    '    background: rgba(200, 169, 110, 0.12);',
+    '  }',
     '',
     '  .jh-mobile-dropdown-inner a {',
     '    display: block;',
@@ -291,6 +328,12 @@
   header.className = 'jh-header';
   if (isHome) {
     header.className += ' jh-home-header';
+  }
+  if (isArchivePage && !isHome) {
+    header.className += ' jh-archives-header';
+  }
+  if (isDarkroomPage) {
+    header.className += ' jh-darkroom-header';
   }
   header.innerHTML =
     '<div class="jh-header-top">' +
