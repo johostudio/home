@@ -13,8 +13,12 @@
   var dots = [];
   var pointer = { x: -9999, y: -9999, vx: 0, vy: 0, speed: 0, lastTime: 0, lastX: 0, lastY: 0 };
   var lastFrame = 0;
+  var targetFrameMs = 1000 / 50;
   var logicalW = 0, logicalH = 0;
   var dpr = 1, circleR = 4, rafId = 0;
+  var resizeRaf = 0;
+  var scrollRaf = 0;
+  var lastImpulseAt = 0;
 
   // Cached text element rects (viewport-relative, refreshed on resize/scroll)
   var textRects = [];
@@ -38,6 +42,14 @@
     spring: 70,
     damping: 16
   };
+
+  var hardwareThreads = Number(navigator.hardwareConcurrency || 0);
+  if (hardwareThreads && hardwareThreads <= 4) {
+    config.maxDots = Math.min(config.maxDots, 5600);
+  }
+  if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+    config.maxDots = Math.min(config.maxDots, 5200);
+  }
 
   var path = window.location.pathname || '';
   var isArchivePage = /archives|scrambled|bookshelf|atlas/.test(path);
@@ -97,10 +109,11 @@
         textRects.push({ left: cr.left - 4, top: cr.top - 2, right: cr.right + 4, bottom: cr.bottom + 2 });
       }
     }
+    recomputeDotTextFade();
   }
 
   // Returns 0-1: textDim when inside text, 1 when far from text, smooth fade between
-  function textFade(x, y) {
+  function textFadeAt(x, y) {
     if (textRects.length === 0) return 1;
     var closest = Infinity;
     for (var i = 0; i < textRects.length; i++) {
@@ -118,6 +131,13 @@
     // smooth fade
     var t = closest / textFadeRadius;
     return textDim + (1 - textDim) * t;
+  }
+
+  function recomputeDotTextFade() {
+    for (var i = 0, len = dots.length; i < len; i++) {
+      var dot = dots[i];
+      dot.tFade = textFadeAt(dot.cx, dot.cy);
+    }
   }
 
   /* ---- sizing & grid build ---- */
@@ -200,7 +220,6 @@
     }
 
     refreshTextRects();
-    console.log('Dot Grid initialized successfully: ' + dots.length + ' dots');
   }
 
   /* ---- render loop ---- */
@@ -208,6 +227,7 @@
     rafId = requestAnimationFrame(frame);
     if (!ctx || dots.length === 0) return;
 
+    if (lastFrame && (now - lastFrame) < targetFrameMs) return;
     var dt = Math.min(0.033, (now - (lastFrame || now)) / 1000);
     lastFrame = now;
 
@@ -254,7 +274,7 @@
       var t = dsq <= proxSq ? clamp01(1 - Math.sqrt(dsq) / config.proximity) : 0;
 
       // text-area fade — small radius around text elements
-      var tFade = textFade(drawX, drawY);
+      var tFade = dot.tFade || 1;
 
       // Special case: Archives page radial mask (keep center clean for sphere)
       if (window.location.pathname.indexOf('archives') !== -1) {
@@ -318,6 +338,8 @@
     pointer.y = clientY - rect.top;
 
     if (speed < config.speedTrigger) return;
+    if ((now - lastImpulseAt) < 32) return;
+    lastImpulseAt = now;
 
     var proxSq = config.proximity * config.proximity;
     var px = pointer.x;
@@ -369,15 +391,26 @@
   sizeCanvas();
 
   window.addEventListener('resize', function () {
-    logicalW = 0; logicalH = 0;
-    sizeCanvas();
+    if (resizeRaf) return;
+    resizeRaf = requestAnimationFrame(function () {
+      resizeRaf = 0;
+      logicalW = 0;
+      logicalH = 0;
+      sizeCanvas();
+    });
   });
 
   // Refresh text rects on scroll (positions shift)
-  window.addEventListener('scroll', refreshTextRects, { passive: true });
+  window.addEventListener('scroll', function () {
+    if (scrollRaf) return;
+    scrollRaf = requestAnimationFrame(function () {
+      scrollRaf = 0;
+      refreshTextRects();
+    });
+  }, { passive: true });
 
   document.addEventListener('mousemove', onMove, { passive: true });
-  document.addEventListener('touchmove', onMove, { passive: false });
+  document.addEventListener('touchmove', onMove, { passive: true });
   document.addEventListener('touchstart', function (e) {
     pointer.lastX = e.touches[0].clientX;
     pointer.lastY = e.touches[0].clientY;

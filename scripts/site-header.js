@@ -420,7 +420,15 @@
     }
   }
 
-  window.addEventListener('scroll', updateScroll, { passive: true });
+  var headerScrollTick = false;
+  window.addEventListener('scroll', function () {
+    if (headerScrollTick) return;
+    headerScrollTick = true;
+    requestAnimationFrame(function () {
+      headerScrollTick = false;
+      updateScroll();
+    });
+  }, { passive: true });
   updateScroll(); // Initial check
 
   /* Insert as very first child of <body> */

@@ -3,6 +3,12 @@
   const DURATION = 340; // should match --page-transition
   const root = document.documentElement;
   const body = document.body;
+  const supportsReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (supportsReducedMotion) {
+    root.classList.add('page-transition-ready');
+    return;
+  }
 
   // Prepare enter animation
   function playEnter() {

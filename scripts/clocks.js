@@ -69,9 +69,17 @@
   }
 
   window.addEventListener('resize', syncHeaderClearance, { passive: true });
-  window.setTimeout(syncHeaderClearance, 0);
-  window.setTimeout(syncHeaderClearance, 250);
-  window.setTimeout(syncHeaderClearance, 600);
+  var headerSyncRaf = 0;
+  function scheduleHeaderSync() {
+    if (headerSyncRaf) return;
+    headerSyncRaf = window.requestAnimationFrame(function () {
+      headerSyncRaf = 0;
+      syncHeaderClearance();
+    });
+  }
+  window.addEventListener('load', scheduleHeaderSync, { passive: true });
+  window.setTimeout(scheduleHeaderSync, 0);
+  window.setTimeout(scheduleHeaderSync, 220);
 
   function updateClockVisibility() {
     var y = window.scrollY || 0;
@@ -79,7 +87,14 @@
     wrapper.classList.toggle('clocks-hidden', y > 54);
   }
 
-  window.addEventListener('scroll', updateClockVisibility, { passive: true });
+  var scrollRaf = 0;
+  window.addEventListener('scroll', function () {
+    if (scrollRaf) return;
+    scrollRaf = window.requestAnimationFrame(function () {
+      scrollRaf = 0;
+      updateClockVisibility();
+    });
+  }, { passive: true });
   updateClockVisibility();
 
   // Apply dark (black) clock text on home page only
@@ -137,5 +152,27 @@
   }
 
   tick();
-  setInterval(tick, 1000);
+
+  var tickTimer = 0;
+  function startClockTimer() {
+    if (tickTimer) return;
+    tickTimer = window.setInterval(tick, 1000);
+  }
+
+  function stopClockTimer() {
+    if (!tickTimer) return;
+    window.clearInterval(tickTimer);
+    tickTimer = 0;
+  }
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) {
+      stopClockTimer();
+      return;
+    }
+    tick();
+    startClockTimer();
+  });
+
+  startClockTimer();
 })();
