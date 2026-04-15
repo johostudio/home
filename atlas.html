@@ -350,6 +350,25 @@
       font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     }
 
+    .atlas-delete-btn {
+      margin-top: 0.42rem;
+      width: auto;
+      border: 1px solid rgba(255, 132, 132, 0.42);
+      background: rgba(255, 86, 112, 0.12);
+      color: rgba(255, 186, 198, 0.95);
+      border-radius: 999px;
+      font-size: 0.64rem;
+      text-transform: lowercase;
+      letter-spacing: -0.01em;
+      padding: 0.28rem 0.56rem;
+      cursor: pointer;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    .atlas-delete-btn:hover {
+      background: rgba(255, 86, 112, 0.22);
+    }
+
     .atlas-browse-item:hover {
       background: rgba(255, 255, 255, 0.08);
     }
@@ -1233,6 +1252,7 @@
           .setLngLat([entry.lng, entry.lat])
           .setPopup(new mapboxgl.Popup({ offset: 12 }).setHTML(popupHtml(entry)))
           .addTo(map);
+        marker.__atlasPoint = entry;
         allMarkers.push(marker);
         markerById[id] = marker;
         seenEntryIds[id] = true;
@@ -1300,6 +1320,7 @@
         var lng = parseFloat(entry.lng);
         if (isNaN(lat) || isNaN(lng)) return null;
         return {
+          id: entry.id ? String(entry.id) : '',
           city: String(entry.city),
           type: entry.type || 'user',
           lat: lat,
@@ -1384,6 +1405,79 @@
       var cityJump3dBtn = document.getElementById('atlas-jump-3d-btn');
       var browseList = document.getElementById('atlas-browse-list');
       var browseEmpty = document.getElementById('atlas-browse-empty');
+      var adminTokenCache = (window.ATLAS_ADMIN_TOKEN || '').trim();
+
+      function removeAtlasEntryById(id) {
+        if (!id) return;
+
+        function keepEntry(entry) {
+          return String(entry && entry.id ? entry.id : '') !== id;
+        }
+
+        userCities = userCities.filter(keepEntry);
+        stampEntries = stampEntries.filter(keepEntry);
+
+        allMarkers = allMarkers.filter(function (marker) {
+          var point = marker && marker.__atlasPoint;
+          if (point && String(point.id || '') === id) {
+            marker.remove();
+            return false;
+          }
+          return true;
+        });
+
+        Object.keys(markerById).forEach(function (key) {
+          var marker = markerById[key];
+          var point = marker && marker.__atlasPoint;
+          if (point && String(point.id || '') === id) {
+            delete markerById[key];
+            delete seenEntryIds[key];
+          }
+        });
+
+        writeStoredEntries();
+        updateJumpList();
+      }
+
+      function promptAdminToken() {
+        if (adminTokenCache) {
+          return Promise.resolve(adminTokenCache);
+        }
+        var token = window.prompt('admin token required to delete atlas entries');
+        adminTokenCache = (token || '').trim();
+        return Promise.resolve(adminTokenCache);
+      }
+
+      function deleteAtlasEntry(entry) {
+        if (!entry || !entry.id || !workerBase) return;
+        if (!window.confirm('delete this atlas entry? this cannot be undone.')) return;
+
+        promptAdminToken().then(function (token) {
+          if (!token) return;
+
+          return fetch(workerBase + '/atlas-points/' + encodeURIComponent(entry.id), {
+            method: 'DELETE',
+            headers: {
+              'x-admin-token': token
+            }
+          }).then(function (response) {
+            if (!response.ok) {
+              if (response.status === 403) {
+                adminTokenCache = '';
+              }
+              throw new Error('delete failed');
+            }
+            return response.json();
+          }).then(function () {
+            removeAtlasEntryById(entry.id);
+            showToast('entry deleted');
+            if (stampToast) stampToast.textContent = 'entry deleted';
+          });
+        }).catch(function () {
+          showToast('could not delete entry. check admin token.');
+          if (stampToast) stampToast.textContent = 'could not delete entry. check admin token.';
+        });
+      }
 
       var is3D = false;
 
@@ -1460,28 +1554,41 @@
         browseEmpty.setAttribute('hidden', 'hidden');
 
         items.slice().reverse().forEach(function (entry) {
-          var button = document.createElement('button');
-          button.type = 'button';
-          button.className = 'atlas-browse-item';
+          var card = document.createElement('div');
+          card.className = 'atlas-browse-item';
+          card.setAttribute('role', 'button');
+          card.tabIndex = 0;
 
           var title = document.createElement('strong');
           title.textContent = entry.city;
-          button.appendChild(title);
+          card.appendChild(title);
 
           var meta = document.createElement('div');
           var metaText = entry.stamp
             ? 'stamp: ' + stampLabel(entry.stamp)
             : 'city note';
           meta.textContent = metaText;
-          button.appendChild(meta);
+          card.appendChild(meta);
 
           if (entry.note) {
             var note = document.createElement('div');
             note.textContent = entry.note.length > 88 ? (entry.note.slice(0, 88) + '...') : entry.note;
-            button.appendChild(note);
+            card.appendChild(note);
           }
 
-          button.addEventListener('click', function () {
+          if (entry.id && workerBase) {
+            var deleteBtn = document.createElement('button');
+            deleteBtn.type = 'button';
+            deleteBtn.className = 'atlas-delete-btn';
+            deleteBtn.textContent = 'delete';
+            deleteBtn.addEventListener('click', function (event) {
+              event.stopPropagation();
+              deleteAtlasEntry(entry);
+            });
+            card.appendChild(deleteBtn);
+          }
+
+          function openEntryOnMap() {
             map.flyTo({
               center: [entry.lng, entry.lat],
               zoom: Math.max(map.getZoom(), 6),
@@ -1493,9 +1600,19 @@
                 marker.togglePopup();
               }, 460);
             }
+          }
+
+          card.addEventListener('click', function () {
+            openEntryOnMap();
           });
 
-          browseList.appendChild(button);
+          card.addEventListener('keydown', function (event) {
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+            event.preventDefault();
+            openEntryOnMap();
+          });
+
+          browseList.appendChild(card);
         });
       }
 

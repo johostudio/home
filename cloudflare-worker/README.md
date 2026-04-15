@@ -34,6 +34,7 @@ Edit `cloudflare-worker/wrangler.toml`:
 - Set `R2_PUBLIC_BASE_URL` to your public R2 URL (for example `https://media.joho.studio`)
 - Set `MAPBOX_PUBLIC_TOKEN` (public `pk...` token used by atlas)
 - Set `OPEN_LIBRARY_QUERY` for bookshelf page (Open Library search query)
+- Set `ATLAS_ADMIN_TOKEN` (required for atlas entry deletes from UI)
 
 If you do not have a custom domain for R2 yet, create a public bucket domain in Cloudflare and use that URL.
 
@@ -80,10 +81,11 @@ This URL is consumed by both:
 - `GET /strips` -> latest strip entries
 - `GET /atlas-points` -> list atlas saved city/stamp points
 - `POST /atlas-points` -> save atlas city/stamp point
+- `DELETE /atlas-points/:id` -> delete atlas point (requires `x-admin-token` header)
 - `POST /atlas-stamp-upload` -> upload atlas stamp image to R2
 
 ## Notes
 
 - Song deletes are owner-scoped using a browser client id (`x-client-id`).
 - Anyone can add songs; only the creator (same browser identity) can remove their own entries.
-- If you want admin moderation/deletes across all entries, add an admin token check in worker routes.
+- Atlas delete is admin-scoped using `ATLAS_ADMIN_TOKEN` and `x-admin-token`.

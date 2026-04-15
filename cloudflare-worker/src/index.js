@@ -5,7 +5,7 @@ function json(data, status = 200) {
       'content-type': 'application/json; charset=utf-8',
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,POST,DELETE,OPTIONS',
-      'access-control-allow-headers': 'content-type,x-client-id'
+      'access-control-allow-headers': 'content-type,x-client-id,x-admin-token'
     }
   });
 }
@@ -17,7 +17,7 @@ function text(message, status = 200) {
       'content-type': 'text/plain; charset=utf-8',
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,POST,DELETE,OPTIONS',
-      'access-control-allow-headers': 'content-type,x-client-id'
+      'access-control-allow-headers': 'content-type,x-client-id,x-admin-token'
     }
   });
 }
@@ -28,9 +28,16 @@ function corsPreflight() {
     headers: {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,POST,DELETE,OPTIONS',
-      'access-control-allow-headers': 'content-type,x-client-id'
+      'access-control-allow-headers': 'content-type,x-client-id,x-admin-token'
     }
   });
+}
+
+function hasAtlasAdminAccess(request, env) {
+  var configuredToken = safeText(env.ATLAS_ADMIN_TOKEN || '', 256);
+  if (!configuredToken) return false;
+  var providedToken = safeText(request.headers.get('x-admin-token') || '', 256);
+  return !!providedToken && providedToken === configuredToken;
 }
 
 function makeId() {
@@ -242,6 +249,29 @@ async function createAtlasPoint(request, env) {
   }, 201);
 }
 
+async function deleteAtlasPoint(id, request, env) {
+  if (!id) {
+    return json({ error: 'atlas point id is required' }, 400);
+  }
+
+  if (!hasAtlasAdminAccess(request, env)) {
+    return json({ error: 'admin token required' }, 403);
+  }
+
+  var record = await env.DB.prepare(
+    'SELECT id FROM atlas_points WHERE id = ?1'
+  )
+    .bind(id)
+    .first();
+
+  if (!record) {
+    return json({ error: 'atlas point not found' }, 404);
+  }
+
+  await env.DB.prepare('DELETE FROM atlas_points WHERE id = ?1').bind(id).run();
+  return json({ ok: true, id: id });
+}
+
 async function uploadAtlasStamp(request, env) {
   var formData;
   try {
@@ -330,6 +360,11 @@ export default {
 
     if (request.method === 'POST' && path === '/atlas-points') {
       return createAtlasPoint(request, env);
+    }
+
+    if (request.method === 'DELETE' && path.startsWith('/atlas-points/')) {
+      var atlasPointId = path.slice('/atlas-points/'.length);
+      return deleteAtlasPoint(atlasPointId, request, env);
     }
 
     if (request.method === 'POST' && path === '/atlas-stamp-upload') {
