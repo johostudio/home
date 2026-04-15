@@ -176,6 +176,28 @@
       animation: stickerFloat 4.2s ease-in-out infinite;
     }
 
+    .sticker-desc-label {
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 6px);
+      transform: translateX(-50%);
+      display: none;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-style: italic;
+      font-size: 9px;
+      letter-spacing: -0.01em;
+      text-transform: lowercase;
+      color: rgba(230, 238, 246, 0.9);
+      white-space: nowrap;
+      pointer-events: none;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.55);
+    }
+
+    .sticker-selected .sticker-desc-label,
+    .sticker-rotating .sticker-desc-label {
+      display: block;
+    }
+
     .sticker:nth-child(2) img {
       animation-duration: 5.1s;
       animation-delay: 0.5s;
@@ -253,42 +275,6 @@
       }
     }
 
-    .about-tap-note {
-      position: fixed;
-      top: calc(var(--clocks-top, 164px) - 44px);
-      left: 50%;
-      transform: translate(-50%, -8px);
-      z-index: 48;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      background: rgba(7, 16, 33, 0.88);
-      color: rgba(230, 238, 246, 0.9);
-      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-      font-size: 0.67rem;
-      letter-spacing: -0.01em;
-      text-transform: lowercase;
-      padding: 0.38rem 0.62rem;
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.18s ease, transform 0.18s ease;
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.26);
-    }
-
-    .about-tap-note.visible {
-      opacity: 1;
-      transform: translate(-50%, 0);
-    }
-
-    @media (max-width: 768px) {
-      .about-tap-note {
-        top: calc(var(--clocks-top-mobile, 154px) - 42px);
-        font-size: 0.62rem;
-        max-width: calc(100vw - 26px);
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-    }
   </style>
 </head>
 
@@ -299,47 +285,58 @@
   <!-- Self-injecting site header -->
   <script src="scripts/site-header.js"></script>
 
-  <div class="about-tap-note" id="about-tap-note">about me: engineering + design student who builds things and tells stories.</div>
-
   <div class="sticker-layer" data-sticker-layer data-safe-bottom="0">
     <button class="sticker" type="button" data-sticker data-size="148" data-x="18" data-y="18" data-rotation="-8" aria-label="snoopy sticker">
       <img src="https://upload.wikimedia.org/wikipedia/en/5/53/Snoopy_Peanuts.png" alt="Snoopy sticker" loading="lazy">
+      <span class="sticker-desc-label">sleepy mascot energy.</span>
     </button>
     <button class="sticker" type="button" data-sticker data-size="112" data-x="248" data-y="214" data-rotation="6" aria-label="piplup sticker">
       <img src="gif/piplup1.webp" alt="Piplup sticker" loading="lazy">
+      <span class="sticker-desc-label">small but stubborn.</span>
     </button>
     <button class="sticker" type="button" data-sticker data-size="332" data-x="1092" data-y="24" data-rotation="-6" data-spawn-bias="left-bottom" aria-label="smiski sticker">
       <img src="gif/smiski1.png" alt="Smiski sticker" loading="lazy">
+      <span class="sticker-desc-label">quiet glow in the corner.</span>
     </button>
     <button class="sticker" type="button" data-sticker data-size="196" data-x="820" data-y="304" data-rotation="5" aria-label="camera sticker">
       <img src="gif/xt4.png" alt="XT4 sticker" loading="lazy">
+      <span class="sticker-desc-label">camera always nearby.</span>
     </button>
     <button class="sticker" type="button" data-sticker data-size="126" data-x="96" data-y="606" data-rotation="-7" aria-label="photo sticker">
       <img src="gif/1600.jpg" alt="Photo sticker" loading="lazy">
+      <span class="sticker-desc-label">film-ish snapshots forever.</span>
     </button>
     <button class="sticker" type="button" data-sticker data-size="206" data-x="700" data-y="438" data-rotation="7" aria-label="typhoon sticker">
       <img src="gif/typhoon.png" alt="Typhoon sticker" loading="lazy">
+      <span class="sticker-desc-label">storm mood, good chaos.</span>
     </button>
     <button class="sticker" type="button" data-sticker data-size="138" data-x="1460" data-y="42" data-rotation="-7" data-spawn-bias="left-top" aria-label="rotring sticker">
       <img src="gif/rotring.png" alt="Rotring sticker" loading="lazy">
+      <span class="sticker-desc-label">drawing tool obsession.</span>
     </button>
     <button class="sticker" type="button" data-sticker data-size="118" data-x="1584" data-y="250" data-rotation="6" aria-label="pepero sticker">
       <img src="gif/pepero.png" alt="Pepero sticker" loading="lazy">
+      <span class="sticker-desc-label">snack break before work.</span>
     </button>
     <button class="sticker" type="button" data-sticker data-size="156" data-x="1740" data-y="26" data-rotation="-6" data-spawn-bias="right-top" aria-label="crt tv sticker">
       <img src="gif/crttv.png" alt="CRT TV sticker" loading="lazy">
+      <span class="sticker-desc-label">retro screen nostalgia.</span>
     </button>
     <button class="sticker" type="button" data-sticker data-size="130" data-x="1460" data-y="560" data-rotation="7" aria-label="n3ds sticker">
       <img src="gif/n3ds.png" alt="N3DS sticker" loading="lazy">
+      <span class="sticker-desc-label">handheld comfort era.</span>
     </button>
     <button class="sticker" type="button" data-sticker data-size="320" data-x="322" data-y="520" data-rotation="-5" aria-label="stick sticker">
       <img src="gif/stick.png" alt="Stick sticker" loading="lazy">
+      <span class="sticker-desc-label">favorite sticker pile.</span>
     </button>
     <button class="sticker" type="button" data-sticker data-size="134" data-x="1040" data-y="614" data-rotation="6" data-spawn-bias="right-bottom" aria-label="disc sticker">
       <img src="gif/disc.png" alt="Disc sticker" loading="lazy">
+      <span class="sticker-desc-label">cds on repeat forever.</span>
     </button>
     <button class="sticker" type="button" data-sticker data-size="128" data-x="1714" data-y="430" data-rotation="-6" aria-label="yakult sticker">
       <img src="gif/yakult.png" alt="Yakult sticker" loading="lazy">
+      <span class="sticker-desc-label">tiny drink, huge nostalgia.</span>
     </button>
   </div>
 
@@ -417,33 +414,6 @@
 
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
-
-    (function () {
-      var tip = document.getElementById('about-tap-note');
-      if (!tip) return;
-      var hideTimer = null;
-
-      function showTip() {
-        tip.classList.add('visible');
-        clearTimeout(hideTimer);
-        hideTimer = setTimeout(function () {
-          tip.classList.remove('visible');
-        }, 2400);
-      }
-
-      document.addEventListener('pointerdown', function (event) {
-        if (event.pointerType && event.pointerType !== 'mouse') {
-          showTip();
-        }
-      }, { passive: true });
-
-      document.addEventListener('click', function (event) {
-        var target = event.target;
-        if (target && target.closest && target.closest('.sticker')) {
-          showTip();
-        }
-      });
-    })();
 
     (function () {
       var preview = document.getElementById('link-preview');
