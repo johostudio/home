@@ -1,7 +1,7 @@
 /* Dual Clocks - Vancouver (right) & Nanchang (left) */
 .clock-container {
   position: fixed;
-  top: 110px;
+  top: 146px;
   z-index: 40;
   font-family: Helvetica, Arial, sans-serif;
   font-size: 11px;
@@ -9,6 +9,30 @@
   letter-spacing: 0.04em;
   pointer-events: none;
   user-select: none;
+}
+
+.clocks-wrapper {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  transform: translateX(var(--clock-drag-x, 0px));
+}
+
+.clock-left,
+.clock-right {
+  transition: left 0.2s ease, right 0.2s ease;
+}
+
+@media (min-width: 1000px) {
+  .clocks-wrapper {
+    pointer-events: auto;
+    cursor: ew-resize;
+  }
+
+  .clocks-wrapper.clock-dragging {
+    cursor: grabbing;
+  }
 }
 
 .clock-left {
@@ -22,7 +46,7 @@
 
 .clock-label {
   font-size: 9px;
-  text-transform: uppercase;
+  text-transform: lowercase;
   opacity: 0.6;
   margin-bottom: 1px;
 }
@@ -30,6 +54,11 @@
 .clock-time {
   font-size: 12px;
   font-weight: 500;
+}
+
+.clock-divider {
+  opacity: 0.45;
+  margin: 0 4px;
 }
 
 .clock-date {
@@ -40,8 +69,13 @@
 
 /* ── Mobile clock spacing fixes ── */
 @media (max-width: 768px) {
+  .clocks-wrapper {
+    transform: none;
+    pointer-events: none;
+  }
+
   .clock-container {
-    top: 100px;
+    top: 132px;
     font-size: 10px;
   }
 
@@ -70,7 +104,7 @@
 @media (max-width: 480px) {
   .clocks-wrapper {
     position: fixed;
-    top: 90px;
+    top: 122px;
     left: 0;
     right: 0;
     z-index: 40;

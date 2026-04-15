@@ -518,12 +518,68 @@
     </div>
   </main>
 
+  <script src="scripts/cloudflare-config.js"></script>
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
   <script>
     window.MAPBOX_ACCESS_TOKEN = window.MAPBOX_ACCESS_TOKEN || '';
   </script>
   <script>
     (function () {
+      var overlay = document.getElementById('atlas-overlay');
+      var overlayClose = document.getElementById('atlas-overlay-close');
+      var overlayTitle = document.getElementById('atlas-overlay-title');
+
+      function closeOverlay() {
+        if (!overlay) return;
+        overlay.setAttribute('hidden', 'hidden');
+        document.querySelectorAll('.atlas-overlay-view').forEach(function (view) {
+          view.setAttribute('hidden', 'hidden');
+        });
+      }
+
+      function openOverlay(section) {
+        if (!overlay) return;
+        var target = document.getElementById('atlas-overlay-' + section);
+        if (!target) return;
+
+        document.querySelectorAll('.atlas-overlay-view').forEach(function (view) {
+          view.setAttribute('hidden', 'hidden');
+        });
+        target.removeAttribute('hidden');
+        overlay.removeAttribute('hidden');
+
+        if (overlayTitle) {
+          var labels = {
+            style: 'map style',
+            jump: 'fast track',
+            legend: 'legend',
+            add: 'add your city',
+            stamp: 'stamp board'
+          };
+          overlayTitle.textContent = labels[section] || 'atlas menu';
+        }
+      }
+
+      document.querySelectorAll('[data-overlay-target]').forEach(function (button) {
+        button.addEventListener('click', function () {
+          openOverlay(button.getAttribute('data-overlay-target'));
+        });
+      });
+
+      if (overlayClose) {
+        overlayClose.addEventListener('click', closeOverlay);
+      }
+
+      if (overlay) {
+        overlay.addEventListener('click', function (event) {
+          if (event.target === overlay) closeOverlay();
+        });
+      }
+
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') closeOverlay();
+      });
+
       mapboxgl.accessToken = window.MAPBOX_ACCESS_TOKEN || '';
       if (!mapboxgl.accessToken) {
         var mapRoot = document.getElementById('atlas-map');
@@ -531,7 +587,7 @@
         mapRoot.style.alignItems = 'center';
         mapRoot.style.justifyContent = 'center';
         mapRoot.style.padding = '1rem';
-        mapRoot.innerHTML = '<div style="font-family:Helvetica,Arial,sans-serif;font-size:12px;letter-spacing:0.03em;color:rgba(230,238,246,0.72);text-transform:lowercase;text-align:center;line-height:1.6;">mapbox token missing.<br>set <code style="font-family:inherit;color:#c084fc;">window.MAPBOX_ACCESS_TOKEN</code> in this page.</div>';
+        mapRoot.innerHTML = '<div style="font-family:Helvetica,Arial,sans-serif;font-size:12px;letter-spacing:0.03em;color:rgba(230,238,246,0.72);text-transform:lowercase;text-align:center;line-height:1.6;">mapbox token missing.<br>set <code style="font-family:inherit;color:#c084fc;">window.MAPBOX_ACCESS_TOKEN</code> in scripts/cloudflare-config.js.</div>';
         return;
       }
 
@@ -665,9 +721,6 @@
       var cityJumpSelect = document.getElementById('atlas-city-jump');
       var cityJumpBtn = document.getElementById('atlas-jump-btn');
       var cityJump3dBtn = document.getElementById('atlas-jump-3d-btn');
-      var overlay = document.getElementById('atlas-overlay');
-      var overlayClose = document.getElementById('atlas-overlay-close');
-      var overlayTitle = document.getElementById('atlas-overlay-title');
 
       var is3D = false;
 
@@ -748,55 +801,6 @@
             marker.togglePopup();
           }, 650);
         }
-      }
-
-      function closeOverlay() {
-        if (!overlay) return;
-        overlay.setAttribute('hidden', 'hidden');
-        document.querySelectorAll('.atlas-overlay-view').forEach(function (view) {
-          view.setAttribute('hidden', 'hidden');
-        });
-      }
-
-      function openOverlay(section) {
-        if (!overlay) return;
-        var target = document.getElementById('atlas-overlay-' + section);
-        if (!target) return;
-
-        document.querySelectorAll('.atlas-overlay-view').forEach(function (view) {
-          view.setAttribute('hidden', 'hidden');
-        });
-        target.removeAttribute('hidden');
-        overlay.removeAttribute('hidden');
-
-        if (overlayTitle) {
-          var labels = {
-            style: 'map style',
-            jump: 'fast track',
-            legend: 'legend',
-            add: 'add your city',
-            stamp: 'stamp board'
-          };
-          overlayTitle.textContent = labels[section] || 'atlas menu';
-        }
-      }
-
-      document.querySelectorAll('[data-overlay-target]').forEach(function (button) {
-        button.addEventListener('click', function () {
-          openOverlay(button.getAttribute('data-overlay-target'));
-        });
-      });
-
-      if (overlayClose) {
-        overlayClose.addEventListener('click', closeOverlay);
-      }
-
-      if (overlay) {
-        overlay.addEventListener('click', function (event) {
-          if (event.target === overlay) {
-            closeOverlay();
-          }
-        });
       }
 
       function markInvalid(field) {

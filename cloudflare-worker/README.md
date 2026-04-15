@@ -55,6 +55,7 @@ Edit `scripts/cloudflare-config.js`:
 
 ```js
 window.CLOUDFLARE_WORKER_URL = 'https://joho-studio-api.<subdomain>.workers.dev';
+window.MAPBOX_ACCESS_TOKEN = 'pk.your_mapbox_public_token';
 ```
 
 This URL is consumed by both:
