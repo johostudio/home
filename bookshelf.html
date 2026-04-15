@@ -701,6 +701,9 @@ it really brought an interesting argument, often pushed myself to compare to my 
       var currentSort = 'all';
       var curatedItemsCache = [];
       var isCuratedShelfReady = false;
+      var CURATED_CACHE_KEY = 'joho_books_curated_cache_v5';
+      var CURATED_CACHE_TTL = 1000 * 60 * 60 * 24 * 14;
+      var curatedFetchCache = loadCuratedFetchCache();
       var fallbackCover = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 450">' +
         '<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">' +
@@ -743,6 +746,26 @@ it really brought an interesting argument, often pushed myself to compare to my 
         window.setTimeout(function () {
           loader.classList.remove('show');
         }, 260);
+      }
+
+      function loadCuratedFetchCache() {
+        try {
+          if (!window.localStorage) return {};
+          var raw = window.localStorage.getItem(CURATED_CACHE_KEY);
+          if (!raw) return {};
+          var parsed = JSON.parse(raw);
+          if (!parsed || typeof parsed !== 'object') return {};
+          return parsed;
+        } catch (_e) {
+          return {};
+        }
+      }
+
+      function persistCuratedFetchCache() {
+        try {
+          if (!window.localStorage) return;
+          window.localStorage.setItem(CURATED_CACHE_KEY, JSON.stringify(curatedFetchCache));
+        } catch (_e) { }
       }
 
       function requestJson(url, timeoutMs) {
@@ -832,6 +855,60 @@ it really brought an interesting argument, often pushed myself to compare to my 
           .replace(/[^a-z0-9]+/g, ' ')
           .replace(/\s+/g, ' ')
           .trim();
+      }
+
+      function getCuratedCacheKey(entry) {
+        if (!entry) return '';
+        var title = normalizeKey(entry.title);
+        var author = normalizeKey(entry.author);
+        if (!title) return '';
+        return title + '::' + author;
+      }
+
+      function readCachedCuratedEntry(entry) {
+        var key = getCuratedCacheKey(entry);
+        if (!key) return null;
+        var cached = curatedFetchCache[key];
+        if (!cached || !cached.item || !cached.ts) return null;
+        if ((Date.now() - Number(cached.ts)) > CURATED_CACHE_TTL) {
+          delete curatedFetchCache[key];
+          return null;
+        }
+        return cached.item;
+      }
+
+      function hasStaleFallbackCacheEntry(entry) {
+        var key = getCuratedCacheKey(entry);
+        if (!key) return false;
+        var cached = curatedFetchCache[key];
+        if (!cached || !cached.item || !cached.ts) return false;
+        var age = Date.now() - Number(cached.ts);
+        if (!Number.isFinite(age)) return false;
+        if (age > (1000 * 60 * 60 * 24)) return false;
+        return !hasUsableCover(cached.item);
+      }
+
+      function writeCachedCuratedEntry(entry, item) {
+        var key = getCuratedCacheKey(entry);
+        if (!key || !item) return;
+        curatedFetchCache[key] = {
+          ts: Date.now(),
+          item: item
+        };
+
+        var keys = Object.keys(curatedFetchCache);
+        if (keys.length > 180) {
+          keys.sort(function (a, b) {
+            var aTs = Number((curatedFetchCache[a] && curatedFetchCache[a].ts) || 0);
+            var bTs = Number((curatedFetchCache[b] && curatedFetchCache[b].ts) || 0);
+            return bTs - aTs;
+          });
+          keys.slice(160).forEach(function (dropKey) {
+            delete curatedFetchCache[dropKey];
+          });
+        }
+
+        persistCuratedFetchCache();
       }
 
       function findBookNote(item) {
@@ -973,6 +1050,59 @@ it really brought an interesting argument, often pushed myself to compare to my 
         return top;
       }
 
+      function hasUsableCover(item) {
+        var list = coverCandidates(item);
+        for (var i = 0; i < list.length; i += 1) {
+          var url = String(list[i] || '');
+          if (!url) continue;
+          if (url === fallbackCover) continue;
+          if (url.indexOf('data:image/svg+xml') === 0) continue;
+          return true;
+        }
+        return false;
+      }
+
+      function mergeCuratedItems(openItem, googleItem) {
+        if (!openItem && !googleItem) return null;
+        if (!openItem && googleItem) return googleItem;
+        if (openItem && !googleItem) return openItem;
+
+        var merged = Object.assign({}, openItem);
+        var mergedCoverUrls = coverCandidates(openItem)
+          .concat(coverCandidates(googleItem))
+          .filter(Boolean);
+
+        var deduped = [];
+        mergedCoverUrls.forEach(function (url) {
+          if (deduped.indexOf(url) >= 0) return;
+          deduped.push(url);
+        });
+
+        if (deduped.length) {
+          merged.cover_url = deduped[0];
+          merged.cover_urls = deduped;
+        }
+
+        if (!merged.info_link && googleItem.info_link) {
+          merged.info_link = googleItem.info_link;
+        }
+
+        return merged;
+      }
+
+      function requestJsonWithRetry(url, timeoutMs, retries) {
+        var retryCount = Number.isFinite(retries) ? retries : 0;
+        return requestJson(url, timeoutMs)
+          .catch(function (error) {
+            if (retryCount <= 0) throw error;
+            return new Promise(function (resolve) {
+              window.setTimeout(resolve, 180);
+            }).then(function () {
+              return requestJsonWithRetry(url, timeoutMs, retryCount - 1);
+            });
+          });
+      }
+
       function mapGoogleVolumeToItem(volume) {
         var info = (volume && volume.volumeInfo) || {};
         var authors = Array.isArray(info.authors) && info.authors.length ? info.authors : ['Unknown author'];
@@ -1016,9 +1146,9 @@ it really brought an interesting argument, often pushed myself to compare to my 
         var endpoint = 'https://openlibrary.org/search.json?title=' + encodeURIComponent(entry.title || '') +
           '&author=' + encodeURIComponent(entry.author || '') +
           '&language=' + encodeURIComponent(cfg.language || 'en') +
-          '&limit=8';
+          '&limit=12';
 
-        return requestJson(endpoint, 6500)
+        return requestJsonWithRetry(endpoint, 6500, 1)
           .then(function (data) {
             var docs = Array.isArray(data.docs) ? data.docs : [];
             return pickBestDoc(entry, docs, false);
@@ -1028,9 +1158,9 @@ it really brought an interesting argument, often pushed myself to compare to my 
       function searchGoogleEntry(entry) {
         var endpoint = 'https://www.googleapis.com/books/v1/volumes?q=' +
           encodeURIComponent('intitle:' + (entry.title || '') + ' inauthor:' + (entry.author || '')) +
-          '&maxResults=8&printType=books';
+          '&maxResults=6&printType=books';
 
-        return requestJson(endpoint, 6500)
+        return requestJsonWithRetry(endpoint, 6500, 1)
           .then(function (data) {
             var items = Array.isArray(data.items) ? data.items.map(mapGoogleVolumeToItem) : [];
             return pickBestDoc(entry, items, false);
@@ -1038,51 +1168,74 @@ it really brought an interesting argument, often pushed myself to compare to my 
       }
 
       function fetchCuratedEntry(entry) {
-        return Promise.allSettled([
-          searchOpenLibraryEntry(entry),
-          searchGoogleEntry(entry)
-        ])
-          .then(function (results) {
-            var openItem = results[0] && results[0].status === 'fulfilled' ? results[0].value : null;
-            var googleItem = results[1] && results[1].status === 'fulfilled' ? results[1].value : null;
+        var cached = readCachedCuratedEntry(entry);
+        if (cached && !hasStaleFallbackCacheEntry(entry)) return Promise.resolve(cached);
 
-            if (!openItem && !googleItem) {
-              return makeFallbackItem(entry);
-            }
-
-            if (!openItem && googleItem) {
-              return googleItem;
-            }
-
-            if (openItem && !googleItem) {
+        return searchOpenLibraryEntry(entry)
+          .catch(function () {
+            return null;
+          })
+          .then(function (openItem) {
+            if (openItem && hasUsableCover(openItem)) {
               return openItem;
             }
 
-            var merged = Object.assign({}, openItem);
-            var mergedCoverUrls = coverCandidates(openItem)
-              .concat(coverCandidates(googleItem))
-              .filter(Boolean);
-
-            var deduped = [];
-            mergedCoverUrls.forEach(function (url) {
-              if (deduped.indexOf(url) >= 0) return;
-              deduped.push(url);
-            });
-
-            if (deduped.length) {
-              merged.cover_url = deduped[0];
-              merged.cover_urls = deduped;
-            }
-
-            if (!merged.info_link && googleItem.info_link) {
-              merged.info_link = googleItem.info_link;
-            }
-
-            return merged;
+            return searchGoogleEntry(entry)
+              .then(function (googleItem) {
+                return mergeCuratedItems(openItem, googleItem);
+              })
+              .catch(function () {
+                return openItem;
+              });
+          })
+          .then(function (resolvedItem) {
+            var safeItem = resolvedItem || makeFallbackItem(entry);
+            writeCachedCuratedEntry(entry, safeItem);
+            return safeItem;
           })
           .catch(function () {
-            return makeFallbackItem(entry);
+            var fallback = makeFallbackItem(entry);
+            writeCachedCuratedEntry(entry, fallback);
+            return fallback;
           });
+      }
+
+      function mapWithConcurrency(items, limit, mapper, onProgress) {
+        var list = Array.isArray(items) ? items : [];
+        var max = Math.max(1, Number(limit) || 1);
+        if (!list.length) return Promise.resolve([]);
+
+        var results = new Array(list.length);
+        var nextIndex = 0;
+        var completed = 0;
+
+        function runWorker() {
+          if (nextIndex >= list.length) return Promise.resolve();
+          var index = nextIndex;
+          nextIndex += 1;
+
+          return Promise.resolve(mapper(list[index], index))
+            .catch(function () {
+              return null;
+            })
+            .then(function (value) {
+              results[index] = value;
+              completed += 1;
+              if (typeof onProgress === 'function') {
+                onProgress(completed, list.length, value, index);
+              }
+              return runWorker();
+            });
+        }
+
+        var workers = [];
+        for (var i = 0; i < Math.min(max, list.length); i += 1) {
+          workers.push(runWorker());
+        }
+
+        return Promise.all(workers).then(function () {
+          return results;
+        });
       }
 
       function wireCoverFallbacks() {
@@ -1116,7 +1269,11 @@ it really brought an interesting argument, often pushed myself to compare to my 
         showLoader('loading shelf...');
         setProgress(8, 'finding books...');
         status.textContent = 'loading curated shelf...';
-        Promise.all(notes.map(fetchCuratedEntry))
+        mapWithConcurrency(notes, 4, fetchCuratedEntry, function (done, total) {
+          var pct = 12 + (done / total) * 80;
+          setProgress(pct, 'loading books...');
+          status.textContent = 'loading curated shelf... ' + done + '/' + total;
+        })
           .then(function (items) {
             var valid = items.filter(Boolean);
             if (!valid.length) {
