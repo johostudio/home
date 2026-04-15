@@ -877,17 +877,6 @@ it really brought an interesting argument, often pushed myself to compare to my 
         return cached.item;
       }
 
-      function hasStaleFallbackCacheEntry(entry) {
-        var key = getCuratedCacheKey(entry);
-        if (!key) return false;
-        var cached = curatedFetchCache[key];
-        if (!cached || !cached.item || !cached.ts) return false;
-        var age = Date.now() - Number(cached.ts);
-        if (!Number.isFinite(age)) return false;
-        if (age > (1000 * 60 * 60 * 24)) return false;
-        return !hasUsableCover(cached.item);
-      }
-
       function writeCachedCuratedEntry(entry, item) {
         var key = getCuratedCacheKey(entry);
         if (!key || !item) return;
@@ -1143,9 +1132,11 @@ it really brought an interesting argument, often pushed myself to compare to my 
       }
 
       function searchOpenLibraryEntry(entry) {
+        var language = String(cfg.language || '').trim().toLowerCase();
+        if (language === 'en') language = 'eng';
         var endpoint = 'https://openlibrary.org/search.json?title=' + encodeURIComponent(entry.title || '') +
           '&author=' + encodeURIComponent(entry.author || '') +
-          '&language=' + encodeURIComponent(cfg.language || 'en') +
+          (language ? '&language=' + encodeURIComponent(language) : '') +
           '&limit=12';
 
         return requestJsonWithRetry(endpoint, 6500, 1)
@@ -1169,7 +1160,7 @@ it really brought an interesting argument, often pushed myself to compare to my 
 
       function fetchCuratedEntry(entry) {
         var cached = readCachedCuratedEntry(entry);
-        if (cached && !hasStaleFallbackCacheEntry(entry)) return Promise.resolve(cached);
+        if (cached && hasUsableCover(cached)) return Promise.resolve(cached);
 
         return searchOpenLibraryEntry(entry)
           .catch(function () {
