@@ -69,6 +69,12 @@
       display: block;
       background: #111;
       transition: transform 0.4s ease, filter 0.3s ease;
+      opacity: 0;
+    }
+
+    .book-cover.book-cover-loaded {
+      opacity: 1;
+      transition: opacity 0.24s ease, transform 0.4s ease, filter 0.3s ease;
     }
 
     .book-card:hover .book-cover,
@@ -229,7 +235,6 @@
       inset: 0;
       border: 0;
       background: rgba(3, 4, 7, 0.72);
-      backdrop-filter: blur(8px);
       opacity: 0;
       transition: opacity 0.34s cubic-bezier(0.22, 1, 0.36, 1);
       cursor: pointer;
@@ -408,7 +413,7 @@
       line-height: 1.45;
       color: rgba(230, 238, 246, 0.78);
       letter-spacing: -0.01em;
-      text-transform: lowercase;
+      text-transform: none;
       white-space: pre-wrap;
     }
 
@@ -701,9 +706,20 @@ it really brought an interesting argument, often pushed myself to compare to my 
       var currentSort = 'all';
       var curatedItemsCache = [];
       var isCuratedShelfReady = false;
-      var CURATED_CACHE_KEY = 'joho_books_curated_cache_v5';
+      var CURATED_CACHE_KEY = 'joho_books_curated_cache_v6';
       var CURATED_CACHE_TTL = 1000 * 60 * 60 * 24 * 14;
       var curatedFetchCache = loadCuratedFetchCache();
+      var notesByKey = {};
+      var MANUAL_BOOK_HINTS = {
+        'goodnight tokyo::atsuhiro yoshida': { isbn: ['9781787705128'] },
+        'the lantern of lost memories::sanaka hiiragi': { isbn: ['9788425366079'] },
+        'the restaurant of lost recipes::hisashi kashiwai': { isbn: ['9788419346001'] },
+        'the second chance convenience store::kim ho yeon': { isbn: ['9780063354784', '9781035032891'] },
+        'snowglobe 2::soyoung park': { isbn: ['9780241681084'] },
+        'the passengers on the hankyu line::hiro arikawa': { isbn: ['9781529934915'] },
+        'break room::miye lee': { isbn: ['9781035438976'] },
+        'i want to die but i still want to eat tteokbokki::baek sehee': { isbn: ['9781526663665', '9781639732302'] }
+      };
       var fallbackCover = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 450">' +
         '<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">' +
@@ -714,6 +730,12 @@ it really brought an interesting argument, often pushed myself to compare to my 
         '<text x="150" y="250" text-anchor="middle" fill="#98a4b7" font-family="Helvetica, Arial, sans-serif" font-size="14">unavailable</text>' +
         '</svg>'
       );
+
+      notes.forEach(function (note) {
+        var key = getCuratedCacheKey(note);
+        if (!key || notesByKey[key]) return;
+        notesByKey[key] = note;
+      });
 
       function setProgress(value, label) {
         var safe = Math.max(0, Math.min(100, Math.round(value)));
@@ -842,6 +864,14 @@ it really brought an interesting argument, often pushed myself to compare to my 
           });
         }
 
+        if (item.work_key) {
+          var workKey = String(item.work_key).replace(/^\/works\//, '');
+          if (workKey) {
+            push('https://openlibrary.org/works/' + encodeURIComponent(workKey) + '/covers/large.jpg?default=false');
+            push('https://openlibrary.org/works/' + encodeURIComponent(workKey) + '/covers/medium.jpg?default=false');
+          }
+        }
+
         if (!list.length) push(fallbackCover);
         return list;
       }
@@ -863,6 +893,31 @@ it really brought an interesting argument, often pushed myself to compare to my 
         var author = normalizeKey(entry.author);
         if (!title) return '';
         return title + '::' + author;
+      }
+
+      function getManualBookHint(entry) {
+        var key = getCuratedCacheKey(entry);
+        if (!key) return null;
+        return MANUAL_BOOK_HINTS[key] || null;
+      }
+
+      function applyManualHints(item, entry) {
+        var hint = getManualBookHint(entry);
+        if (!hint || !item) return item;
+        var next = Object.assign({}, item);
+
+        if (Array.isArray(hint.isbn) && hint.isbn.length) {
+          var existing = Array.isArray(next.isbn) ? next.isbn.slice() : [];
+          hint.isbn.forEach(function (raw) {
+            var code = String(raw || '').replace(/[^0-9Xx]/g, '').trim();
+            if (!(code.length === 10 || code.length === 13)) return;
+            if (existing.indexOf(code) >= 0) return;
+            existing.push(code);
+          });
+          next.isbn = existing;
+        }
+
+        return next;
       }
 
       function readCachedCuratedEntry(entry) {
@@ -902,10 +957,30 @@ it really brought an interesting argument, often pushed myself to compare to my 
 
       function findBookNote(item) {
         if (!item || !notes.length) return null;
+
+        if (item._noteKey && notesByKey[item._noteKey]) {
+          return notesByKey[item._noteKey];
+        }
+
         var titleKey = normalizeKey(item.title);
         var firstAuthor = Array.isArray(item.author_name) && item.author_name.length
           ? normalizeKey(item.author_name[0])
           : '';
+
+        for (var i = 0; i < notes.length; i += 1) {
+          var note = notes[i] || {};
+          var noteTitle = normalizeKey(note.title);
+          var noteAuthor = normalizeKey(note.author || '');
+          if (!noteTitle) continue;
+          if (titleKey !== noteTitle) continue;
+
+          if (noteAuthor && firstAuthor) {
+            var strictAuthorMatched = (noteAuthor === firstAuthor) ||
+              (noteAuthor.indexOf(firstAuthor) >= 0 || firstAuthor.indexOf(noteAuthor) >= 0);
+            if (!strictAuthorMatched) continue;
+          }
+          return note;
+        }
 
         for (var i = 0; i < notes.length; i += 1) {
           var note = notes[i] || {};
@@ -1015,14 +1090,85 @@ it really brought an interesting argument, often pushed myself to compare to my 
       }
 
       function makeFallbackItem(entry) {
-        return {
+        return applyManualHints({
           title: entry.title,
           author_name: entry.author ? [entry.author] : ['Unknown author'],
-          key: '',
+          key: entry.work_key || '',
+          work_key: entry.work_key || '',
           cover_i: null,
           cover_url: fallbackCover,
           isbn: []
-        };
+        }, entry);
+      }
+
+      function fetchWorkEditions(workKey) {
+        var workId = String(workKey || '').replace(/^\/works\//, '').trim();
+        if (!workId) return Promise.resolve(null);
+        var endpoint = 'https://openlibrary.org/works/' + encodeURIComponent(workId) + '/editions.json?limit=24';
+        return requestJsonWithRetry(endpoint, 6500, 1)
+          .then(function (data) {
+            var entries = Array.isArray(data && data.entries) ? data.entries : [];
+            if (!entries.length) return null;
+            var coverIds = [];
+            var isbnList = [];
+
+            entries.forEach(function (edition) {
+              var covers = Array.isArray(edition && edition.covers) ? edition.covers : [];
+              covers.forEach(function (id) {
+                var v = String(id || '').trim();
+                if (!v) return;
+                if (coverIds.indexOf(v) >= 0) return;
+                coverIds.push(v);
+              });
+
+              ['isbn_13', 'isbn_10'].forEach(function (field) {
+                var values = Array.isArray(edition && edition[field]) ? edition[field] : [];
+                values.forEach(function (isbn) {
+                  var cleaned = String(isbn || '').replace(/[^0-9Xx]/g, '').trim();
+                  if (!(cleaned.length === 10 || cleaned.length === 13)) return;
+                  if (isbnList.indexOf(cleaned) >= 0) return;
+                  isbnList.push(cleaned);
+                });
+              });
+            });
+
+            return {
+              coverIds: coverIds,
+              isbn: isbnList
+            };
+          })
+          .catch(function () {
+            return null;
+          });
+      }
+
+      function enrichItemFromWork(item) {
+        if (!item || (!item.work_key && !item.key)) return Promise.resolve(item);
+        var workKey = item.work_key || item.key;
+        return fetchWorkEditions(workKey)
+          .then(function (meta) {
+            if (!meta) return item;
+
+            var next = Object.assign({}, item);
+
+            if (Array.isArray(meta.isbn) && meta.isbn.length) {
+              var existingIsbn = Array.isArray(next.isbn) ? next.isbn.slice() : [];
+              meta.isbn.forEach(function (code) {
+                if (existingIsbn.indexOf(code) >= 0) return;
+                existingIsbn.push(code);
+              });
+              next.isbn = existingIsbn;
+            }
+
+            if (Array.isArray(meta.coverIds) && meta.coverIds.length) {
+              var firstCoverId = meta.coverIds[0];
+              if (!next.cover_i && firstCoverId) {
+                next.cover_i = firstCoverId;
+              }
+            }
+
+            return next;
+          });
       }
 
       function pickBestDoc(entry, docs, allowFallback) {
@@ -1032,7 +1178,8 @@ it really brought an interesting argument, often pushed myself to compare to my 
         var ranked = docs.slice().sort(function (a, b) {
           return scoreCandidate(entry, b) - scoreCandidate(entry, a);
         });
-        var top = ranked[0];
+        var rankedWithCover = ranked.filter(hasUsableCover);
+        var top = rankedWithCover.length ? rankedWithCover[0] : ranked[0];
         if (!top || scoreCandidate(entry, top) <= 0) {
           return allowFallback ? makeFallbackItem(entry) : null;
         }
@@ -1096,6 +1243,7 @@ it really brought an interesting argument, often pushed myself to compare to my 
         var info = (volume && volume.volumeInfo) || {};
         var authors = Array.isArray(info.authors) && info.authors.length ? info.authors : ['Unknown author'];
         var coverUrls = [];
+        var isbnList = [];
 
         function pushCover(url) {
           if (!url) return;
@@ -1113,6 +1261,15 @@ it really brought an interesting argument, often pushed myself to compare to my 
           pushCover(info.imageLinks.smallThumbnail);
         }
 
+        var identifiers = Array.isArray(info.industryIdentifiers) ? info.industryIdentifiers : [];
+        identifiers.forEach(function (idEntry) {
+          var value = idEntry && idEntry.identifier ? String(idEntry.identifier) : '';
+          var cleaned = value.replace(/[^0-9Xx]/g, '').trim();
+          if (!(cleaned.length === 10 || cleaned.length === 13)) return;
+          if (isbnList.indexOf(cleaned) >= 0) return;
+          isbnList.push(cleaned);
+        });
+
         if (volume && volume.id) {
           var volumeId = encodeURIComponent(volume.id);
           pushCover('https://books.google.com/books/content?id=' + volumeId + '&printsec=frontcover&img=1&zoom=2&source=gbs_api');
@@ -1127,22 +1284,52 @@ it really brought an interesting argument, often pushed myself to compare to my 
           cover_i: null,
           cover_url: coverUrls[0] || fallbackCover,
           cover_urls: coverUrls,
-          isbn: []
+          isbn: isbnList
         };
       }
 
       function searchOpenLibraryEntry(entry) {
         var language = String(cfg.language || '').trim().toLowerCase();
         if (language === 'en') language = 'eng';
-        var endpoint = 'https://openlibrary.org/search.json?title=' + encodeURIComponent(entry.title || '') +
+        var baseEndpoint = 'https://openlibrary.org/search.json?title=' + encodeURIComponent(entry.title || '') +
           '&author=' + encodeURIComponent(entry.author || '') +
-          (language ? '&language=' + encodeURIComponent(language) : '') +
           '&limit=12';
+
+        return requestJsonWithRetry(baseEndpoint + (language ? '&language=' + encodeURIComponent(language) : ''), 6500, 1)
+          .then(function (data) {
+            var docs = Array.isArray(data.docs) ? data.docs : [];
+            if (!docs.length && language) {
+              return requestJsonWithRetry(baseEndpoint, 6500, 1)
+                .then(function (retryData) {
+                  docs = Array.isArray(retryData.docs) ? retryData.docs : [];
+                  return docs;
+                });
+            }
+            return docs;
+          })
+          .then(function (docs) {
+            var picked = pickBestDoc(entry, docs, false);
+            if (picked && picked.key) {
+              picked.work_key = picked.key;
+            }
+            return picked;
+          });
+      }
+
+      function searchOpenLibraryLoose(entry) {
+        var authorText = String(entry.author || '').replace(/-/g, ' ');
+        var query = [entry.title || '', authorText].join(' ').trim();
+        var endpoint = 'https://openlibrary.org/search.json?q=' + encodeURIComponent(query) +
+          '&limit=20';
 
         return requestJsonWithRetry(endpoint, 6500, 1)
           .then(function (data) {
             var docs = Array.isArray(data.docs) ? data.docs : [];
-            return pickBestDoc(entry, docs, false);
+            var picked = pickBestDoc(entry, docs, false);
+            if (picked && picked.key) {
+              picked.work_key = picked.key;
+            }
+            return picked;
           });
       }
 
@@ -1159,8 +1346,12 @@ it really brought an interesting argument, often pushed myself to compare to my 
       }
 
       function fetchCuratedEntry(entry) {
+        var noteKey = getCuratedCacheKey(entry);
         var cached = readCachedCuratedEntry(entry);
-        if (cached && hasUsableCover(cached)) return Promise.resolve(cached);
+        if (cached && hasUsableCover(cached)) {
+          if (!cached._noteKey) cached._noteKey = noteKey;
+          return Promise.resolve(cached);
+        }
 
         return searchOpenLibraryEntry(entry)
           .catch(function () {
@@ -1171,21 +1362,52 @@ it really brought an interesting argument, often pushed myself to compare to my 
               return openItem;
             }
 
-            return searchGoogleEntry(entry)
-              .then(function (googleItem) {
-                return mergeCuratedItems(openItem, googleItem);
+            if (openItem && (openItem.work_key || openItem.key)) {
+              return enrichItemFromWork(openItem)
+                .then(function (workEnriched) {
+                  if (workEnriched && hasUsableCover(workEnriched)) {
+                    return workEnriched;
+                  }
+                  return workEnriched || openItem;
+                });
+            }
+
+            return openItem;
+          })
+          .then(function (openItem) {
+            if (openItem && hasUsableCover(openItem)) {
+              return openItem;
+            }
+
+            return searchOpenLibraryLoose(entry)
+              .then(function (looseItem) {
+                return mergeCuratedItems(openItem, looseItem);
               })
               .catch(function () {
                 return openItem;
               });
           })
+          .then(function (mergedOpenItem) {
+            if (mergedOpenItem && (mergedOpenItem.work_key || mergedOpenItem.key) && !hasUsableCover(mergedOpenItem)) {
+              return enrichItemFromWork(mergedOpenItem);
+            }
+            return mergedOpenItem;
+          })
+          .then(function (mergedOpenItem) {
+            if (mergedOpenItem && hasUsableCover(mergedOpenItem)) {
+              return mergedOpenItem;
+            }
+            return mergedOpenItem;
+          })
           .then(function (resolvedItem) {
-            var safeItem = resolvedItem || makeFallbackItem(entry);
+            var safeItem = applyManualHints(resolvedItem || makeFallbackItem(entry), entry);
+            safeItem._noteKey = noteKey;
             writeCachedCuratedEntry(entry, safeItem);
             return safeItem;
           })
           .catch(function () {
-            var fallback = makeFallbackItem(entry);
+            var fallback = applyManualHints(makeFallbackItem(entry), entry);
+            fallback._noteKey = noteKey;
             writeCachedCuratedEntry(entry, fallback);
             return fallback;
           });
@@ -1235,6 +1457,15 @@ it really brought an interesting argument, often pushed myself to compare to my 
           var candidates = raw ? raw.split('|').filter(Boolean) : [];
           if (!candidates.length) candidates = [fallbackCover];
           img.dataset.coverIndex = img.dataset.coverIndex || '0';
+          img.classList.remove('book-cover-loaded');
+
+          img.addEventListener('load', function () {
+            img.classList.add('book-cover-loaded');
+          }, { once: true });
+
+          if (img.complete && img.naturalWidth > 0) {
+            img.classList.add('book-cover-loaded');
+          }
 
           img.addEventListener('error', function () {
             var current = parseInt(img.dataset.coverIndex || '0', 10);
