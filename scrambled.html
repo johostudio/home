@@ -156,6 +156,22 @@
         font-size: 0.92rem;
       }
     }
+
+    .archive-footer {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 18;
+      text-align: center;
+      font-size: 0.66rem;
+      letter-spacing: -0.01em;
+      text-transform: lowercase;
+      color: rgba(230, 238, 246, 0.42);
+      padding: 0.45rem 0 1.1rem;
+      pointer-events: none;
+      background: linear-gradient(to top, rgba(0,0,0,0.62), transparent);
+    }
   </style>
 </head>
 
@@ -180,6 +196,8 @@
   </div>
 
   <div id="graph-container"></div>
+
+  <footer class="archive-footer">johostudio, all rights reserved</footer>
 
   <script>
     // Define the graph data (an "obsidian-like" network of thoughts/journals)
