@@ -127,6 +127,13 @@
       outline: none;
     }
 
+    .social-icon-link.tap-armed {
+      color: rgba(0, 0, 0, 0.95);
+      background: transparent !important;
+      transform: translateY(-1px);
+      outline: none;
+    }
+
     .social-icon-link::after {
       content: attr(data-label);
       position: absolute;
@@ -150,7 +157,8 @@
     }
 
     .social-icon-link:hover::after,
-    .social-icon-link:focus-visible::after {
+    .social-icon-link:focus-visible::after,
+    .social-icon-link.tap-armed::after {
       opacity: 1;
       transform: translate(-50%, 0);
     }
@@ -172,7 +180,8 @@
       display: inline-block;
     }
 
-    .home-bio-link:hover {
+    .home-bio-link:hover,
+    .home-bio-link.tap-armed {
       background: rgba(0, 0, 0, 0.13);
     }
 
@@ -187,7 +196,8 @@
     }
 
     .home-tagline-link:hover,
-    .home-tagline-link:focus-visible {
+    .home-tagline-link:focus-visible,
+    .home-tagline-link.tap-armed {
       color: rgba(0, 0, 0, 0.96) !important;
       background: rgba(0, 0, 0, 0.08) !important;
       text-decoration-thickness: 2px;
@@ -707,6 +717,53 @@
         });
         link.addEventListener('blur', hidePreview);
       });
+
+      var isCoarsePointer = window.matchMedia && (
+        window.matchMedia('(hover: none)').matches ||
+        window.matchMedia('(pointer: coarse)').matches
+      );
+
+      if (!isCoarsePointer) return;
+
+      var armedLink = null;
+
+      function clearTapArmed() {
+        if (armedLink) {
+          armedLink.classList.remove('tap-armed');
+          armedLink = null;
+        }
+        hidePreview();
+      }
+
+      document.querySelectorAll('.home-bio-link').forEach(function (link) {
+        link.addEventListener('click', function (event) {
+          var hasPreview = !!(link.getAttribute('data-preview-title') || link.getAttribute('data-preview-desc'));
+          if (!hasPreview) return;
+
+          if (armedLink === link) {
+            clearTapArmed();
+            return; // second tap proceeds to link navigation
+          }
+
+          event.preventDefault();
+          clearTapArmed();
+          armedLink = link;
+          link.classList.add('tap-armed');
+
+          var rect = link.getBoundingClientRect();
+          showPreview(link, rect.left + (rect.width / 2), rect.top + (rect.height / 2));
+        });
+      });
+
+      document.addEventListener('click', function (event) {
+        if (!armedLink) return;
+        var tappedLink = event.target && event.target.closest ? event.target.closest('.home-bio-link') : null;
+        if (tappedLink === armedLink) return;
+        clearTapArmed();
+      });
+
+      window.addEventListener('scroll', clearTapArmed, { passive: true });
+      window.addEventListener('resize', clearTapArmed, { passive: true });
     })();
   </script>
 </body>
