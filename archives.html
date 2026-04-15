@@ -300,13 +300,9 @@
     }
 
     .archive-footer {
-      margin-top: 3.6rem;
-      text-align: center;
-      font-size: 0.66rem;
-      letter-spacing: -0.01em;
-      text-transform: lowercase;
-      color: rgba(230, 238, 246, 0.44);
-      padding: 0.75rem 1rem 3rem;
+      margin-top: 0;
+      width: 100%;
+      margin-bottom: 0.75rem;
     }
 
     .gallery-content {
@@ -626,7 +622,10 @@
       </div>
     </div>
 
-    <footer class="archive-footer">johostudio, all rights reserved</footer>
+    <footer class="archive-footer text-center mt-0 w-full mb-3" aria-label="copyright notice">
+      <small>© <span id="year"></span> joho's studio 昌栢</small>
+      <div class="text-sm mt-2">ALL RIGHTS RESERVED. ®</div>
+    </footer>
 
   </div><!-- /#archives-content -->
 
@@ -634,6 +633,9 @@
 
   <script>
     (function () {
+      var yearEl = document.getElementById('year');
+      if (yearEl) yearEl.textContent = new Date().getFullYear();
+
       var backBtn = document.getElementById('back-to-top');
       var sphereSection = document.getElementById('sphere-section');
       var archivesCablesFrame = document.getElementById('archives-cables-frame');

@@ -569,28 +569,9 @@
     }
 
     .archive-footer {
-      margin-top: 3.4rem;
-      padding: 0.9rem 1rem 3rem;
-      text-align: center;
-      display: grid;
-      gap: 0.34rem;
-    }
-
-    .archive-footer-line {
-      margin: 0;
-      color: rgba(230, 238, 246, 0.88);
-      letter-spacing: -0.045em;
-      text-transform: lowercase;
-      font-size: clamp(0.92rem, 1.8vw, 1.05rem);
-      line-height: 1.08;
-    }
-
-    .archive-footer-strong {
-      color: rgba(230, 238, 246, 0.96);
-      letter-spacing: -0.02em;
-      text-transform: uppercase;
-      font-size: clamp(1.08rem, 2.4vw, 1.42rem);
-      line-height: 1.05;
+      margin-top: 0;
+      width: 100%;
+      margin-bottom: 0.75rem;
     }
 
     .atlas-menu-toggle .label-short {
@@ -811,17 +792,7 @@
       }
 
       .archive-footer {
-        margin-top: 3rem;
-        padding-bottom: 2.6rem;
-        gap: 0.28rem;
-      }
-
-      .archive-footer-line {
-        font-size: 0.84rem;
-      }
-
-      .archive-footer-strong {
-        font-size: 1.02rem;
+        margin-bottom: 0.45rem;
       }
     }
   </style>
@@ -948,14 +919,17 @@
       </div>
     </section>
 
-    <footer class="archive-footer" aria-label="copyright notice">
-      <p class="archive-footer-line">© 2026 joho's studio 昌佑</p>
-      <p class="archive-footer-line archive-footer-strong">ALL RIGHTS RESERVED. ®</p>
+    <footer class="archive-footer text-center mt-0 w-full mb-3" aria-label="copyright notice">
+      <small>© <span id="year"></span> joho's studio 昌栢</small>
+      <div class="text-sm mt-2">ALL RIGHTS RESERVED. ®</div>
     </footer>
   </main>
 
   <script src="scripts/cloudflare-config.js"></script>
   <script>
+    var yearEl = document.getElementById('year');
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
+
     window.__loadLocalConfig = function () {
       var s = document.createElement('script');
       s.src = 'scripts/local-config.js';

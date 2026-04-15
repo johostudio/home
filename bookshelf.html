@@ -192,28 +192,9 @@
     }
 
     .archive-footer {
-      margin-top: 3.4rem;
-      padding: 0.9rem 1rem 3rem;
-      text-align: center;
-      display: grid;
-      gap: 0.34rem;
-    }
-
-    .archive-footer-line {
-      margin: 0;
-      color: rgba(230, 238, 246, 0.88);
-      letter-spacing: -0.045em;
-      text-transform: lowercase;
-      font-size: clamp(0.92rem, 1.8vw, 1.05rem);
-      line-height: 1.08;
-    }
-
-    .archive-footer-strong {
-      color: rgba(230, 238, 246, 0.96);
-      letter-spacing: -0.02em;
-      text-transform: uppercase;
-      font-size: clamp(1.08rem, 2.4vw, 1.42rem);
-      line-height: 1.05;
+      margin-top: 0;
+      width: 100%;
+      margin-bottom: 0.75rem;
     }
 
     main {
@@ -383,17 +364,7 @@
       }
 
       .archive-footer {
-        margin-top: 3rem;
-        padding-bottom: 2.6rem;
-        gap: 0.28rem;
-      }
-
-      .archive-footer-line {
-        font-size: 0.84rem;
-      }
-
-      .archive-footer-strong {
-        font-size: 1.02rem;
+        margin-bottom: 0.45rem;
       }
 
       .book-modal-grid {
@@ -436,9 +407,9 @@
       Could not load shelf yet. Check your Open Library query or curated book list in `bookshelf.html` and reload.
     </div>
 
-    <footer class="archive-footer" aria-label="copyright notice">
-      <p class="archive-footer-line">© 2026 joho's studio 昌佑</p>
-      <p class="archive-footer-line archive-footer-strong">ALL RIGHTS RESERVED. ®</p>
+    <footer class="archive-footer text-center mt-0 w-full mb-3" aria-label="copyright notice">
+      <small>© <span id="year"></span> joho's studio 昌栢</small>
+      <div class="text-sm mt-2">ALL RIGHTS RESERVED. ®</div>
     </footer>
   </main>
 
@@ -464,6 +435,9 @@
   </div>
 
   <script>
+    var yearEl = document.getElementById('year');
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
+
     window.JOHO_BOOKS_CONFIG = window.JOHO_BOOKS_CONFIG || {
       query: '"101 Things I Learned in Product Design School" OR "Battle Hymn of the Tiger Mother" OR "Permission to Come Home" OR "The Book Thief" OR "Atomic Habits" OR "101 Things I Learned in Architecture School" OR "The Creative Act" OR "The Convenience Store by the Sea" OR "We\'ll Prescribe You a Cat" OR "Goodnight Tokyo" OR "The Lantern of Lost Memories" OR "Ikigai" OR "More Days at the Morisaki Bookshop" OR "Days at the Morisaki Bookshop" OR "The Restaurant of Lost Recipes" OR "Welcome to the Hyunam-dong Bookshop" OR "The Second Chance Convenience Store" OR "The 99% Invisible City" OR "In Praise of Shadows" OR "Snowglobe" OR "Snowglobe 2" OR "The Passengers on the Hankyu Line" OR "The Travelling Cat Chronicles" OR "Break Room" OR "I Want to Die But I Want to Eat Tteokbokki" OR "I Want to Die But I Still Want to Eat Tteokbokki"',
       maxResults: 40,
