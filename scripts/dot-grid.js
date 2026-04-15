@@ -22,22 +22,30 @@
   var textDim = 0.25;       // opacity multiplier for dots right on top of text (0 = invisible, 1 = no change)
 
   var config = {
-    dotSize: 8,
-    gap: 32,
+    dotSize: 2,
+    gap: 10,
     baseColor: '#ffffff',
     activeColor: '#a855f7',
-    baseAlpha: 0.12,        // subtle base opacity
-    activeAlpha: 0.6,
-    proximity: 150,
+    baseAlpha: 0.045,       // very subtle — grain-like
+    activeAlpha: 0.2,
+    proximity: 100,
     speedTrigger: 50,
-    shockRadius: 170,
-    shockStrength: 3,
+    shockRadius: 130,
+    shockStrength: 2,
     maxSpeed: 5000,
-    maxDots: 2000,
-    overflow: 60,           // dots start this far outside viewport (clipped, gives edge bleed)
+    maxDots: 8000,
+    overflow: 40,           // dots start this far outside viewport (clipped, gives edge bleed)
     spring: 70,
     damping: 16
   };
+
+  var path = window.location.pathname || '';
+  var isArchivePage = /archives|scrambled|bookshelf|atlas/.test(path);
+  if (isArchivePage) {
+    config.baseAlpha = 0.085;
+    config.activeAlpha = 0.28;
+    textDim = 0.35;
+  }
 
   function hexToRgb(hex) {
     var m = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);

@@ -40,6 +40,8 @@
       letter-spacing: -0.082em;
       font-size: clamp(2.2rem, 4.7vw, 3.35rem);
       line-height: 0.94;
+      cursor: pointer;
+      user-select: none;
     }
 
     .hsoh-subtitle {
@@ -347,10 +349,11 @@
   <!-- Self-injecting site header -->
   <script src="scripts/site-header.js"></script>
 
-  <div class="sticker-layer" data-sticker-layer data-safe-bottom="260">
+  <div class="sticker-layer" data-sticker-layer data-safe-bottom="0">
     <button class="sticker" type="button" data-sticker data-size="196" data-x="1180" data-y="72" data-rotation="7"
       aria-label="typhoon sticker">
       <img src="gif/typhoon.png" alt="Typhoon sticker" loading="lazy">
+      <span class="sticker-album-label">typhoon</span>
     </button>
     <button class="sticker" type="button" data-sticker data-size="186" data-x="380" data-y="92" data-rotation="-6"
       aria-label="pryvt back to reality vinyl">
@@ -408,7 +411,7 @@
 
       <!-- hsoh.tech link -->
       <div class="mt-8 p-2 text-center relative">
-        <h2 class="hsoh-main-title mb-2 relative z-10">+86.</h2>
+        <h2 class="hsoh-main-title mb-2 relative z-10" id="hsoh-dial" tabindex="0" role="button" aria-label="randomize studio dial code">+86</h2>
         <p class="hsoh-subtitle relative z-10">@hsoh.wav</p>
         <div class="relative z-10 inline-block mt-3">
           <a href="http://www.hsoh.tech" target="_blank" rel="noopener"
@@ -456,6 +459,74 @@
     document.getElementById('year').textContent = new Date().getFullYear();
 
     (function () {
+      var dial = document.getElementById('hsoh-dial');
+      var dialOptions = ['+1', '+86', '+358', '+46', '+60', '+65', '+673', '+81', '+82', '+886'];
+      var dialAnim = null;
+
+      function randomDigit() {
+        return String(Math.floor(Math.random() * 10));
+      }
+
+      function randomFrameFor(target) {
+        var out = '+';
+        for (var i = 1; i < target.length; i += 1) {
+          out += randomDigit();
+        }
+        return out;
+      }
+
+      function pickTarget(current) {
+        var pool = dialOptions.filter(function (item) { return item !== current; });
+        if (!pool.length) return dialOptions[0];
+        return pool[Math.floor(Math.random() * pool.length)];
+      }
+
+      function animateDial(target) {
+        if (!dial) return;
+        if (dialAnim) {
+          clearInterval(dialAnim);
+          dialAnim = null;
+        }
+
+        var start = Date.now();
+        var duration = 2300;
+        var frameMs = 42;
+
+        dialAnim = setInterval(function () {
+          var elapsed = Date.now() - start;
+          var progress = Math.min(1, elapsed / duration);
+          var reveal = Math.floor(progress * target.length);
+          var randomPart = randomFrameFor(target);
+          var next = '';
+
+          for (var i = 0; i < target.length; i += 1) {
+            next += i < reveal ? target.charAt(i) : randomPart.charAt(i);
+          }
+
+          dial.textContent = next;
+
+          if (progress >= 1) {
+            clearInterval(dialAnim);
+            dialAnim = null;
+            dial.textContent = target;
+          }
+        }, frameMs);
+      }
+
+      function triggerDialShuffle() {
+        if (!dial) return;
+        var current = dial.textContent.trim() || '+86';
+        var target = pickTarget(current);
+        animateDial(target);
+      }
+
+      if (dial) {
+        dial.addEventListener('click', function (event) {
+          event.preventDefault();
+          triggerDialShuffle();
+        });
+      }
+
       var CLOUDFLARE_WORKER_URL = (window.CLOUDFLARE_WORKER_URL || '').trim();
       var CLIENT_KEY = 'hsoh-song-client-id-v1';
       var form = document.getElementById('song-rec-form');

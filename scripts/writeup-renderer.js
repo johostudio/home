@@ -156,4 +156,69 @@
   }
 
   target.innerHTML = renderMarkdown(md);
+
+  /* ── Side jumpbar (table of contents) ── */
+  var headings = target.querySelectorAll('h1, h2, h3');
+  if (headings.length > 1) {
+    // Generate IDs for headings
+    for (var j = 0; j < headings.length; j++) {
+      var h = headings[j];
+      if (!h.id) {
+        h.id = 'section-' + h.textContent.trim()
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-|-$/g, '');
+      }
+    }
+
+    // Build jumpbar
+    var jumpbar = document.createElement('nav');
+    jumpbar.className = 'writeup-jumpbar';
+    var jumpInner = '<div class="jumpbar-title">On this page</div>';
+    for (var k = 0; k < headings.length; k++) {
+      var hd = headings[k];
+      var indent = hd.tagName === 'H3' ? ' jumpbar-indent' : '';
+      jumpInner += '<a href="#' + hd.id + '" class="jumpbar-link' + indent + '" data-target="' + hd.id + '">' + hd.textContent + '</a>';
+    }
+    jumpbar.innerHTML = jumpInner;
+
+    // Insert jumpbar into page
+    var mainEl = document.querySelector('.writeup-main');
+    if (mainEl) {
+      mainEl.style.position = 'relative';
+      mainEl.appendChild(jumpbar);
+    }
+
+    // Scroll spy
+    var jumpLinks = jumpbar.querySelectorAll('.jumpbar-link');
+    function updateJumpbar() {
+      var scrollPos = window.scrollY + 120;
+      var activeId = '';
+      for (var m = 0; m < headings.length; m++) {
+        if (headings[m].offsetTop <= scrollPos) {
+          activeId = headings[m].id;
+        }
+      }
+      for (var n = 0; n < jumpLinks.length; n++) {
+        if (jumpLinks[n].getAttribute('data-target') === activeId) {
+          jumpLinks[n].classList.add('jumpbar-active');
+        } else {
+          jumpLinks[n].classList.remove('jumpbar-active');
+        }
+      }
+    }
+    window.addEventListener('scroll', updateJumpbar, { passive: true });
+    updateJumpbar();
+
+    // Smooth scroll
+    jumpbar.addEventListener('click', function(e) {
+      if (e.target.classList.contains('jumpbar-link')) {
+        e.preventDefault();
+        var tgt = document.getElementById(e.target.getAttribute('data-target'));
+        if (tgt) {
+          tgt.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    });
+  }
 })();

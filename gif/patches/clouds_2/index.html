@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>cloud</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #000;
+            color: #fff;
+            font-family: Helvetica, Arial, sans-serif;
+            overflow: hidden; /* disable scrolling / rubberband effect on mobile */
+            height:100vh;
+        }
+
+        canvas {
+            display: block;
+            position: absolute;
+            outline:0;
+        }
+
+        * {
+            /* disable on touch highlights of html elements, especially on mobile! */
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+    </style>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1">
+    <meta itemprop="name" content="cloud">
+    <meta itemprop="description" content="made with cables">
+    <meta itemprop="image" content="screenshot.png">
+    <meta name="description" content="made with cables"/>
+
+</head>
+<body>
+    <script type="text/javascript">
+        window.__cloudJsonCandidates = ['js/cloud.json', './js/cloud.json', '/gif/patches/clouds_2/js/cloud.json'];
+    </script>
+    <div id="canvascontainer" style="width:100%;height: 100%;overflow: hidden;">
+        <canvas id="glcanvas" width="100vw" height="100vh" tabindex="1"></canvas>
+    </div>
+
+    
+    <script type="text/javascript">
+        (function () {
+            var scriptNames = ['cables.js', 'ops.js', 'cgl.js', 'vargetset.js', 'interactionneededbutton.js'];
+            var prefixes = ['js/', './js/', '/gif/patches/clouds_2/js/'];
+
+            function tryLoadScript(name, prefixIndex, done) {
+                if (prefixIndex >= prefixes.length) {
+                    window.__cablesLastError = 'failed loading ' + name;
+                    done(false);
+                    return;
+                }
+
+                var src = prefixes[prefixIndex] + name;
+                var s = document.createElement('script');
+                s.type = 'text/javascript';
+                s.async = false;
+                s.src = src;
+                s.onload = function () { done(true); };
+                s.onerror = function () {
+                    window.__cablesLastError = 'failed loading ' + src;
+                    tryLoadScript(name, prefixIndex + 1, done);
+                };
+                document.head.appendChild(s);
+            }
+
+            function loadInOrder(index) {
+                if (index >= scriptNames.length) {
+                    window.__cablesScriptLoaded = true;
+                    return;
+                }
+                tryLoadScript(scriptNames[index], 0, function (ok) {
+                    if (!ok) return;
+                    loadInOrder(index + 1);
+                });
+            }
+
+            loadInOrder(0);
+        })();
+    </script>
+
+
+    <script type="text/javascript">
+
+        function showError(initiator,...args)
+        {
+            window.__cablesLastError = "[" + initiator + "] " + args.join(" ");
+            CABLES.logErrorConsole("[" + initiator + "]", ...args);
+        }
+
+        function patchInitialized(patch)
+        {
+            // You can now access the patch object (patch), register variable watchers and so on
+        }
+
+        function patchFinishedLoading(patch)
+        {
+            // The patch is ready now, all assets have been loaded
+        }
+
+        function initPatchSafe()
+        {
+            if (window.__cablesPatchStarted) return;
+            if (!window.CABLES || !window.CABLES.Patch) return;
+
+            window.__cablesPatchInitTried = true;
+
+            var fileCandidate = window.__cloudJsonCandidates[0];
+
+            CABLES.patch = new CABLES.Patch({
+                patchFile: fileCandidate,
+                "prefixAssetPath": "",
+                "assetPath": "assets/",
+                "jsPath": "js/",
+                "glCanvasId": "glcanvas",
+                "glCanvasResizeToWindow": true,
+                "onError": showError,
+                "onPatchLoaded": patchInitialized,
+                "onFinishedLoading": patchFinishedLoading,
+                "canvas": {"alpha":true, "premultipliedAlpha":true }
+            });
+
+            window.__cablesPatchStarted = !!(CABLES && CABLES.patch);
+
+            if (!window.__cablesPatchStarted && window.__cloudJsonCandidates.length > 1) {
+                window.__cloudJsonCandidates.shift();
+            }
+        }
+
+        document.addEventListener("CABLES.jsLoaded", initPatchSafe);
+        window.addEventListener("load", initPatchSafe);
+
+        var __tries = 0;
+        var __patchTimer = setInterval(function () {
+            __tries++;
+            initPatchSafe();
+            if (window.__cablesPatchStarted || __tries > 80) {
+                clearInterval(__patchTimer);
+            }
+        }, 50);
+
+        setTimeout(function () {
+            if (!window.__cablesPatchStarted && !window.__cablesLastError) {
+                window.__cablesLastError = 'scripts loaded but CABLES.jsLoaded did not fire';
+            }
+        }, 3500);
+
+        // disable rubberband effect on mobile devices
+        document.getElementById('glcanvas').addEventListener('touchmove', (e)=>{ e.preventDefault(); }, false);
+    </script>
+</body>
+</html>

@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>a scrambled mind — joho's studio</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="stylesheet" href="styles/tailwind-prod.css">
+  <link rel="stylesheet" href="styles/dot-grid.css">
+  <link rel="stylesheet" href="styles/clocks.css">
+  <script src="//unpkg.com/force-graph"></script>
+  <style>
+    body {
+      background: #000;
+      color: #e6eef6;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      margin: 0;
+      overflow: hidden;
+    }
+    #graph-container {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      cursor: grab;
+    }
+    #graph-container:active {
+      cursor: grabbing;
+    }
+    #info-panel {
+      position: absolute;
+      top: 50%;
+      right: clamp(1rem, 3vw, 2rem);
+      transform: translateY(-50%);
+      width: min(470px, calc(100vw - 2.2rem));
+      max-height: 82vh;
+      overflow-y: auto;
+      background: rgba(6, 8, 16, 0.92);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(192, 132, 252, 0.26);
+      border-radius: 10px;
+      padding: 1.2rem 1.2rem 1.1rem;
+      z-index: 20;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      cursor: default;
+    }
+
+    #info-panel.dragging {
+      cursor: grabbing;
+      user-select: none;
+    }
+
+    .panel-drag-handle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: -0.15rem 0 0.6rem;
+      cursor: grab;
+      user-select: none;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding-bottom: 0.35rem;
+      touch-action: none;
+    }
+
+    .panel-drag-title {
+      font-size: 0.63rem;
+      color: rgba(230, 238, 246, 0.48);
+      letter-spacing: -0.01em;
+      text-transform: lowercase;
+      font-weight: 400;
+    }
+    #info-panel.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    #info-panel h3 {
+      font-size: clamp(1.45rem, 2.9vw, 1.7rem);
+      font-weight: 400;
+      color: #e6eef6;
+      margin-top: 0;
+      margin-bottom: 0.45rem;
+      letter-spacing: -0.075em;
+    }
+    #info-panel .date {
+      font-size: 0.92rem;
+      letter-spacing: 0;
+      color: #c084fc;
+      margin-bottom: 0.5rem;
+      display: block;
+      font-weight: 500;
+    }
+    #info-panel .now-playing {
+      font-size: 0.74rem;
+      color: rgba(230, 238, 246, 0.75);
+      margin-bottom: 0.8rem;
+      line-height: 1.5;
+      text-transform: lowercase;
+    }
+    #info-panel .now-playing a {
+      color: #c084fc;
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
+      transition: color 0.2s ease;
+    }
+    #info-panel .now-playing a:hover {
+      color: #e5c2ff;
+    }
+    #info-panel p {
+      font-size: clamp(0.84rem, 1.2vw, 0.96rem);
+      line-height: 1.45;
+      letter-spacing: -0.03em;
+      color: rgba(230, 238, 246, 0.83);
+      margin: 0;
+      font-weight: 400;
+    }
+    #info-panel .panel-close {
+      margin-top: 0;
+      border: 0;
+      background: transparent;
+      color: rgba(230, 238, 246, 0.66);
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 0.95rem;
+      letter-spacing: 0;
+      line-height: 1;
+      cursor: pointer;
+      padding: 2px 4px;
+      text-transform: lowercase;
+      border-radius: 4px;
+    }
+
+    #info-panel .panel-close:hover {
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+    }
+
+    #panel-content {
+      white-space: pre-line;
+    }
+    @media (max-width: 760px) {
+      #info-panel {
+        right: 1rem;
+        left: 1rem;
+        width: auto;
+        top: auto;
+        bottom: 1rem;
+        transform: none;
+        max-height: 56vh;
+      }
+      #info-panel h3 {
+        font-size: 1.2rem;
+      }
+      #info-panel p {
+        font-size: 0.92rem;
+      }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen relative">
+  <!-- Dot Grid Background -->
+  <div class="dot-grid-wrapper"></div>
+  <!-- Self-injecting site header -->
+  <script src="scripts/site-header.js"></script>
+
+  <a href="archives.html" class="back-btn relative z-50 text-[13px] text-white/50 hover:text-white transition-colors" style="position:fixed; top:24px; left:24px; pointer-events:auto;">← back</a>
+  
+  <!-- Info panel that appears when clicking a node -->
+  <div id="info-panel">
+    <div class="panel-drag-handle" id="panel-drag-handle">
+      <span class="panel-drag-title">drag panel</span>
+      <button class="panel-close" id="panel-close-btn" aria-label="close panel">×</button>
+    </div>
+    <h3 id="panel-title">Node Title</h3>
+    <span class="date" id="panel-date">Date</span>
+    <div class="now-playing" id="panel-now-playing">now playing: —</div>
+    <p id="panel-content">Content goes here...</p>
+  </div>
+
+  <div id="graph-container"></div>
+
+  <script>
+    // Define the graph data (an "obsidian-like" network of thoughts/journals)
+    const gData = {
+      nodes: [
+        { id: 'start', name: 'Start Here', group: 1, val: 20, content: 'Welcome to my scrambled mind. This is an interconnected web of my thoughts, journals, and project ideas.', date: 'Now' },
+        
+         { id: 'journal_1', name: 'late night thoughts', group: 2, val: 10, content: 'Staring at the ceiling at 3AM. Thinking about how the internet used to feel like a neighborhood, and now it feels like a billboard.', date: '10/12/2025', nowPlaying: 'Broken Clocks - SZA', nowPlayingUrl: 'https://open.spotify.com/track/2fXwCWkh6YG5zU1IyvQrbs' },
+         { id: 'journal_2', name: 'vancouver weather', group: 2, val: 8, content: 'It rained again today. There is something comforting about the grey skies when you have a warm cup of coffee.', date: '11/03/2025', nowPlaying: 'Ribs - Lorde', nowPlayingUrl: 'https://open.spotify.com/track/2MvvoeRt8NcOXWESkxWn3g' },
+        
+         { id: 'idea_1', name: 'project: ukiyo', group: 3, val: 14, content: 'An app and a device that somehow brings you back to the present moment. Tangible tech.', date: '10/27/2025', nowPlaying: 'Nights - Frank Ocean', nowPlayingUrl: 'https://open.spotify.com/track/7eqoqGkKwgOaWNNHx90uEZ' },
+         { id: 'idea_2', name: 'camera rig', group: 3, val: 12, content: 'Thinking of building a custom top-handle rig for the FX3 using carbon fiber rods. Needs to be lightweight.', date: '11/10/2025', nowPlaying: 'Kyoto - Phoebe Bridgers', nowPlayingUrl: 'https://open.spotify.com/track/4Of7rzpRpV1mWRbhp5rAqG' },
+        
+         { id: 'list_1', name: 'movies to watch', group: 4, val: 8, content: '1. Perfect Days\n2. Dune: Part Two\n3. Past Lives\n4. Blade Runner 2049', date: '10/30/2025', nowPlaying: 'Dreams Tonite - Alvvays', nowPlayingUrl: 'https://open.spotify.com/track/1f9M9oc95PBA0zMRCV4n5m' },
+         { id: 'list_2', name: 'design inspo', group: 4, val: 8, content: 'Brutalism, Swiss typography, old Dieter Rams Braun products, transparent tech.', date: '11/05/2025', nowPlaying: 'Instant Crush - Daft Punk', nowPlayingUrl: 'https://open.spotify.com/track/2cGxRwrMyEAp8dEbuZaVv6' },
+        
+         { id: 'img_1', name: 'kyoto 2025', group: 5, val: 16, img: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=600&q=80', content: 'The rain made everything so quiet. I stood under the awning for half an hour just watching.', date: '10/20/2025', nowPlaying: 'I Think They Call This Love - Elliot James Reay', nowPlayingUrl: 'https://open.spotify.com/track/5QBY8IP6A6WyQfX5MtxXgJ' }
+      ],
+      links: [
+        { source: 'start', target: 'journal_1' },
+        { source: 'start', target: 'idea_1' },
+        { source: 'start', target: 'list_1' },
+        { source: 'start', target: 'img_1' },
+        { source: 'journal_1', target: 'journal_2' },
+        { source: 'idea_1', target: 'idea_2' },
+        { source: 'list_1', target: 'list_2' },
+        { source: 'journal_1', target: 'idea_1' },
+        { source: 'journal_2', target: 'list_1' },
+      ]
+    };
+
+    // Initialize the Force Graph
+    const Graph = ForceGraph()
+      (document.getElementById('graph-container'))
+        .graphData(gData)
+        .backgroundColor('rgba(0,0,0,0)')
+        .nodeColor(node => {
+          if (node.group === 1) return '#c084fc';
+          if (node.group === 2) return '#e6eef6';
+          if (node.group === 3) return '#818cf8';
+          return '#9ca3af';
+        })
+         .nodeRelSize(1.65)
+        .linkColor(() => 'rgba(255,255,255,0.15)')
+        .linkWidth(1.5)
+         .nodeLabel(function (node) {
+           return '<div style="font-family:Helvetica,Arial,sans-serif;font-size:9px;font-weight:400;letter-spacing:-0.04em;line-height:1.15;padding:3px 5px;border:1px solid rgba(192,132,252,0.25);background:rgba(8,10,18,0.92);border-radius:6px;color:#e6eef6;text-transform:lowercase;">' + node.name + '</div>';
+         })
+        .nodeCanvasObject((node, ctx, globalScale) => {
+          if (node.img) {
+            const size = node.val || 12;
+            if(!node.imgObj) {
+              node.imgObj = new Image();
+              node.imgObj.src = node.img;
+            }
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, size/2, 0, 2 * Math.PI, false);
+            ctx.clip();
+            try {
+              ctx.drawImage(node.imgObj, node.x - size/2, node.y - size/2, size, size);
+            } catch(e) {}
+            ctx.restore();
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, size/2, 0, 2 * Math.PI, false);
+            ctx.strokeStyle = '#c084fc';
+            ctx.lineWidth = 1.5/globalScale;
+            ctx.stroke();
+          } else {
+             const size = node.val ? Math.sqrt(node.val) * 2 : 6;
+             ctx.beginPath();
+             ctx.arc(node.x, node.y, size, 0, 2 * Math.PI);
+             let color = '#9ca3af';
+             if (node.group === 1) color = '#c084fc';
+             if (node.group === 2) color = '#e6eef6';
+             if (node.group === 3) color = '#818cf8';
+             ctx.fillStyle = color;
+             ctx.fill();
+          }
+        })
+        .onNodeClick(node => {
+          // Open info panel
+          const panel = document.getElementById('info-panel');
+          document.getElementById('panel-title').innerText = node.name;
+          document.getElementById('panel-date').innerText = node.date || '';
+          var nowPlaying = document.getElementById('panel-now-playing');
+          var nowPlayingText = node.nowPlaying || 'add a song here';
+          if (node.nowPlayingUrl) {
+            nowPlaying.innerHTML = 'now playing: <a href="' + node.nowPlayingUrl + '" target="_blank" rel="noopener">' + nowPlayingText + '</a>';
+          } else {
+            nowPlaying.textContent = 'now playing: ' + nowPlayingText;
+          }
+          
+          let html = (node.content || '').replace(/\n/g, '<br/>');
+          if (node.img) {
+             html = `<img src="${node.img}" style="width:100%; border-radius:4px; margin-bottom:12px; border:1px solid rgba(255,255,255,0.1); object-fit:cover;">` + html;
+          }
+          document.getElementById('panel-content').innerHTML = html;
+          
+          panel.classList.add('visible');
+          panel.style.left = '';
+          panel.style.top = '';
+          panel.style.right = 'clamp(1rem, 3vw, 2rem)';
+          panel.style.bottom = '';
+          panel.style.transform = 'translateY(-50%)';
+
+          // Center chart on node
+          Graph.centerAt(node.x, node.y, 1000);
+           Graph.zoom(4.2, 1600);
+         });
+
+    (function () {
+      var panel = document.getElementById('info-panel');
+      var handle = document.getElementById('panel-drag-handle');
+      var closeBtn = document.getElementById('panel-close-btn');
+      var dragging = false;
+      var startX = 0;
+      var startY = 0;
+      var panelX = 0;
+      var panelY = 0;
+
+      closeBtn.addEventListener('click', function (event) {
+        event.stopPropagation();
+        panel.classList.remove('visible');
+      });
+
+      handle.addEventListener('mousedown', function (event) {
+        if (event.target === closeBtn) return;
+        dragging = true;
+        panel.classList.add('dragging');
+        var rect = panel.getBoundingClientRect();
+        panelX = rect.left;
+        panelY = rect.top;
+        startX = event.clientX;
+        startY = event.clientY;
+        panel.style.left = panelX + 'px';
+        panel.style.top = panelY + 'px';
+        panel.style.right = 'auto';
+        panel.style.bottom = 'auto';
+        panel.style.transform = 'none';
+        event.preventDefault();
+      });
+
+      handle.addEventListener('touchstart', function (event) {
+        if (event.target === closeBtn) return;
+        var touch = event.touches && event.touches[0];
+        if (!touch) return;
+        dragging = true;
+        panel.classList.add('dragging');
+        var rect = panel.getBoundingClientRect();
+        panelX = rect.left;
+        panelY = rect.top;
+        startX = touch.clientX;
+        startY = touch.clientY;
+        panel.style.left = panelX + 'px';
+        panel.style.top = panelY + 'px';
+        panel.style.right = 'auto';
+        panel.style.bottom = 'auto';
+        panel.style.transform = 'none';
+        event.preventDefault();
+      }, { passive: false });
+
+      window.addEventListener('mousemove', function (event) {
+        if (!dragging) return;
+        var nx = panelX + (event.clientX - startX);
+        var ny = panelY + (event.clientY - startY);
+        var maxX = window.innerWidth - panel.offsetWidth - 8;
+        var maxY = window.innerHeight - panel.offsetHeight - 8;
+        nx = Math.max(8, Math.min(maxX, nx));
+        ny = Math.max(8, Math.min(maxY, ny));
+        panel.style.left = nx + 'px';
+        panel.style.top = ny + 'px';
+      });
+
+      window.addEventListener('touchmove', function (event) {
+        if (!dragging) return;
+        var touch = event.touches && event.touches[0];
+        if (!touch) return;
+        var nx = panelX + (touch.clientX - startX);
+        var ny = panelY + (touch.clientY - startY);
+        var maxX = window.innerWidth - panel.offsetWidth - 8;
+        var maxY = window.innerHeight - panel.offsetHeight - 8;
+        nx = Math.max(8, Math.min(maxX, nx));
+        ny = Math.max(8, Math.min(maxY, ny));
+        panel.style.left = nx + 'px';
+        panel.style.top = ny + 'px';
+        event.preventDefault();
+      }, { passive: false });
+
+      window.addEventListener('mouseup', function () {
+        if (!dragging) return;
+        dragging = false;
+        panel.classList.remove('dragging');
+      });
+
+      window.addEventListener('touchend', function () {
+        if (!dragging) return;
+        dragging = false;
+        panel.classList.remove('dragging');
+      });
+    })();
+
+    // Make it responsive
+    window.addEventListener('resize', () => {
+      Graph.width(window.innerWidth).height(window.innerHeight);
+    });
+  </script>
+
+  <script src="scripts/page-transitions.js"></script>
+  <script src="scripts/dot-grid.js"></script>
+  <script src="scripts/clocks.js"></script>
+</body>
+</html>

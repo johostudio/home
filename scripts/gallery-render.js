@@ -43,7 +43,7 @@
     filtered.forEach(function (project) {
       var card = document.createElement('a');
       card.className = 'project-card';
-      card.href = 'writeups/' + project.slug + '.html';
+      card.href = project.href ? project.href : 'writeups/' + project.slug + '.html';
 
       // Find category label
       var catLabel = '';

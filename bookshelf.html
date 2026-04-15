@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>my bookshelf — joho's studio</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="stylesheet" href="styles/tailwind-prod.css">
+  <link rel="stylesheet" href="styles/dot-grid.css">
+  <link rel="stylesheet" href="styles/clocks.css">
+  <style>
+    body {
+      background: #000;
+      color: #e6eef6;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    .book-card {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      text-align: center;
+      width: 100%;
+      max-width: 190px;
+    }
+
+    .book-cover-wrap {
+      aspect-ratio: 2 / 3;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 4px;
+      margin-bottom: 0.7rem;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .book-card:hover .book-cover-wrap,
+    .book-card:focus-visible .book-cover-wrap {
+      border-color: rgba(192, 132, 252, 0.55);
+      box-shadow: 0 8px 30px rgba(192, 132, 252, 0.16);
+      transform: translateY(-2px);
+    }
+
+    .book-cover {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      background: #111;
+      transition: transform 0.4s ease, filter 0.3s ease;
+    }
+
+    .book-card:hover .book-cover,
+    .book-card:focus-visible .book-cover {
+      transform: scale(1.03);
+      filter: saturate(1.06);
+    }
+
+    .book-title {
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin: 0 0 0.25rem;
+      color: #fff;
+      transition: color 0.2s ease;
+    }
+
+    .book-card:hover .book-title,
+    .book-card:focus-visible .book-title {
+      color: #c084fc;
+    }
+
+    .book-authors {
+      font-size: 11px;
+      color: rgba(230, 238, 246, 0.5);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin: 0;
+      line-height: 1.35;
+    }
+
+    .books-status {
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(230, 238, 246, 0.55);
+      margin-bottom: 1.1rem;
+      min-height: 1.2em;
+      text-align: center;
+    }
+
+    #books-grid {
+      justify-items: center;
+    }
+
+    .books-empty {
+      text-align: center;
+      max-width: 560px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen relative">
+  <!-- Dot Grid Background -->
+  <div class="dot-grid-wrapper"></div>
+  <!-- Self-injecting site header -->
+  <script src="scripts/site-header.js"></script>
+
+  <a href="archives.html" class="back-btn relative z-50 text-[13px] text-white/50 hover:text-white transition-colors" style="position:fixed; top:24px; left:24px;">← back</a>
+
+  <main class="relative z-10 pt-40 px-6 pb-24 max-w-5xl mx-auto text-center">
+    <div class="mb-16 text-center">
+      <h1 class="text-4xl md:text-5xl font-normal tracking-tight mb-4" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:-0.082em;text-transform:lowercase;">my bookshelf</h1>
+      <p class="text-[0.72rem] text-white/45" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:-0.01em;text-transform:lowercase;">a cluttered shelf</p>
+    </div>
+
+    <p class="books-status" id="books-status">loading shelf...</p>
+
+    <div id="books-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8 gap-y-12"></div>
+
+    <div id="books-empty" class="books-empty hidden text-sm text-white/55 mt-8">
+      Could not load shelf yet. Add your Google Books settings in `bookshelf.html` and reload.
+    </div>
+  </main>
+
+  <script>
+    window.JOHO_BOOKS_CONFIG = window.JOHO_BOOKS_CONFIG || {
+      apiKey: 'AIzaSyC3HPjHmPbuCuLb2E5ZqrRLm13HXdXhiQY',
+      userId: '',
+      shelfId: '',
+      maxResults: 40
+    };
+  </script>
+
+  <script>
+    (function () {
+      var cfg = window.JOHO_BOOKS_CONFIG || {
+        apiKey: '',
+        userId: '',
+        shelfId: '',
+        maxResults: 40
+      };
+
+      var grid = document.getElementById('books-grid');
+      var status = document.getElementById('books-status');
+      var empty = document.getElementById('books-empty');
+
+      function escapeHtml(str) {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function renderBook(item) {
+        var volume = item.volumeInfo || {};
+        var title = volume.title || 'Untitled';
+        var authors = Array.isArray(volume.authors) ? volume.authors.join(', ') : 'Unknown author';
+        var cover = '';
+        if (volume.imageLinks) {
+          cover = volume.imageLinks.thumbnail || volume.imageLinks.smallThumbnail || '';
+        }
+        if (!cover) {
+          cover = 'https://via.placeholder.com/300x450/111111/777777?text=No+Cover';
+        }
+        cover = cover.replace(/^http:\/\//i, 'https://');
+
+        var infoLink = volume.infoLink || '#';
+
+        return [
+          '<a class="book-card" href="', escapeHtml(infoLink), '" target="_blank" rel="noopener">',
+          '<div class="book-cover-wrap">',
+          '<img class="book-cover" src="', escapeHtml(cover), '" alt="', escapeHtml(title), ' cover" loading="lazy">',
+          '</div>',
+          '<h3 class="book-title">', escapeHtml(title), '</h3>',
+          '<p class="book-authors">', escapeHtml(authors), '</p>',
+          '</a>'
+        ].join('');
+      }
+
+      function setMissingConfigMessage() {
+        status.textContent = 'add google books api details to load this shelf';
+        empty.classList.remove('hidden');
+      }
+
+      if (!cfg.apiKey || !cfg.userId || !cfg.shelfId) {
+        setMissingConfigMessage();
+        return;
+      }
+
+      var endpoint = 'https://www.googleapis.com/books/v1/users/' + encodeURIComponent(cfg.userId) +
+        '/bookshelves/' + encodeURIComponent(cfg.shelfId) +
+        '/volumes?maxResults=' + encodeURIComponent(cfg.maxResults || 40) +
+        '&key=' + encodeURIComponent(cfg.apiKey);
+
+      fetch(endpoint)
+        .then(function (response) {
+          if (!response.ok) throw new Error('request failed');
+          return response.json();
+        })
+        .then(function (data) {
+          var items = Array.isArray(data.items) ? data.items : [];
+          if (!items.length) {
+            status.textContent = 'shelf loaded, but no books returned';
+            empty.classList.remove('hidden');
+            return;
+          }
+
+          grid.innerHTML = items.map(renderBook).join('');
+          status.textContent = 'loaded ' + items.length + ' books';
+          empty.classList.add('hidden');
+        })
+        .catch(function () {
+          status.textContent = 'unable to load google books shelf';
+          empty.classList.remove('hidden');
+        });
+    })();
+  </script>
+
+  <script src="scripts/page-transitions.js"></script>
+  <script src="scripts/dot-grid.js"></script>
+  <script src="scripts/clocks.js"></script>
+</body>
+</html>

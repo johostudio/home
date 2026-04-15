@@ -41,78 +41,14 @@
   wrapper.className = 'clocks-wrapper';
   document.body.appendChild(wrapper);
 
-  var dragOffsetX = 0;
-
-  function applyHorizontalOffset() {
-    wrapper.style.setProperty('--clock-drag-x', dragOffsetX + 'px');
+  function updateClockVisibility() {
+    var y = window.scrollY || 0;
+    wrapper.classList.toggle('clocks-faded', y > 14);
+    wrapper.classList.toggle('clocks-hidden', y > 92);
   }
 
-  (function setupHorizontalDrag() {
-    if (window.matchMedia && !window.matchMedia('(min-width: 1000px)').matches) {
-      return;
-    }
-
-    var dragging = false;
-    var startClientX = 0;
-    var startOffsetX = 0;
-
-    function start(clientX) {
-      dragging = true;
-      startClientX = clientX;
-      startOffsetX = dragOffsetX;
-      wrapper.classList.add('clock-dragging');
-    }
-
-    function move(clientX) {
-      if (!dragging) return;
-      var next = startOffsetX + (clientX - startClientX);
-      var maxOffset = Math.max(0, Math.floor((window.innerWidth - 820) / 2));
-      if (next > maxOffset) next = maxOffset;
-      if (next < -maxOffset) next = -maxOffset;
-      dragOffsetX = next;
-      applyHorizontalOffset();
-    }
-
-    function end() {
-      if (!dragging) return;
-      dragging = false;
-      wrapper.classList.remove('clock-dragging');
-    }
-
-    wrapper.addEventListener('mousedown', function (event) {
-      if (event.button !== 0) return;
-      start(event.clientX);
-      event.preventDefault();
-    });
-
-    window.addEventListener('mousemove', function (event) {
-      move(event.clientX);
-    });
-    window.addEventListener('mouseup', end);
-
-    wrapper.addEventListener('touchstart', function (event) {
-      var touch = event.touches && event.touches[0];
-      if (!touch) return;
-      start(touch.clientX);
-    }, { passive: true });
-
-    window.addEventListener('touchmove', function (event) {
-      var touch = event.touches && event.touches[0];
-      if (!touch) return;
-      move(touch.clientX);
-    }, { passive: true });
-    window.addEventListener('touchend', end);
-    window.addEventListener('touchcancel', end);
-
-    window.addEventListener('resize', function () {
-      var maxOffset = Math.max(0, Math.floor((window.innerWidth - 820) / 2));
-      if (dragOffsetX > maxOffset) dragOffsetX = maxOffset;
-      if (dragOffsetX < -maxOffset) dragOffsetX = -maxOffset;
-      applyHorizontalOffset();
-    });
-  })();
-
-  applyHorizontalOffset();
+  window.addEventListener('scroll', updateClockVisibility, { passive: true });
+  updateClockVisibility();
 
   // Apply dark (black) clock text on home page only
   var clockPath = window.location.pathname;

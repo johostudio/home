@@ -20,12 +20,140 @@
       background: #000;
       color: #e6eef6;
       overflow-x: hidden;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     }
 
 
     /* ── Archives content ── */
     #archives-content {
       display: block;
+    }
+
+    #gardens-section {
+      position: relative;
+      z-index: 10;
+      padding: 9.5rem 1.5rem 3rem;
+      max-width: 980px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+      pointer-events: auto;
+    }
+
+    .archives-title {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      text-align: center;
+    }
+
+    .archives-title h1 {
+      margin: 0;
+      font-size: clamp(2.45rem, 5.1vw, 3.85rem);
+      font-weight: 400;
+      letter-spacing: -0.09em;
+      color: #f2f6ff;
+      text-transform: lowercase;
+      line-height: 0.94;
+    }
+
+    .archives-title p {
+      margin: 0.55rem 0 0;
+      font-size: 0.74rem;
+      letter-spacing: -0.01em;
+      text-transform: lowercase;
+      color: rgba(190, 198, 214, 0.52);
+    }
+
+    .archives-links {
+      width: min(820px, 100%);
+      display: grid;
+      grid-template-columns: repeat(3, minmax(130px, 1fr));
+      gap: clamp(1.2rem, 5vw, 4rem);
+      align-items: start;
+      justify-items: center;
+    }
+
+    .archives-link {
+      text-decoration: none;
+      color: rgba(230, 238, 246, 0.72);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      text-align: center;
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+
+    .archives-link svg {
+      width: 26px;
+      height: 26px;
+      flex-shrink: 0;
+      filter: drop-shadow(0 0 10px rgba(192, 132, 252, 0.15));
+      transition: transform 0.22s ease;
+    }
+
+    .archives-link .sketch-icon {
+      stroke-width: 2.15;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 2.6 1.8;
+      transform: rotate(-1.25deg);
+      opacity: 0.92;
+    }
+
+    .archives-link .sketch-icon path,
+    .archives-link .sketch-icon line,
+    .archives-link .sketch-icon circle,
+    .archives-link .sketch-icon rect {
+      vector-effect: non-scaling-stroke;
+    }
+
+    .archives-link:nth-child(2) .sketch-icon {
+      transform: rotate(1.4deg);
+      stroke-dasharray: 2.2 1.7;
+    }
+
+    .archives-link:nth-child(3) .sketch-icon {
+      transform: rotate(-0.7deg);
+      stroke-dasharray: 2.9 1.7;
+    }
+
+    .archives-link-label {
+      font-size: 1.02rem;
+      letter-spacing: -0.042em;
+      font-weight: 400;
+      text-transform: lowercase;
+      line-height: 1.35;
+      color: rgba(230, 238, 246, 0.88);
+    }
+
+    .archives-link:hover,
+    .archives-link:focus-visible {
+      color: #c084fc;
+      transform: translateY(-2px);
+      outline: none;
+    }
+
+    .archives-link:hover svg,
+    .archives-link:focus-visible svg {
+      transform: scale(1.12);
+    }
+
+
+    @media (max-width: 640px) {
+      #gardens-section {
+        padding-top: 8rem;
+      }
+
+      .archives-links {
+        grid-template-columns: 1fr;
+        gap: 1.35rem;
+      }
+
+      .archives-link {
+        gap: 0.5rem;
+      }
     }
 
     /* ── Shared fixed nav overlay (over both sections) ── */
@@ -49,7 +177,7 @@
       align-items: center;
       gap: 0.4rem;
       font-size: 1.2rem;
-      font-weight: 700;
+      font-weight: 400;
       letter-spacing: -0.13em;
       color: #e6eef6;
     }
@@ -133,8 +261,9 @@
 
     #scroll-strip span {
       font-size: 0.72rem;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
+      letter-spacing: -0.02em;
+      text-transform: lowercase;
+      font-weight: 400;
       color: rgba(200, 180, 255, 0.55);
     }
 
@@ -180,18 +309,21 @@
     }
 
     .gallery-header p {
-      font-size: 0.68rem;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: rgba(192, 132, 252, 0.45);
+      font-size: 0.72rem;
+      letter-spacing: -0.01em;
+      text-transform: lowercase;
+      color: rgba(190, 198, 214, 0.52);
       margin-bottom: 0.5rem;
+      font-weight: 400;
     }
 
     .gallery-header h2 {
       font-size: clamp(1.8rem, 5vw, 3rem);
-      font-weight: 700;
-      letter-spacing: -0.07em;
+      font-weight: 400;
+      letter-spacing: -0.09em;
       color: #e6eef6;
+      line-height: 0.95;
+      text-transform: lowercase;
     }
 
     /* Carousel */
@@ -260,17 +392,19 @@
 
     .proj-num {
       font-size: 0.65rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
+      letter-spacing: -0.01em;
+      text-transform: lowercase;
       color: rgba(192, 132, 252, 0.4);
+      font-weight: 400;
     }
 
     .proj-title {
       font-size: clamp(1.3rem, 3vw, 1.8rem);
-      font-weight: 700;
-      letter-spacing: -0.05em;
+      font-weight: 400;
+      letter-spacing: -0.08em;
       color: #e6eef6;
       line-height: 1.1;
+      text-transform: lowercase;
     }
 
     .proj-intent {
@@ -287,12 +421,13 @@
 
     .stack-tag {
       font-size: 0.62rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
+      letter-spacing: -0.01em;
+      text-transform: lowercase;
       padding: 0.25rem 0.6rem;
       border: 1px solid rgba(192, 132, 252, 0.22);
       border-radius: 2px;
       color: rgba(192, 132, 252, 0.65);
+      font-weight: 400;
     }
 
     .proj-links {
@@ -304,14 +439,15 @@
 
     .proj-links a {
       font-size: 0.72rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      letter-spacing: -0.01em;
+      text-transform: lowercase;
       color: rgba(192, 132, 252, 0.65);
       text-decoration: none;
       display: flex;
       align-items: center;
       gap: 0.35rem;
       transition: color .18s;
+      font-weight: 400;
     }
 
     .proj-links a:hover {
@@ -392,225 +528,45 @@
   <!-- Back button -->
   <a href="/" class="back-btn" style="position:fixed;top:1rem;left:1rem;z-index:9998;">← back</a>
 
-  <!-- Archives Content (hidden until unlocked) -->
+  <!-- Archives Content -->
   <div id="archives-content">
 
-    <!-- ── Section 1: cables.gl Sphere ── -->
-    <div id="sphere-section">
-      <div id="cables-wrap">
-        <iframe src="https://cables.gl/view/5YDGDb" allow="autoplay; fullscreen" allowfullscreen
-          title="cloud — cables.gl"></iframe>
+    <!-- ── Section 1: Minimal Archives Nav ── -->
+    <div id="gardens-section">
+      <div class="archives-title">
+        <h1>archives</h1>
+        <p>joho's archives</p>
       </div>
+      <div class="archives-links">
+        <a href="scrambled.html" class="archives-link" title="a scrambled mind">
+          <svg class="sketch-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5c1.1-1.8 2.6-2.8 4.6-2.8 1.4 0 2.8.6 4 1.6 1.5 1.2 2.8 1.8 4.2 1.8 1.2 0 2.4-.4 3.2-1.2"></path><path d="M4.8 15.6c1.1-1.1 2.4-1.7 3.9-1.7 1.4 0 2.8.5 4.2 1.5 1.7 1.3 3.1 1.9 4.5 1.9 1 0 1.9-.2 2.8-.8"></path><circle cx="7" cy="7" r="1.4"></circle><circle cx="12" cy="6" r="1.1"></circle><circle cx="17" cy="7.4" r="1.3"></circle></svg>
+          <span class="archives-link-label">a scrambled mind</span>
+        </a>
 
-      <!-- Scroll strip at bottom -->
-      <div id="scroll-strip" onclick="document.getElementById('gallery-section').scrollIntoView({behavior:'smooth'})">
-        <span>projects</span>
-        <div class="scroll-arrow"></div>
+        <a href="bookshelf.html" class="archives-link" title="a cluttered shelf">
+          <svg class="sketch-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.2 5.2h3.1v13.4H4.2z"></path><path d="M8.6 4.3h3.7v14.3H8.6z"></path><path d="M13.5 5.6H18v13H13.5z"></path><path d="M4 19.6h16"></path><line x1="10.5" y1="7" x2="10.5" y2="15"></line></svg>
+          <span class="archives-link-label">a cluttered shelf</span>
+        </a>
+
+        <a href="atlas.html" class="archives-link" title="a colourful atlas">
+          <svg class="sketch-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 8.2l6.5-2.1 4.3 1.6 6.4-1.8v10.1l-6.4 2.1-4.3-1.6-6.5 1.8z"></path><path d="M9.9 6.1v10.2"></path><path d="M14.2 7.7v10.2"></path><path d="M3.4 12.2l6.5-1.8 4.3 1.4 6.4-1.7"></path></svg>
+          <span class="archives-link-label">a colourful atlas</span>
+        </a>
       </div>
     </div>
 
-    <!-- ── Section 2: Project Gallery ── -->
-    <div id="gallery-section">
-
-      <div class="gallery-content">
-        <div class="gallery-header">
-          <p>selected work</p>
-          <h2>projects</h2>
-        </div>
-
-        <div class="carousel-outer">
-          <div class="carousel-viewport">
-            <div class="carousel-track" id="carousel-track">
-
-              <!-- ════ CARD 1 — edit your project data here ════ -->
-              <div class="proj-card">
-                <div class="proj-img-wrap">
-                  <!-- Updated with local asset (heading slider) -->
-                  <img src="gif/archive-png/heading%20slider.jpg" alt="verdant">
-                </div>
-                <div class="proj-info">
-                  <span class="proj-num">01 / 03</span>
-                  <h3 class="proj-title">verdant</h3>
-                  <p class="proj-intent">Climate resilience dashboard for city agencies to map urban heat islands and
-                    plan green infrastructure.</p>
-                  <div class="proj-stack">
-                    <span class="stack-tag">React</span>
-                    <span class="stack-tag">Next.js</span>
-                    <span class="stack-tag">Mapbox</span>
-                    <span class="stack-tag">Tailwind</span>
-                  </div>
-                  <div class="proj-links">
-                    <a href="https://github.com/martinlcam/verdant" target="_blank" rel="noopener" aria-label="GitHub">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path
-                          d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z" />
-                      </svg>
-                      GitHub
-                    </a>
-                    <a href="https://devpost.com/software/verdant-8hf09j" target="_blank" rel="noopener">Devpost →</a>
-                    <a href="https://verdant-delta-ashen.vercel.app/" target="_blank" rel="noopener">Website →</a>
-                  </div>
-                </div>
-              </div>
-
-              <!-- ════ CARD 2 ════ -->
-              <div class="proj-card">
-                <div class="proj-img-wrap">
-                  <img src="gif/archive-png/landing%20thumbnaiil.png" alt="ascend.ai">
-                </div>
-                <div class="proj-info">
-                  <span class="proj-num">02 / 03</span>
-                  <h3 class="proj-title">ascend.ai</h3>
-                  <p class="proj-intent">Personalized financial advisor engine that adapts recommendations based on user
-                    context.</p>
-                  <div class="proj-stack">
-                    <span class="stack-tag">Python</span>
-                    <span class="stack-tag">Flask</span>
-                    <span class="stack-tag">React</span>
-                    <span class="stack-tag">Firebase</span>
-                  </div>
-                  <div class="proj-links">
-                    <a href="https://github.com/ExxML/ascend.ai" target="_blank" rel="noopener" aria-label="GitHub">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path
-                          d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z" />
-                      </svg>
-                      GitHub
-                    </a>
-                    <a href="https://devpost.com/software/ascend-ai-a-personalized-financial-advisor-engine"
-                      target="_blank" rel="noopener">Devpost →</a>
-                  </div>
-                </div>
-              </div>
-
-              <!-- ════ CARD 3 ════ -->
-              <div class="proj-card">
-                <div class="proj-img-wrap">
-                  <img src="gif/archive-png/cbcf021b-1.png" alt="bussin!">
-                </div>
-                <div class="proj-info">
-                  <span class="proj-num">03 / 03</span>
-                  <h3 class="proj-title">bussin!</h3>
-                  <p class="proj-intent">Real-time bus tracking app with live location and arrival updates for reliable
-                    transit.</p>
-                  <div class="proj-stack">
-                    <span class="stack-tag">Flutter</span>
-                    <span class="stack-tag">Dart</span>
-                    <span class="stack-tag">Kotlin</span>
-                    <span class="stack-tag">Google Maps</span>
-                  </div>
-                  <div class="proj-links">
-                    <a href="https://github.com/grubk/bussin" target="_blank" rel="noopener" aria-label="GitHub">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path
-                          d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z" />
-                      </svg>
-                      GitHub
-                    </a>
-                    <a href="https://devpost.com/software/bussin-cgztw6" target="_blank" rel="noopener">Devpost →</a>
-                  </div>
-                </div>
-              </div>
-
-            </div><!-- /.carousel-track -->
-          </div><!-- /.carousel-viewport -->
-
-          <!-- Arrow buttons -->
-          <button class="carousel-btn" id="btn-prev" aria-label="Previous">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-          </button>
-          <button class="carousel-btn" id="btn-next" aria-label="Next">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </button>
-        </div><!-- /.carousel-outer -->
-
-        <!-- Dots -->
-        <div class="carousel-dots" id="carousel-dots"></div>
-
-      </div><!-- /.gallery-content -->
-    </div><!-- /#gallery-section -->
+    <!-- ── Section 2: cables.gl Sphere ── -->
+    <div id="sphere-section" style="position:relative; height:100vh;">
+      <div id="cables-wrap" style="position:absolute; top:0; left:0; right:0; bottom:0;">
+        <iframe id="archives-cables-frame" src="https://cables.gl/view/5YDGDb" loading="eager" allow="autoplay; fullscreen" allowfullscreen
+          title="cloud — cables.gl" style="width:100%; height:100%; border:none; display:block; background:transparent;"></iframe>
+      </div>
+    </div>
 
   </div><!-- /#archives-content -->
-
-  <script>
-    /* ── GSAP carousel ── */
-    (function () {
-      const track = document.getElementById('carousel-track');
-      const cards = track.querySelectorAll('.proj-card');
-      const dotsEl = document.getElementById('carousel-dots');
-      const btnPrev = document.getElementById('btn-prev');
-      const btnNext = document.getElementById('btn-next');
-      const total = cards.length;
-      let current = 0;
-      let animating = false;
-
-      /* Build dots */
-      cards.forEach(function (_, i) {
-        const d = document.createElement('div');
-        d.className = 'dot' + (i === 0 ? ' active' : '');
-        d.addEventListener('click', function () { goTo(i); });
-        dotsEl.appendChild(d);
-      });
-
-      function updateDots() {
-        dotsEl.querySelectorAll('.dot').forEach(function (d, i) {
-          d.classList.toggle('active', i === current);
-        });
-      }
-
-      function goTo(idx) {
-        if (animating || idx === current) return;
-        animating = true;
-        const dir = idx > current ? 1 : -1;
-        const outX = dir * -100;
-        const inX = dir * 100;
-
-        /* slide current out */
-        gsap.to(cards[current], { x: outX + '%', opacity: 0, duration: 0.45, ease: 'power2.in' });
-
-        /* prepare incoming card */
-        gsap.set(cards[idx], { x: (-inX) + '%', opacity: 0 });
-
-        /* slide new card in */
-        gsap.to(cards[idx], {
-          x: '0%', opacity: 1, duration: 0.45, delay: 0.15, ease: 'power2.out',
-          onComplete: function () {
-            /* reset outgoing */
-            gsap.set(cards[current], { x: '0%', opacity: 0 });
-            current = idx;
-            updateDots();
-            animating = false;
-          }
-        });
-      }
-
-      /* Hide all but first */
-      cards.forEach(function (c, i) {
-        if (i !== 0) gsap.set(c, { opacity: 0, position: 'absolute', top: 0, left: 0, width: '100%' });
-      });
-      track.style.position = 'relative';
-
-      /* Animate first card in */
-      gsap.from(cards[0], { opacity: 0, y: 24, duration: 0.7, ease: 'power2.out', delay: 0.2 });
-
-      btnNext.addEventListener('click', function () { goTo((current + 1) % total); });
-      btnPrev.addEventListener('click', function () { goTo((current - 1 + total) % total); });
-
-      /* Keyboard */
-      document.addEventListener('keydown', function (e) {
-        if (e.key === 'ArrowRight') goTo((current + 1) % total);
-        if (e.key === 'ArrowLeft') goTo((current - 1 + total) % total);
-      });
-    })();
-  </script>
 
   <script src="scripts/page-transitions.js"></script>
   <script src="scripts/dot-grid.js"></script>
   <script src="scripts/clocks.js"></script>
 </body>
-
 </html>

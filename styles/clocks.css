@@ -16,23 +16,16 @@
   inset: 0;
   z-index: 40;
   pointer-events: none;
-  transform: translateX(var(--clock-drag-x, 0px));
+  opacity: 1;
+  transition: opacity 0.28s ease;
 }
 
-.clock-left,
-.clock-right {
-  transition: left 0.2s ease, right 0.2s ease;
+.clocks-wrapper.clocks-faded {
+  opacity: 0.42;
 }
 
-@media (min-width: 1000px) {
-  .clocks-wrapper {
-    pointer-events: auto;
-    cursor: ew-resize;
-  }
-
-  .clocks-wrapper.clock-dragging {
-    cursor: grabbing;
-  }
+.clocks-wrapper.clocks-hidden {
+  opacity: 0;
 }
 
 .clock-left {
@@ -70,7 +63,6 @@
 /* ── Mobile clock spacing fixes ── */
 @media (max-width: 768px) {
   .clocks-wrapper {
-    transform: none;
     pointer-events: none;
   }
 
