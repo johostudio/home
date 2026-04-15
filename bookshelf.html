@@ -140,8 +140,8 @@
       width: 0%;
       height: 100%;
       border-radius: 999px;
-      background: linear-gradient(90deg, #d8a166 0%, #ecbf83 36%, #f6d29b 52%, #d9a15f 100%);
-      box-shadow: 0 0 14px rgba(236, 191, 131, 0.32);
+      background: linear-gradient(90deg, #8b5cf6 0%, #a78bfa 34%, #c4b5fd 56%, #9333ea 100%);
+      box-shadow: 0 0 14px rgba(167, 139, 250, 0.35);
       transition: width 0.28s ease;
       position: relative;
       overflow: hidden;
@@ -395,6 +395,14 @@
       color: #f0dcff;
     }
 
+    .book-status-reading {
+      color: rgba(192, 132, 252, 0.9) !important;
+    }
+
+    .book-status-finished {
+      color: rgba(230, 238, 246, 0.5) !important;
+    }
+
     .book-modal-review {
       font-size: 0.78rem;
       line-height: 1.45;
@@ -419,28 +427,108 @@
     }
 
     @media (max-width: 920px) {
+      main {
+        padding-top: 9.5rem !important;
+        padding-left: 1.15rem !important;
+        padding-right: 1.15rem !important;
+      }
+
       #books-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.45rem 0.9rem;
+        margin-bottom: 120px;
+      }
+
+      .book-card {
+        max-width: 205px;
+      }
+
+      .book-modal {
+        padding: 0.95rem;
+      }
+
+      .book-modal-panel {
+        max-height: calc(100dvh - 1.9rem);
+        overflow-y: auto;
       }
     }
 
     @media (max-width: 520px) {
+      .back-btn {
+        top: 18px !important;
+        left: 14px !important;
+        font-size: 12px !important;
+      }
+
+      main {
+        padding-top: 8.25rem !important;
+        padding-left: 0.9rem !important;
+        padding-right: 0.9rem !important;
+        padding-bottom: 5.8rem !important;
+      }
+
       #books-grid {
         grid-template-columns: 1fr;
-        margin-bottom: 110px;
+        gap: 1.25rem;
+        margin-bottom: 96px;
+      }
+
+      .book-card {
+        max-width: min(82vw, 250px);
+      }
+
+      .books-controls {
+        margin-bottom: 0.75rem;
+        gap: 0.35rem;
+      }
+
+      .books-sort-btn {
+        font-size: 0.63rem;
+        padding: 0.3rem 0.58rem;
       }
 
       .archive-footer {
-        margin-top: 180px;
+        margin-top: 150px;
         margin-bottom: 0.45rem;
+      }
+
+      .book-modal {
+        padding: 0.55rem;
+        align-items: flex-end;
+      }
+
+      .book-modal-backdrop {
+        backdrop-filter: none;
+      }
+
+      .book-modal-panel {
+        width: min(100%, 540px);
+        border-radius: 10px 10px 0 0;
+        padding: 0.82rem 0.82rem 0.9rem;
+        max-height: calc(100dvh - 0.8rem);
       }
 
       .book-modal-grid {
         grid-template-columns: 1fr;
+        gap: 0.72rem;
       }
 
       .book-modal-cover {
-        width: min(170px, 52vw);
+        width: min(156px, 48vw);
+        margin: 0 auto;
+      }
+
+      .book-modal-meta {
+        gap: 0.48rem;
+      }
+
+      .book-modal-meta .book-authors {
+        font-size: 0.72rem;
+      }
+
+      .book-modal-review {
+        font-size: 0.74rem;
+        line-height: 1.4;
       }
     }
   </style>
@@ -612,6 +700,7 @@ it really brought an interesting argument, often pushed myself to compare to my 
       var visualProgress = 0;
       var currentSort = 'all';
       var curatedItemsCache = [];
+      var isCuratedShelfReady = false;
       var fallbackCover = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 450">' +
         '<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">' +
@@ -699,8 +788,10 @@ it really brought an interesting argument, often pushed myself to compare to my 
 
         function push(url) {
           if (!url) return;
-          if (list.indexOf(url) >= 0) return;
-          list.push(url);
+          var safeUrl = String(url).trim().replace(/^http:/, 'https:');
+          if (!safeUrl) return;
+          if (list.indexOf(safeUrl) >= 0) return;
+          list.push(safeUrl);
         }
 
         if (item.cover_url) push(item.cover_url);
@@ -716,12 +807,16 @@ it really brought an interesting argument, often pushed myself to compare to my 
         }
 
         if (Array.isArray(item.isbn) && item.isbn.length) {
-          var isbn = encodeURIComponent(item.isbn[0]);
-          push('https://images.penguinrandomhouse.com/cover/' + isbn);
-          push('https://covers.openlibrary.org/b/isbn/' + isbn + '-L.jpg');
-          push('https://covers.openlibrary.org/b/isbn/' + isbn + '-M.jpg');
-          push('https://covers.openlibrary.org/b/isbn/' + isbn + '-S.jpg');
-          push('https://books.google.com/books/content?vid=ISBN:' + isbn + '&printsec=frontcover&img=1&zoom=1&source=gbs_api');
+          item.isbn.slice(0, 3).forEach(function (rawIsbn) {
+            var isbn = encodeURIComponent(rawIsbn);
+            if (!isbn) return;
+            push('https://images.penguinrandomhouse.com/cover/' + isbn);
+            push('https://covers.openlibrary.org/b/isbn/' + isbn + '-L.jpg');
+            push('https://covers.openlibrary.org/b/isbn/' + isbn + '-M.jpg');
+            push('https://covers.openlibrary.org/b/isbn/' + isbn + '-S.jpg');
+            push('https://books.google.com/books/content?vid=ISBN:' + isbn + '&printsec=frontcover&img=1&zoom=2&source=gbs_api');
+            push('https://books.google.com/books/content?vid=ISBN:' + isbn + '&printsec=frontcover&img=1&zoom=1&source=gbs_api');
+          });
         }
 
         if (!list.length) push(fallbackCover);
@@ -807,7 +902,10 @@ it really brought an interesting argument, often pushed myself to compare to my 
         }
 
         var filtered = curatedItemsCache.filter(shouldIncludeItemBySort);
-        if (controls) controls.removeAttribute('hidden');
+        if (controls) {
+          if (isCuratedShelfReady) controls.removeAttribute('hidden');
+          else controls.setAttribute('hidden', 'hidden');
+        }
         updateSortButtons();
 
         if (!filtered.length) {
@@ -987,31 +1085,6 @@ it really brought an interesting argument, often pushed myself to compare to my 
           });
       }
 
-      function preloadBookCovers(items) {
-        var listLike = Array.isArray(items) ? items : [];
-        if (!listLike.length) return Promise.resolve();
-
-        var total = listLike.length;
-        var loaded = 0;
-
-        function bump() {
-          loaded += 1;
-          var pct = 15 + (loaded / total) * 80;
-          setProgress(pct, 'loading covers...');
-        }
-
-        var tasks = listLike.map(function (item) {
-          return new Promise(function (resolve) {
-            var img = new Image();
-            img.onload = function () { bump(); resolve(); };
-            img.onerror = function () { bump(); resolve(); };
-            img.src = openLibraryCover(item);
-          });
-        });
-
-        return Promise.all(tasks).then(function () { });
-      }
-
       function wireCoverFallbacks() {
         grid.querySelectorAll('.book-cover').forEach(function (img) {
           var raw = img.getAttribute('data-cover-candidates') || '';
@@ -1038,6 +1111,8 @@ it really brought an interesting argument, often pushed myself to compare to my 
       }
 
       function loadCuratedShelf() {
+        isCuratedShelfReady = false;
+        if (controls) controls.setAttribute('hidden', 'hidden');
         showLoader('loading shelf...');
         setProgress(8, 'finding books...');
         status.textContent = 'loading curated shelf...';
@@ -1052,24 +1127,18 @@ it really brought an interesting argument, often pushed myself to compare to my 
             }
 
             setProgress(16, 'found books...');
-            return preloadBookCovers(valid).then(function () {
-              curatedItemsCache = valid.slice();
-              renderCuratedItemsFromCache();
-              hideLoader('loaded');
-            });
+            curatedItemsCache = valid.slice();
+            renderCuratedItemsFromCache();
+            hideLoader('loaded');
+            isCuratedShelfReady = true;
+            if (controls) controls.removeAttribute('hidden');
+            updateSortButtons();
           })
           .catch(function () {
             hideLoader('done');
             status.textContent = 'unable to load curated shelf right now.';
             empty.classList.remove('hidden');
           });
-      }
-
-      function hasNoteContent(noteMeta) {
-        if (!noteMeta) return false;
-        var ratingValue = Number(noteMeta.rating);
-        var reviewText = noteMeta.review == null ? '' : String(noteMeta.review).trim();
-        return !!(reviewText || (Number.isFinite(ratingValue) && ratingValue > 0));
       }
 
       function finishCloseModal() {
@@ -1095,7 +1164,8 @@ it really brought an interesting argument, often pushed myself to compare to my 
         if (!bookModal || !item) return;
         var title = item.title || 'untitled';
         var authors = Array.isArray(item.author_name) ? item.author_name.join(', ') : 'unknown author';
-        var cover = openLibraryCover(item);
+        var coverList = coverCandidates(item);
+        var cover = coverList.length ? coverList[0] : fallbackCover;
         var infoLink = item.info_link || (item.key ? ('https://openlibrary.org' + item.key) : '#');
         var noteMeta = findBookNote(item);
         var statusValue = normalizeStatus(noteMeta && noteMeta.status);
@@ -1105,6 +1175,19 @@ it really brought an interesting argument, often pushed myself to compare to my 
         bookModalTitle.textContent = title;
         bookModalCover.src = cover;
         bookModalCover.alt = title + ' cover';
+        bookModalCover.dataset.coverIndex = '0';
+        bookModalCover.onerror = function () {
+          var current = parseInt(bookModalCover.dataset.coverIndex || '0', 10);
+          if (!Number.isFinite(current)) current = 0;
+          var next = current + 1;
+          if (next < coverList.length) {
+            bookModalCover.dataset.coverIndex = String(next);
+            bookModalCover.src = coverList[next];
+            return;
+          }
+          bookModalCover.onerror = null;
+          bookModalCover.src = fallbackCover;
+        };
         bookModalAuthors.textContent = authors;
         bookModalLink.href = infoLink;
 
@@ -1148,8 +1231,8 @@ it really brought an interesting argument, often pushed myself to compare to my 
         var cover = openLibraryCover(item);
         var coverList = coverCandidates(item);
         var noteMeta = findBookNote(item);
-        var hasNote = hasNoteContent(noteMeta);
         var statusValue = normalizeStatus(noteMeta && noteMeta.status);
+        var statusClass = statusValue === 'finished' ? 'book-status-finished' : 'book-status-reading';
         var chips = [];
 
         chips.push(statusValue);
@@ -1157,13 +1240,12 @@ it really brought an interesting argument, often pushed myself to compare to my 
         return [
           '<button class="book-card" type="button" data-book-card data-book-json="', escapeHtml(JSON.stringify(item)), '">',
           '<div class="book-cover-wrap">',
-          '<img class="book-cover" src="', escapeHtml(cover), '" alt="', escapeHtml(title), ' cover" loading="eager" decoding="async" data-cover-candidates="', escapeHtml(coverList.join('|')), '" data-cover-index="0">',
+          '<img class="book-cover" src="', escapeHtml(cover), '" alt="', escapeHtml(title), ' cover" loading="lazy" decoding="async" data-cover-candidates="', escapeHtml(coverList.join('|')), '" data-cover-index="0">',
           '</div>',
           '<div class="book-plank" aria-hidden="true"></div>',
           '<h3 class="book-title">', escapeHtml(title), '</h3>',
           '<p class="book-authors">', escapeHtml(authors), '</p>',
-          '<p class="book-authors" style="margin-top:0.28rem;">', escapeHtml(chips.join(' • ')), '</p>',
-          hasNote ? '<p class="book-authors" style="margin-top:0.35rem;color:rgba(192,132,252,0.76);">review added</p>' : '',
+          '<p class="book-authors ', statusClass, '" style="margin-top:0.28rem;">', escapeHtml(chips.join(' • ')), '</p>',
           '</button>'
         ].join('');
       }
@@ -1230,14 +1312,12 @@ it really brought an interesting argument, often pushed myself to compare to my 
             }
 
             setProgress(24, 'found books...');
-            return preloadBookCovers(items).then(function () {
-              grid.innerHTML = items.map(renderBook).join('');
-              wireCoverFallbacks();
-              wireBookCardEvents();
-              status.textContent = 'loaded ' + items.length + ' books';
-              empty.classList.add('hidden');
-              hideLoader('loaded');
-            });
+            grid.innerHTML = items.map(renderBook).join('');
+            wireCoverFallbacks();
+            wireBookCardEvents();
+            status.textContent = 'loaded ' + items.length + ' books';
+            empty.classList.add('hidden');
+            hideLoader('loaded');
           })
           .catch(function () {
             hideLoader('done');
