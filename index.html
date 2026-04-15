@@ -376,6 +376,11 @@
       filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.4));
     }
 
+    .home-snoopy-sticker {
+      z-index: 180 !important;
+      filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.45));
+    }
+
     @keyframes stickerFloat {
 
       0%,
@@ -442,9 +447,9 @@
   <!-- Self-injecting site header -->
   <script src="scripts/site-header.js"></script>
 
-  <div class="sticker-layer" data-sticker-layer data-safe-bottom="120">
-    <button class="sticker" type="button" data-sticker data-size="156" data-x="26" data-y="84" data-rotation="-8" aria-label="snoopy sticker">
-      <img src="https://upload.wikimedia.org/wikipedia/en/5/53/Snoopy_Peanuts.png" alt="Snoopy sticker" loading="lazy">
+  <div class="sticker-layer" data-sticker-layer data-safe-bottom="120" data-random-spawn="off">
+    <button class="sticker home-snoopy-sticker" type="button" data-sticker data-size="162" data-x="30" data-y="78" data-rotation="-8" style="--drag-x:30px;--drag-y:78px;--rot:-8deg;" aria-label="snoopy sticker">
+      <img src="gif/stickers/snoopy.png" alt="Snoopy sticker" loading="lazy">
     </button>
   </div>
 

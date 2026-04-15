@@ -235,11 +235,33 @@
       gap: 0.3rem;
     }
 
+    .song-rec-list.cycle-mode {
+      position: relative;
+      display: block;
+      min-height: 1.85rem;
+      overflow: hidden;
+    }
+
     .song-rec-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 0.6rem;
+    }
+
+    .song-rec-list.cycle-mode .song-rec-item {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transform: translateY(7px);
+      transition: opacity 0.36s ease, transform 0.36s ease;
+      pointer-events: none;
+    }
+
+    .song-rec-list.cycle-mode .song-rec-item.song-rec-active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
     }
 
     .song-rec-text {
@@ -542,8 +564,44 @@
       var input = document.getElementById('song-rec-input');
       var list = document.getElementById('song-rec-list');
       var note = document.getElementById('song-rec-note');
+      var cycleTimer = 0;
+      var cycleIndex = 0;
+      var cycleItems = [];
 
       if (!form || !input || !list || !note) return;
+
+      function stopCycle() {
+        if (cycleTimer) {
+          clearInterval(cycleTimer);
+          cycleTimer = 0;
+        }
+      }
+
+      function setActiveCycleItem(index) {
+        if (!cycleItems.length) return;
+        cycleItems.forEach(function (item, itemIndex) {
+          item.classList.toggle('song-rec-active', itemIndex === index);
+        });
+      }
+
+      function startCycle() {
+        if (cycleItems.length < 2) return;
+        stopCycle();
+        cycleTimer = setInterval(function () {
+          cycleIndex = (cycleIndex + 1) % cycleItems.length;
+          setActiveCycleItem(cycleIndex);
+        }, 2800);
+      }
+
+      list.addEventListener('mouseenter', function () {
+        stopCycle();
+      });
+
+      list.addEventListener('mouseleave', function () {
+        if (list.classList.contains('cycle-mode')) {
+          startCycle();
+        }
+      });
 
       function resolveWorkerUrl() {
         if (CLOUDFLARE_WORKER_URL) return CLOUDFLARE_WORKER_URL;
@@ -606,6 +664,10 @@
       var clientId = getClientId();
 
       function renderSongs(items) {
+        stopCycle();
+        cycleItems = [];
+        cycleIndex = 0;
+        list.classList.remove('cycle-mode');
         list.innerHTML = '';
         if (!items.length) {
           var empty = document.createElement('li');
@@ -636,6 +698,14 @@
           }
           list.appendChild(li);
         });
+
+        if (items.length >= 5) {
+          list.classList.add('cycle-mode');
+          cycleItems = Array.prototype.slice.call(list.querySelectorAll('.song-rec-item'));
+          cycleIndex = 0;
+          setActiveCycleItem(cycleIndex);
+          startCycle();
+        }
       }
 
       async function loadSongs() {
@@ -649,8 +719,13 @@
           var res = await fetch(workerPath('/song-recs'));
           if (!res.ok) throw new Error('failed to load');
           var data = await res.json();
-          renderSongs(normalizeSongs(data));
-          note.textContent = 'shared globally on this page.';
+          var items = normalizeSongs(data);
+          renderSongs(items);
+          if (items.length >= 5) {
+            note.textContent = 'shared globally on this page. compact cycling view is on.';
+          } else {
+            note.textContent = 'shared globally on this page.';
+          }
         } catch (_e) {
           note.textContent = 'could not load recommendations right now.';
           renderSongs([]);
