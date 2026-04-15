@@ -235,7 +235,8 @@
       border: none;
       display: block;
       background: #000;
-      pointer-events: none;
+      pointer-events: auto;
+      touch-action: pan-x pan-y;
     }
 
     /* Scroll strip at bottom of sphere */
@@ -622,6 +623,8 @@
   <script>
     (function () {
       var backBtn = document.getElementById('back-to-top');
+      var sphereSection = document.getElementById('sphere-section');
+      var archivesCablesFrame = document.getElementById('archives-cables-frame');
       if (!backBtn) return;
 
       function updateBackBtn() {
@@ -635,6 +638,37 @@
 
       window.addEventListener('scroll', updateBackBtn, { passive: true });
       updateBackBtn();
+
+      if (sphereSection && archivesCablesFrame) {
+        var startY = 0;
+        var dragging = false;
+
+        sphereSection.addEventListener('touchstart', function (event) {
+          var touch = event.touches && event.touches[0];
+          if (!touch) return;
+          startY = touch.clientY;
+          dragging = true;
+          archivesCablesFrame.style.pointerEvents = 'auto';
+        }, { passive: true });
+
+        sphereSection.addEventListener('touchmove', function (event) {
+          if (!dragging) return;
+          var touch = event.touches && event.touches[0];
+          if (!touch) return;
+          var dy = Math.abs(touch.clientY - startY);
+          if (dy > 24) {
+            archivesCablesFrame.style.pointerEvents = 'none';
+          }
+        }, { passive: true });
+
+        function resetFramePointer() {
+          dragging = false;
+          archivesCablesFrame.style.pointerEvents = 'auto';
+        }
+
+        sphereSection.addEventListener('touchend', resetFramePointer, { passive: true });
+        sphereSection.addEventListener('touchcancel', resetFramePointer, { passive: true });
+      }
     })();
   </script>
 
