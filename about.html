@@ -252,6 +252,43 @@
         width: clamp(62px, 21vw, var(--sticker-size));
       }
     }
+
+    .about-tap-note {
+      position: fixed;
+      top: calc(var(--clocks-top, 164px) - 44px);
+      left: 50%;
+      transform: translate(-50%, -8px);
+      z-index: 48;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(7, 16, 33, 0.88);
+      color: rgba(230, 238, 246, 0.9);
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 0.67rem;
+      letter-spacing: -0.01em;
+      text-transform: lowercase;
+      padding: 0.38rem 0.62rem;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s ease, transform 0.18s ease;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.26);
+    }
+
+    .about-tap-note.visible {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    @media (max-width: 768px) {
+      .about-tap-note {
+        top: calc(var(--clocks-top-mobile, 154px) - 42px);
+        font-size: 0.62rem;
+        max-width: calc(100vw - 26px);
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
   </style>
 </head>
 
@@ -261,6 +298,8 @@
 
   <!-- Self-injecting site header -->
   <script src="scripts/site-header.js"></script>
+
+  <div class="about-tap-note" id="about-tap-note">about me: engineering + design student who builds things and tells stories.</div>
 
   <div class="sticker-layer" data-sticker-layer data-safe-bottom="0">
     <button class="sticker" type="button" data-sticker data-size="148" data-x="18" data-y="18" data-rotation="-8" aria-label="snoopy sticker">
@@ -378,6 +417,33 @@
 
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
+
+    (function () {
+      var tip = document.getElementById('about-tap-note');
+      if (!tip) return;
+      var hideTimer = null;
+
+      function showTip() {
+        tip.classList.add('visible');
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(function () {
+          tip.classList.remove('visible');
+        }, 2400);
+      }
+
+      document.addEventListener('pointerdown', function (event) {
+        if (event.pointerType && event.pointerType !== 'mouse') {
+          showTip();
+        }
+      }, { passive: true });
+
+      document.addEventListener('click', function (event) {
+        var target = event.target;
+        if (target && target.closest && target.closest('.sticker')) {
+          showTip();
+        }
+      });
+    })();
 
     (function () {
       var preview = document.getElementById('link-preview');
