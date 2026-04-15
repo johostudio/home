@@ -32,7 +32,7 @@
     #gardens-section {
       position: relative;
       z-index: 10;
-      padding: 9.5rem 1.5rem 3rem;
+      padding: 11rem 1.5rem 3rem;
       max-width: 980px;
       margin: 0 auto;
       display: flex;
@@ -143,7 +143,7 @@
 
     @media (max-width: 640px) {
       #gardens-section {
-        padding-top: 8rem;
+        padding-top: 10.5rem;
       }
 
       .archives-links {
@@ -235,6 +235,7 @@
       border: none;
       display: block;
       background: #000;
+      pointer-events: none;
     }
 
     /* Scroll strip at bottom of sphere */
@@ -516,6 +517,39 @@
     .back-btn {
       z-index: 110;
     }
+
+    #back-to-top {
+      position: fixed;
+      right: 16px;
+      bottom: 18px;
+      z-index: 220;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(8, 12, 18, 0.72);
+      color: rgba(230, 238, 246, 0.88);
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: -0.01em;
+      text-transform: lowercase;
+      padding: 0.5rem 0.78rem;
+      backdrop-filter: blur(6px);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(6px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    #back-to-top.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    #back-to-top:hover {
+      background: rgba(192, 132, 252, 0.18);
+      border-color: rgba(192, 132, 252, 0.4);
+      color: #eed9ff;
+    }
   </style>
 </head>
 
@@ -564,6 +598,27 @@
     </div>
 
   </div><!-- /#archives-content -->
+
+  <button id="back-to-top" type="button" aria-label="back to top">back to top</button>
+
+  <script>
+    (function () {
+      var backBtn = document.getElementById('back-to-top');
+      if (!backBtn) return;
+
+      function updateBackBtn() {
+        var y = window.scrollY || 0;
+        backBtn.classList.toggle('visible', y > 340);
+      }
+
+      backBtn.addEventListener('click', function () {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+
+      window.addEventListener('scroll', updateBackBtn, { passive: true });
+      updateBackBtn();
+    })();
+  </script>
 
   <script src="scripts/page-transitions.js"></script>
   <script src="scripts/dot-grid.js"></script>

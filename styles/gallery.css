@@ -3,7 +3,7 @@
 .gallery-main {
   max-width: 1160px;
   margin: 0 auto;
-  padding: 178px 28px 40px;
+  padding: 198px 28px 40px;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
@@ -221,7 +221,7 @@
 /* ── Responsive ── */
 @media (max-width: 600px) {
   .gallery-main {
-    padding-top: 132px;
+    padding-top: 172px;
     padding-left: 16px;
     padding-right: 16px;
   }

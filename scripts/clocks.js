@@ -51,8 +51,18 @@
       }
     }
 
-    var desktopTop = headerBottom + 14;
-    var mobileTop = headerBottom + 12;
+    var path = window.location.pathname || '';
+    var laneGap = 16;
+    var isAbout = /about(?:\.html)?$/.test(path);
+    var isGallery = /gallery(?:\.html)?$/.test(path) || /projects(?:\.html)?$/.test(path);
+    var isArchives = /archives(?:\.html)?$/.test(path);
+
+    if (isAbout) laneGap = 24;
+    if (isGallery) laneGap = 26;
+    if (isArchives) laneGap = 30;
+
+    var desktopTop = headerBottom + laneGap;
+    var mobileTop = headerBottom + laneGap + 4;
 
     document.documentElement.style.setProperty('--clocks-top', desktopTop + 'px');
     document.documentElement.style.setProperty('--clocks-top-mobile', mobileTop + 'px');
