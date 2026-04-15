@@ -22,24 +22,37 @@
       display: block;
       text-align: center;
       width: 100%;
-      max-width: 190px;
+      max-width: 230px;
       border: 0;
       background: transparent;
       padding: 0;
       font: inherit;
       cursor: pointer;
+      justify-self: center;
     }
 
     .book-cover-wrap {
       aspect-ratio: 2 / 3;
       background: rgba(255, 255, 255, 0.04);
       border-radius: 4px;
-      margin-bottom: 0.7rem;
+      margin-bottom: 0.2rem;
       overflow: hidden;
       border: 1px solid rgba(255, 255, 255, 0.12);
       transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
       margin-left: auto;
       margin-right: auto;
+    }
+
+    .book-plank {
+      width: 100%;
+      height: 16px;
+      border-radius: 4px;
+      margin: 0 auto 0.55rem;
+      border: 1px solid rgba(77, 47, 18, 0.68);
+      background:
+        linear-gradient(180deg, rgba(255, 212, 154, 0.26), rgba(108, 67, 28, 0.9)),
+        repeating-linear-gradient(90deg, rgba(124, 79, 36, 0.55) 0 16px, rgba(97, 58, 22, 0.62) 16px 32px);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 220, 164, 0.2);
     }
 
     .book-card:hover .book-cover-wrap,
@@ -89,18 +102,86 @@
         line-height: 1.35;
       }
 
-      .books-status {
-        font-size: 0.72rem;
-        letter-spacing: -0.01em;
-        text-transform: lowercase;
-        color: rgba(230, 238, 246, 0.55);
-        margin-bottom: 1.1rem;
-        min-height: 1.2em;
-        text-align: center;
+    .books-status {
+      font-size: 0.72rem;
+      letter-spacing: -0.01em;
+      text-transform: lowercase;
+      color: rgba(230, 238, 246, 0.55);
+      margin-bottom: 1.1rem;
+      min-height: 1.2em;
+      text-align: center;
+    }
+
+    .books-loader {
+      width: min(560px, 100%);
+      margin: 0 auto 1.05rem;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      pointer-events: none;
+    }
+
+    .books-loader.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .books-loader-track {
+      height: 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow: inset 0 1px 5px rgba(0, 0, 0, 0.3);
+    }
+
+    .books-loader-fill {
+      display: block;
+      width: 0%;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #d8a166 0%, #ecbf83 36%, #f6d29b 52%, #d9a15f 100%);
+      box-shadow: 0 0 14px rgba(236, 191, 131, 0.32);
+      transition: width 0.28s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .books-loader-fill::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(110deg, transparent 20%, rgba(255, 255, 255, 0.42) 50%, transparent 80%);
+      transform: translateX(-100%);
+      animation: loaderSweep 1.15s linear infinite;
+    }
+
+    @keyframes loaderSweep {
+      to {
+        transform: translateX(100%);
       }
+    }
+
+    .books-loader-text {
+      margin-top: 0.38rem;
+      font-size: 0.66rem;
+      text-transform: lowercase;
+      letter-spacing: -0.01em;
+      color: rgba(230, 238, 246, 0.58);
+    }
 
     #books-grid {
       justify-items: center;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.8rem 1.2rem;
+      align-items: end;
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+
+    #books-grid > * {
+      min-width: 0;
     }
 
     .books-empty {
@@ -261,7 +342,17 @@
       text-decoration: underline;
     }
 
+    @media (max-width: 920px) {
+      #books-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
     @media (max-width: 520px) {
+      #books-grid {
+        grid-template-columns: 1fr;
+      }
+
       .book-modal-grid {
         grid-template-columns: 1fr;
       }
@@ -289,7 +380,14 @@
 
     <p class="books-status" id="books-status">loading shelf...</p>
 
-    <div id="books-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8 gap-y-12"></div>
+    <div class="books-loader" id="books-loader" aria-hidden="true">
+      <div class="books-loader-track">
+        <span class="books-loader-fill" id="books-loader-fill"></span>
+      </div>
+      <div class="books-loader-text" id="books-loader-text">loading shelf... 0%</div>
+    </div>
+
+    <div id="books-grid"></div>
 
     <div id="books-empty" class="books-empty hidden text-sm text-white/55 mt-8">
       Could not load shelf yet. Check your Open Library query or curated book list in `bookshelf.html` and reload.
@@ -374,7 +472,78 @@
       var bookModalLink = document.getElementById('book-modal-link');
       var bookModalClose = document.getElementById('book-modal-close');
       var bookModalBackdrop = document.getElementById('book-modal-backdrop');
+      var loader = document.getElementById('books-loader');
+      var loaderFill = document.getElementById('books-loader-fill');
+      var loaderText = document.getElementById('books-loader-text');
       var closeModalTimer = null;
+      var progressTimer = null;
+      var visualProgress = 0;
+      var fallbackCover = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 450">' +
+        '<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">' +
+        '<stop offset="0" stop-color="#20232b"/><stop offset="1" stop-color="#0f1219"/></linearGradient></defs>' +
+        '<rect width="300" height="450" fill="url(#g)"/>' +
+        '<rect x="22" y="22" width="256" height="406" rx="12" fill="none" stroke="rgba(255,255,255,0.22)"/>' +
+        '<text x="150" y="218" text-anchor="middle" fill="#d7dde8" font-family="Helvetica, Arial, sans-serif" font-size="24">book cover</text>' +
+        '<text x="150" y="250" text-anchor="middle" fill="#98a4b7" font-family="Helvetica, Arial, sans-serif" font-size="14">unavailable</text>' +
+        '</svg>'
+      );
+
+      function setProgress(value, label) {
+        var safe = Math.max(0, Math.min(100, Math.round(value)));
+        visualProgress = safe;
+        if (loaderFill) loaderFill.style.width = safe + '%';
+        if (loaderText) loaderText.textContent = (label || 'loading shelf...') + ' ' + safe + '%';
+      }
+
+      function showLoader(label) {
+        if (!loader) return;
+        loader.classList.add('show');
+        setProgress(0, label || 'loading shelf...');
+        if (progressTimer) {
+          window.clearInterval(progressTimer);
+          progressTimer = null;
+        }
+        progressTimer = window.setInterval(function () {
+          if (visualProgress >= 92) return;
+          setProgress(visualProgress + 1, label || 'loading shelf...');
+        }, 170);
+      }
+
+      function hideLoader(finalLabel) {
+        setProgress(100, finalLabel || 'loaded');
+        if (progressTimer) {
+          window.clearInterval(progressTimer);
+          progressTimer = null;
+        }
+        if (!loader) return;
+        window.setTimeout(function () {
+          loader.classList.remove('show');
+        }, 260);
+      }
+
+      function requestJson(url, timeoutMs) {
+        if (typeof AbortController !== 'function') {
+          return fetch(url).then(function (response) {
+            if (!response.ok) throw new Error('request failed');
+            return response.json();
+          });
+        }
+
+        var controller = new AbortController();
+        var timer = window.setTimeout(function () {
+          controller.abort();
+        }, timeoutMs || 7000);
+
+        return fetch(url, { signal: controller.signal })
+          .then(function (response) {
+            if (!response.ok) throw new Error('request failed');
+            return response.json();
+          })
+          .finally(function () {
+            window.clearTimeout(timer);
+          });
+      }
 
       function escapeHtml(str) {
         return String(str || '')
@@ -386,14 +555,15 @@
       }
 
       function openLibraryCover(item) {
-        if (!item) return 'https://via.placeholder.com/300x450/111111/777777?text=No+Cover';
+        if (!item) return fallbackCover;
+        if (item.cover_url) return item.cover_url;
         if (item.cover_i) {
           return 'https://covers.openlibrary.org/b/id/' + encodeURIComponent(item.cover_i) + '-L.jpg';
         }
         if (Array.isArray(item.isbn) && item.isbn.length) {
           return 'https://covers.openlibrary.org/b/isbn/' + encodeURIComponent(item.isbn[0]) + '-L.jpg';
         }
-        return 'https://via.placeholder.com/300x450/111111/777777?text=No+Cover';
+        return fallbackCover;
       }
 
       function normalizeKey(value) {
@@ -463,59 +633,150 @@
           author_name: entry.author ? [entry.author] : ['Unknown author'],
           key: '',
           cover_i: null,
+          cover_url: fallbackCover,
           isbn: []
         };
       }
 
-      function pickBestDoc(entry, docs) {
-        if (!Array.isArray(docs) || !docs.length) return makeFallbackItem(entry);
+      function pickBestDoc(entry, docs, allowFallback) {
+        if (!Array.isArray(docs) || !docs.length) {
+          return allowFallback ? makeFallbackItem(entry) : null;
+        }
         var ranked = docs.slice().sort(function (a, b) {
           return scoreCandidate(entry, b) - scoreCandidate(entry, a);
         });
         var top = ranked[0];
         if (!top || scoreCandidate(entry, top) <= 0) {
-          return makeFallbackItem(entry);
+          return allowFallback ? makeFallbackItem(entry) : null;
         }
         return top;
       }
 
-      function fetchCuratedEntry(entry) {
+      function mapGoogleVolumeToItem(volume) {
+        var info = (volume && volume.volumeInfo) || {};
+        var authors = Array.isArray(info.authors) && info.authors.length ? info.authors : ['Unknown author'];
+        var coverUrl = '';
+
+        if (info.imageLinks && (info.imageLinks.thumbnail || info.imageLinks.smallThumbnail)) {
+          coverUrl = (info.imageLinks.thumbnail || info.imageLinks.smallThumbnail || '').replace(/^http:/, 'https:');
+        }
+
+        return {
+          title: info.title || 'Untitled',
+          author_name: authors,
+          key: '',
+          info_link: info.infoLink || '',
+          cover_i: null,
+          cover_url: coverUrl || fallbackCover,
+          isbn: []
+        };
+      }
+
+      function searchOpenLibraryEntry(entry) {
         var endpoint = 'https://openlibrary.org/search.json?title=' + encodeURIComponent(entry.title || '') +
           '&author=' + encodeURIComponent(entry.author || '') +
           '&language=' + encodeURIComponent(cfg.language || 'en') +
           '&limit=8';
 
-        return fetch(endpoint)
-          .then(function (response) {
-            if (!response.ok) throw new Error('curated search failed');
-            return response.json();
-          })
+        return requestJson(endpoint, 6500)
           .then(function (data) {
             var docs = Array.isArray(data.docs) ? data.docs : [];
-            return pickBestDoc(entry, docs);
+            return pickBestDoc(entry, docs, false);
+          });
+      }
+
+      function searchGoogleEntry(entry) {
+        var endpoint = 'https://www.googleapis.com/books/v1/volumes?q=' +
+          encodeURIComponent('intitle:' + (entry.title || '') + ' inauthor:' + (entry.author || '')) +
+          '&maxResults=8&printType=books';
+
+        return requestJson(endpoint, 6500)
+          .then(function (data) {
+            var items = Array.isArray(data.items) ? data.items.map(mapGoogleVolumeToItem) : [];
+            return pickBestDoc(entry, items, false);
+          });
+      }
+
+      function fetchCuratedEntry(entry) {
+        return searchOpenLibraryEntry(entry)
+          .catch(function () {
+            return null;
+          })
+          .then(function (openItem) {
+            if (openItem) return openItem;
+            return searchGoogleEntry(entry).catch(function () {
+              return null;
+            });
+          })
+          .then(function (resolved) {
+            return resolved || makeFallbackItem(entry);
           })
           .catch(function () {
             return makeFallbackItem(entry);
           });
       }
 
+      function preloadBookCovers(items) {
+        var listLike = Array.isArray(items) ? items : [];
+        if (!listLike.length) return Promise.resolve();
+
+        var total = listLike.length;
+        var loaded = 0;
+
+        function bump() {
+          loaded += 1;
+          var pct = 15 + (loaded / total) * 80;
+          setProgress(pct, 'loading covers...');
+        }
+
+        var tasks = listLike.map(function (item) {
+          return new Promise(function (resolve) {
+            var img = new Image();
+            img.onload = function () { bump(); resolve(); };
+            img.onerror = function () { bump(); resolve(); };
+            img.src = openLibraryCover(item);
+          });
+        });
+
+        return Promise.all(tasks).then(function () {});
+      }
+
+      function wireCoverFallbacks() {
+        grid.querySelectorAll('.book-cover').forEach(function (img) {
+          img.addEventListener('error', function () {
+            if (img.dataset.fallbackApplied === '1') return;
+            img.dataset.fallbackApplied = '1';
+            img.src = fallbackCover;
+          });
+        });
+      }
+
       function loadCuratedShelf() {
+        showLoader('loading shelf...');
+        setProgress(8, 'finding books...');
         status.textContent = 'loading curated shelf...';
         Promise.all(notes.map(fetchCuratedEntry))
           .then(function (items) {
             var valid = items.filter(Boolean);
             if (!valid.length) {
+              hideLoader('done');
               status.textContent = 'could not load your curated shelf yet.';
               empty.classList.remove('hidden');
               return;
             }
 
-            grid.innerHTML = valid.map(renderBook).join('');
-            wireBookCardEvents();
-            status.textContent = 'loaded ' + valid.length + ' books from your list';
-            empty.classList.add('hidden');
+            setProgress(16, 'found books...');
+            return preloadBookCovers(valid).then(function () {
+              grid.innerHTML = valid.map(renderBook).join('');
+              wireCoverFallbacks();
+              wireBookCardEvents();
+              status.textContent = 'loaded ' + valid.length + ' books from your list';
+              empty.classList.add('hidden');
+              hideLoader('loaded');
+            });
           })
           .catch(function () {
+            hideLoader('done');
             status.textContent = 'unable to load curated shelf right now.';
             empty.classList.remove('hidden');
           });
@@ -551,7 +812,7 @@
         var title = item.title || 'untitled';
         var authors = Array.isArray(item.author_name) ? item.author_name.join(', ') : 'unknown author';
         var cover = openLibraryCover(item);
-        var infoLink = item.key ? ('https://openlibrary.org' + item.key) : '#';
+        var infoLink = item.info_link || (item.key ? ('https://openlibrary.org' + item.key) : '#');
         var noteMeta = findBookNote(item);
 
         bookModalTitle.textContent = title;
@@ -594,6 +855,7 @@
           '<div class="book-cover-wrap">',
           '<img class="book-cover" src="', escapeHtml(cover), '" alt="', escapeHtml(title), ' cover" loading="lazy">',
           '</div>',
+          '<div class="book-plank" aria-hidden="true"></div>',
           '<h3 class="book-title">', escapeHtml(title), '</h3>',
           '<p class="book-authors">', escapeHtml(authors), '</p>',
           hasNote ? '<p class="book-authors" style="margin-top:0.35rem;color:rgba(192,132,252,0.76);">review added</p>' : '',
@@ -623,11 +885,7 @@
         var workerBase = (window.CLOUDFLARE_WORKER_URL || '').trim().replace(/\/$/, '');
         if (!workerBase) return Promise.resolve(cfg);
 
-        return fetch(workerBase + '/public-config')
-          .then(function (res) {
-            if (!res.ok) throw new Error('public config unavailable');
-            return res.json();
-          })
+        return requestJson(workerBase + '/public-config', 5000)
           .then(function (data) {
             if (data && data.openLibraryQuery && !cfg.query) {
               cfg.query = data.openLibraryQuery;
@@ -650,30 +908,35 @@
           return;
         }
 
+        showLoader('loading shelf...');
+        setProgress(12, 'searching open library...');
         var endpoint = 'https://openlibrary.org/search.json?q=' + encodeURIComponent(cfg.query) +
           '&language=' + encodeURIComponent(cfg.language || 'en') +
           '&limit=' + encodeURIComponent(cfg.maxResults || 40) +
           '&sort=editions';
 
-        fetch(endpoint)
-          .then(function (response) {
-            if (!response.ok) throw new Error('request failed');
-            return response.json();
-          })
+        requestJson(endpoint, 7000)
           .then(function (data) {
             var items = Array.isArray(data.docs) ? data.docs : [];
             if (!items.length) {
+              hideLoader('done');
               status.textContent = 'shelf loaded, but no books returned';
               empty.classList.remove('hidden');
               return;
             }
 
-            grid.innerHTML = items.map(renderBook).join('');
-            wireBookCardEvents();
-            status.textContent = 'loaded ' + items.length + ' books';
-            empty.classList.add('hidden');
+            setProgress(24, 'found books...');
+            return preloadBookCovers(items).then(function () {
+              grid.innerHTML = items.map(renderBook).join('');
+              wireCoverFallbacks();
+              wireBookCardEvents();
+              status.textContent = 'loaded ' + items.length + ' books';
+              empty.classList.add('hidden');
+              hideLoader('loaded');
+            });
           })
           .catch(function () {
+            hideLoader('done');
             status.textContent = 'unable to load open library shelf';
             empty.classList.remove('hidden');
           });
