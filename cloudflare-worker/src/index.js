@@ -35,8 +35,14 @@ function corsPreflight() {
 
 function hasAtlasAdminAccess(request, env) {
   var configuredToken = safeText(env.ATLAS_ADMIN_TOKEN || '', 256);
+  if (!configuredToken && env.ATLAS_ADMIN_PASSWORD) {
+    configuredToken = safeText(env.ATLAS_ADMIN_PASSWORD || '', 256);
+  }
   if (!configuredToken) return false;
   var providedToken = safeText(request.headers.get('x-admin-token') || '', 256);
+  if (!providedToken && request.headers.get('x-admin-password')) {
+    providedToken = safeText(request.headers.get('x-admin-password') || '', 256);
+  }
   return !!providedToken && providedToken === configuredToken;
 }
 

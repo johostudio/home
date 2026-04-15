@@ -1405,7 +1405,7 @@
       var cityJump3dBtn = document.getElementById('atlas-jump-3d-btn');
       var browseList = document.getElementById('atlas-browse-list');
       var browseEmpty = document.getElementById('atlas-browse-empty');
-      var adminTokenCache = (window.ATLAS_ADMIN_TOKEN || '').trim();
+      var adminTokenCache = '';
 
       function removeAtlasEntryById(id) {
         if (!id) return;
@@ -1443,7 +1443,7 @@
         if (adminTokenCache) {
           return Promise.resolve(adminTokenCache);
         }
-        var token = window.prompt('admin token required to delete atlas entries');
+        var token = window.prompt('admin password required to delete atlas entries');
         adminTokenCache = (token || '').trim();
         return Promise.resolve(adminTokenCache);
       }
@@ -1474,8 +1474,8 @@
             if (stampToast) stampToast.textContent = 'entry deleted';
           });
         }).catch(function () {
-          showToast('could not delete entry. check admin token.');
-          if (stampToast) stampToast.textContent = 'could not delete entry. check admin token.';
+          showToast('could not delete entry. check admin password.');
+          if (stampToast) stampToast.textContent = 'could not delete entry. check admin password.';
         });
       }
 
