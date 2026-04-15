@@ -38,19 +38,20 @@
     '  display: flex;',
     '  flex-direction: column;',
     '  align-items: center;',
-    '  padding-top: 40px;',
-    '  padding-bottom: 3rem;',
+    '  padding-top: 26px;',
+    '  padding-bottom: 1.75rem;',
     '  pointer-events: none;',
-    '  transition: background 0.3s ease, backdrop-filter 0.3s ease;',
+    '  transition: background 0.42s cubic-bezier(0.22, 1, 0.36, 1), backdrop-filter 0.42s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.32s ease;',
+    '  will-change: background, backdrop-filter;',
     '}',
     '',
     '.jh-header-top {',
+    '  position: relative;',
     '  display: flex;',
-    '  flex-direction: row;',
     '  align-items: center;',
     '  justify-content: center;',
-    '  gap: 2.5rem;',
     '  width: 100%;',
+    '  padding: 0 1rem;',
     '}',
     '',
     '.jh-header.jh-scrolled {',
@@ -58,16 +59,23 @@
     '  background: rgba(7, 16, 33, 0.65);',
     '  backdrop-filter: blur(16px);',
     '  -webkit-backdrop-filter: blur(16px);',
-    '  mask-image: linear-gradient(to bottom, black 50%, transparent 100%);',
-    '  -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);',
+    '  mask-image: linear-gradient(to bottom, black 62%, transparent 100%);',
+    '  -webkit-mask-image: linear-gradient(to bottom, black 62%, transparent 100%);',
     '}',
     '',
     '    /* ── Home Page Black Text ── */',
     '.jh-home-header .jh-logo { color: #000 !important; }',
-    '.jh-home-header .jh-nav a { color: rgba(0, 0, 0, 0.6) !important; }',
+    '.jh-home-header .jh-nav { background: rgba(208, 208, 208, 0.56); border: 1px solid rgba(0, 0, 0, 0.14); border-radius: 999px; padding: 0.44rem 1.05rem; }',
+    '.jh-home-header .jh-nav a { color: rgba(0, 0, 0, 0.68) !important; }',
     '.jh-home-header .jh-nav a:hover, .jh-home-header .jh-nav a.jh-cur { color: #000 !important; }',
     '.jh-home-header .jh-hamburger { color: #000 !important; }',
-    '.jh-home-header.jh-scrolled { background: rgba(255, 255, 255, 0.45) !important; }',
+    '.jh-home-header.jh-scrolled { background: rgba(214, 214, 214, 0.62) !important; transition: background 0.42s cubic-bezier(0.22, 1, 0.36, 1), backdrop-filter 0.42s cubic-bezier(0.22, 1, 0.36, 1); }',
+    '',
+    '/* Home page: black clocks */',
+    '.home-dark-clocks .clock-container { color: rgba(0, 0, 0, 0.5) !important; }',
+    '.home-dark-clocks .clock-label { color: rgba(0, 0, 0, 0.4) !important; }',
+    '.home-dark-clocks .clock-time { color: rgba(0, 0, 0, 0.6) !important; }',
+    '.home-dark-clocks .clock-date { color: rgba(0, 0, 0, 0.4) !important; }',
     '',
     /* ── Logo ── */
     '.jh-logo {',
@@ -76,9 +84,10 @@
     '  display: inline-flex;',
     '  align-items: center;',
     '  gap: 0.45rem;',
-    '  font-size: 1.45rem;',
-    '  font-weight: 700;',
-    '  letter-spacing: -0.06em;',
+    '  font-size: 1.65rem;',
+    '  font-weight: normal;',
+    '  letter-spacing: -0.09em;',
+    '  text-transform: lowercase;',
     '  color: #e6eef6;',
     '  line-height: 1;',
     '}',
@@ -94,17 +103,45 @@
     '.jh-nav {',
     '  display: flex;',
     '  align-items: center;',
-    '  gap: 1.2rem;',
+    '  justify-content: center;',
+    '  gap: 1.45rem;',
+    '  margin-top: 0.55rem;',
     '  pointer-events: auto;',
+    '  background: rgba(10, 16, 28, 0.52);',
+    '  border: 1px solid rgba(255, 255, 255, 0.14);',
+    '  border-radius: 999px;',
+    '  padding: 0.44rem 1.05rem;',
     '}',
     '',
     '.jh-nav a {',
-    '  font-size: 0.7rem;',
-    '  font-weight: 500;',
-    '  letter-spacing: 0.1em;',
+    '  font-size: 0.84rem;',
+    '  font-weight: 400;',
+    '  letter-spacing: -0.015em;',
+    '  text-transform: lowercase;',
     '  color: rgba(230,238,246,0.5);',
     '  text-decoration: none;',
     '  transition: color 0.18s;',
+    '}',
+
+    'main h1, section h1, .writeup-header h1, .gallery-header h1, .archives-title h1, .photo-header h1 {',
+    '  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;',
+    '  font-weight: 400 !important;',
+    '  text-transform: lowercase !important;',
+    '  letter-spacing: -0.09em !important;',
+    '  font-size: clamp(2.45rem, 5.1vw, 3.85rem) !important;',
+    '  line-height: 0.94 !important;',
+    '}',
+    'main h2, section h2, .writeup-header h2, .gallery-header h2 {',
+    '  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;',
+    '  font-weight: 400 !important;',
+    '  text-transform: lowercase !important;',
+    '  letter-spacing: -0.06em !important;',
+    '}',
+    'main h3, section h3 {',
+    '  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;',
+    '  font-weight: 400 !important;',
+    '  text-transform: lowercase !important;',
+    '  letter-spacing: -0.05em !important;',
     '}',
     '',
     '.jh-nav a:hover { color: #e6eef6; }',
@@ -118,6 +155,10 @@
     '  border: none;',
     '  color: #e6eef6;',
     '  font-size: 1.5rem;',
+    '  position: absolute;',
+    '  right: 1rem;',
+    '  top: 50%;',
+    '  transform: translateY(-50%);',
     '  cursor: pointer;',
     '  padding: 0.25rem 0.5rem;',
     '  line-height: 1;',
@@ -125,7 +166,7 @@
     '  -webkit-tap-highlight-color: transparent;',
     '}',
     '',
-    '.jh-hamburger:hover { transform: scale(1.1); }',
+    '.jh-hamburger:hover { transform: translateY(-50%) scale(1.1); }',
     '',
     /* ── Mobile dropdown wrapper (hidden on desktop) ── */
     '.jh-mobile-dropdown {',
@@ -137,8 +178,8 @@
     '@media (max-width: 768px) {',
     '',
     '  .jh-header {',
-    '    padding-top: 24px;',
-    '    padding-bottom: 1.5rem;',
+    '    padding-top: 20px;',
+    '    padding-bottom: 1rem;',
     '  }',
     '',
     '  .jh-header.jh-scrolled {',
@@ -150,12 +191,13 @@
     '  .jh-nav { display: none !important; }',
     '',
     '  /* Show hamburger button */',
-    '  .jh-hamburger { display: block; }',
+    '  .jh-hamburger { display: block; right: 0.65rem; }',
     '',
     '  /* Mobile dropdown */',
     '  .jh-mobile-dropdown {',
     '    display: block;',
     '    width: 100%;',
+    '    margin-top: 0.5rem;',
     '    max-height: 0;',
     '    overflow: hidden;',
     '    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;',
@@ -178,6 +220,22 @@
     '    -webkit-backdrop-filter: blur(16px);',
     '    border-bottom: 1px solid rgba(192, 132, 252, 0.1);',
     '  }',
+
+    '  .jh-home-header .jh-mobile-dropdown-inner {',
+    '    background: rgba(218, 218, 218, 0.95);',
+    '    border-bottom: 1px solid rgba(0, 0, 0, 0.12);',
+    '  }',
+
+    '  .jh-home-header .jh-mobile-dropdown-inner a {',
+    '    color: rgba(0,0,0,0.66);',
+    '  }',
+
+    '  .jh-home-header .jh-mobile-dropdown-inner a:hover,',
+    '  .jh-home-header .jh-mobile-dropdown-inner a:active,',
+    '  .jh-home-header .jh-mobile-dropdown-inner a.jh-cur {',
+    '    color: #000;',
+    '    background: rgba(0, 0, 0, 0.07);',
+    '  }',
     '',
     '  .jh-mobile-dropdown-inner a {',
     '    display: block;',
@@ -185,8 +243,9 @@
     '    text-align: center;',
     '    padding: 0.7rem 1rem;',
     '    font-size: 0.75rem;',
-    '    font-weight: 500;',
+    '    font-weight: 400;',
     '    letter-spacing: 0.1em;',
+    '    text-transform: lowercase;',
     '    color: rgba(230,238,246,0.55);',
     '    text-decoration: none;',
     '    transition: color 0.18s, background 0.18s;',
@@ -209,14 +268,12 @@
 
   /* ── 4. Build nav HTML ── */
   var items = [
-    { key: 'gallery', label: 'GALLERY', href: base + 'gallery' },
-    { key: 'links', label: 'LINKS', href: base + 'links' },
-    { key: 'archives', label: 'ARCHIVES', href: base + 'archives' },
-    { key: 'hoshii', label: 'HSOH', href: base + 'hoshii' },
-    { key: 'vancouver', label: 'VANCOUVER', href: base + 'projects/vancouver' },
-    { key: 'darkroom', label: 'DARKROOM', href: base + 'darkroom' },
-    { key: 'resume', label: 'RESUME', href: base + 'resume' },
-    { key: 'about', label: 'ABOUT', href: base + 'about' }
+    { key: 'gallery', label: 'gallery', href: base + 'gallery' },
+    { key: 'archives', label: 'archives', href: base + 'archives' },
+    { key: 'hoshii', label: 'hsoh', href: base + 'hoshii' },
+    { key: 'darkroom', label: 'darkroom', href: base + 'darkroom' },
+    { key: 'resume', label: 'resume', href: base + 'resume' },
+    { key: 'about', label: 'about', href: base + 'about' }
   ];
 
   var navLinks = items.map(function (item) {
@@ -242,9 +299,9 @@
     'onerror="this.style.display=\'none\'">' +
     'johostudio' +
     '</a>' +
-    '<nav class="jh-nav">' + navLinks + '</nav>' +
     '<button class="jh-hamburger" aria-label="Menu" aria-expanded="false">☰</button>' +
     '</div>' +
+    '<nav class="jh-nav">' + navLinks + '</nav>' +
     '<div class="jh-mobile-dropdown">' +
     '<div class="jh-mobile-dropdown-inner">' + mobileNavLinks + '</div>' +
     '</div>';
@@ -289,8 +346,13 @@
   });
 
   /* ── 7. Scroll Listener ── */
+  var isScrolled = false;
   function updateScroll() {
-    if (window.scrollY > 15) {
+    var y = window.scrollY || 0;
+    var next = isScrolled ? y > 8 : y > 18;
+    if (next === isScrolled) return;
+    isScrolled = next;
+    if (isScrolled) {
       header.classList.add('jh-scrolled');
     } else {
       header.classList.remove('jh-scrolled');
