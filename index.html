@@ -389,7 +389,8 @@
       font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
       font-size: 11px;
       letter-spacing: 0.08em;
-      color: rgba(0, 0, 0, 0.56);
+      color: rgba(70, 70, 70, 0.88);
+      text-shadow: none;
       pointer-events: none;
       user-select: none;
       opacity: 0;
@@ -484,7 +485,7 @@
 
 <body class="bg-[#000] text-white m-0 overflow-hidden h-screen w-screen relative">
   <!-- Cables Patch -->
-  <iframe id="home-cables-frame" src="https://cables.gl/view/mFYiLg" loading="eager"
+  <iframe id="home-cables-frame" data-src="https://cables.gl/view/mFYiLg" loading="lazy"
     allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"></iframe>
 
   <!-- Self-injecting site header -->
@@ -658,7 +659,51 @@
   <script src="scripts/counter.js"></script>
   <script>
     (function () {
+      var cablesFrame = document.getElementById('home-cables-frame');
       var stickersBooted = false;
+
+      function loadCablesFrame() {
+        if (!cablesFrame) return;
+        if (cablesFrame.getAttribute('src')) return;
+
+        var frameSrc = cablesFrame.getAttribute('data-src');
+        if (!frameSrc) return;
+
+        cablesFrame.setAttribute('src', frameSrc);
+      }
+
+      function setupCablesFrame() {
+        if (!cablesFrame) return;
+
+        var prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var isLowPower = false;
+
+        try {
+          var hardwareThreads = Number(navigator.hardwareConcurrency || 0);
+          var deviceMemory = Number(navigator.deviceMemory || 0);
+          isLowPower = (hardwareThreads && hardwareThreads <= 4) || (deviceMemory && deviceMemory <= 4);
+        } catch (_) {
+          isLowPower = false;
+        }
+
+        if (prefersReducedMotion) {
+          return;
+        }
+
+        if (isLowPower) {
+          window.addEventListener('pointerdown', loadCablesFrame, { once: true, passive: true });
+          window.addEventListener('keydown', loadCablesFrame, { once: true });
+          return;
+        }
+
+        if ('requestIdleCallback' in window) {
+          window.requestIdleCallback(loadCablesFrame, { timeout: 1800 });
+        } else {
+          window.setTimeout(loadCablesFrame, 1100);
+        }
+
+        window.addEventListener('pointerdown', loadCablesFrame, { once: true, passive: true });
+      }
 
       function loadScript(src, fallbackSrc) {
         return new Promise(function (resolve, reject) {
@@ -698,16 +743,12 @@
           });
       }
 
-      function scheduleBoot() {
-        if ('requestIdleCallback' in window) {
-          window.requestIdleCallback(bootStickers, { timeout: 1400 });
-        } else {
-          window.setTimeout(bootStickers, 900);
-        }
-      }
+      setupCablesFrame();
 
-      window.addEventListener('load', scheduleBoot, { once: true, passive: true });
-      window.addEventListener('pointerdown', bootStickers, { once: true, passive: true });
+      var stickerLayer = document.querySelector('[data-sticker-layer]');
+      if (stickerLayer) {
+        stickerLayer.addEventListener('pointerdown', bootStickers, { once: true, passive: true });
+      }
     })();
   </script>
   <script>
