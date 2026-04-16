@@ -1,0 +1,8 @@
+.git/**
+node_modules/**
+.wrangler/**
+.vercel/**
+cloudflare-worker/**
+home/**
+nextjs/**
+backup/**
