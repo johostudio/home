@@ -32,3 +32,9 @@ CREATE TABLE IF NOT EXISTS atlas_points (
 
 CREATE INDEX IF NOT EXISTS idx_atlas_points_created_at
 ON atlas_points(created_at DESC);
+
+CREATE TABLE IF NOT EXISTS visitor_counter (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  count INTEGER NOT NULL DEFAULT 0,
+  updated_at INTEGER NOT NULL
+);

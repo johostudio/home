@@ -3,6 +3,7 @@
 This worker powers:
 - Global HSOH song recommendations (`/song-recs`)
 - Darkroom gallery uploads and listing (`/upload`, `/strips`)
+- Home page global visitor counter (`/visitor-count`)
 - Atlas saved cities + stamps (`/atlas-points`)
 - Atlas stamp image uploads to R2 (`/atlas-stamp-upload`)
 
@@ -79,6 +80,8 @@ This URL is consumed by both:
 - `DELETE /song-recs/:id` with header `x-client-id` (only creator can remove)
 - `POST /upload` multipart (`file`, `author`) for darkroom strip image
 - `GET /strips` -> latest strip entries
+- `GET /visitor-count` -> current global home page visitor count
+- `POST /visitor-count/increment` -> increments and returns global visitor count
 - `GET /atlas-points` -> list atlas saved city/stamp points
 - `POST /atlas-points` -> save atlas city/stamp point
 - `DELETE /atlas-points/:id` -> delete atlas point (requires `x-admin-token` or `x-admin-password` header)

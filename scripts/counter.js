@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const workerBase = String(window.CLOUDFLARE_WORKER_URL || '').trim().replace(/\/$/, '');
 
     const VISITOR_KEY = 'homeVisitorCountedV1';
     const LAST_COUNT_KEY = 'homeVisitorCountLastV1';
@@ -22,11 +23,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     renderCount(0);
 
-    async function fetchCount() {
-        const primaryEndpoint = isNewVisitor
+    async function fetchCloudflareCount(shouldIncrement) {
+        if (!workerBase) return null;
+
+        const endpoint = shouldIncrement
+            ? workerBase + '/visitor-count/increment'
+            : workerBase + '/visitor-count';
+        const method = shouldIncrement ? 'POST' : 'GET';
+
+        const response = await fetch(endpoint, { method, cache: 'no-store' });
+        if (!response.ok) {
+            throw new Error('cloudflare counter failed: ' + response.status);
+        }
+
+        return response.json();
+    }
+
+    async function fetchLegacyCount(shouldIncrement) {
+        const primaryEndpoint = shouldIncrement
             ? 'https://api.counterapi.dev/v1/johostudio/portfolio/up'
             : 'https://api.counterapi.dev/v1/johostudio/portfolio/';
-        const fallbackEndpoint = isNewVisitor
+        const fallbackEndpoint = shouldIncrement
             ? 'https://api.counterapi.dev/v1/johostudio/portfolio/up/'
             : 'https://api.counterapi.dev/v1/johostudio/portfolio';
 
@@ -45,6 +62,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    async function fetchCount(shouldIncrement) {
+        if (workerBase) {
+            try {
+                const data = await fetchCloudflareCount(shouldIncrement);
+                if (data) return data;
+            } catch (err) {
+                console.error('Cloudflare visitor counter failed', err);
+            }
+        }
+
+        return fetchLegacyCount(shouldIncrement);
+    }
+
     try {
         isNewVisitor = !localStorage.getItem(VISITOR_KEY);
 
@@ -56,13 +86,11 @@ document.addEventListener('DOMContentLoaded', () => {
         isNewVisitor = false;
     }
 
-    if (isLocalHost) {
-        return;
-    }
+    const shouldIncrement = isNewVisitor && !isLocalHost;
 
-    fetchCount()
+    fetchCount(shouldIncrement)
         .then(data => {
-            if (isNewVisitor) {
+            if (shouldIncrement) {
                 try {
                     localStorage.setItem(VISITOR_KEY, 'true');
                 } catch (_) {

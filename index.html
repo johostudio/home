@@ -656,6 +656,16 @@
 
   <script src="scripts/page-transitions.js"></script>
   <script src="scripts/clocks.js"></script>
+  <script src="scripts/cloudflare-config.js"></script>
+  <script>
+    (function () {
+      var s = document.createElement('script');
+      s.src = 'scripts/local-config.js';
+      s.defer = true;
+      s.onerror = function () { };
+      document.head.appendChild(s);
+    })();
+  </script>
   <script src="scripts/counter.js"></script>
   <script>
     (function () {

@@ -186,6 +186,43 @@ async function listStrips(env) {
   return json(result.results || []);
 }
 
+async function readVisitorCount(env) {
+  var now = Date.now();
+
+  await env.DB.prepare(
+    'INSERT OR IGNORE INTO visitor_counter (id, count, updated_at) VALUES (1, 0, ?1)'
+  )
+    .bind(now)
+    .run();
+
+  var row = await env.DB.prepare('SELECT count, updated_at FROM visitor_counter WHERE id = 1').first();
+  var count = Number(row && row.count);
+  var updatedAt = Number(row && row.updated_at);
+
+  return {
+    count: Number.isFinite(count) ? count : 0,
+    updated_at: Number.isFinite(updatedAt) ? updatedAt : now
+  };
+}
+
+async function incrementVisitorCount(env) {
+  var now = Date.now();
+
+  await env.DB.prepare(
+    'INSERT OR IGNORE INTO visitor_counter (id, count, updated_at) VALUES (1, 0, ?1)'
+  )
+    .bind(now)
+    .run();
+
+  await env.DB.prepare(
+    'UPDATE visitor_counter SET count = count + 1, updated_at = ?1 WHERE id = 1'
+  )
+    .bind(now)
+    .run();
+
+  return readVisitorCount(env);
+}
+
 async function listAtlasPoints(env) {
   var result = await env.DB.prepare(
     'SELECT id, point_type, city, lat, lng, note, stamp, photos_json, created_at FROM atlas_points ORDER BY created_at DESC LIMIT 1000'
@@ -357,6 +394,16 @@ export default {
 
     if (request.method === 'GET' && path === '/strips') {
       return listStrips(env);
+    }
+
+    if (request.method === 'GET' && path === '/visitor-count') {
+      var visitorCount = await readVisitorCount(env);
+      return json(visitorCount);
+    }
+
+    if (request.method === 'POST' && path === '/visitor-count/increment') {
+      var updatedVisitorCount = await incrementVisitorCount(env);
+      return json(updatedVisitorCount);
     }
 
     if (request.method === 'GET' && path === '/atlas-points') {
