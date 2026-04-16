@@ -3,7 +3,14 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    const isNewVisitor = !localStorage.getItem('hasVisited');
+    const VISITOR_KEY = 'homeVisitorCountedV1';
+    let isNewVisitor = false;
+
+    try {
+        isNewVisitor = !localStorage.getItem(VISITOR_KEY);
+    } catch (_) {
+        isNewVisitor = false;
+    }
     
     const endpoint = isNewVisitor 
         ? 'https://api.counterapi.dev/v1/johostudio/portfolio/up'
@@ -13,11 +20,15 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(response => response.json())
         .then(data => {
             if (isNewVisitor) {
-                localStorage.setItem('hasVisited', 'true');
+                try {
+                    localStorage.setItem(VISITOR_KEY, 'true');
+                } catch (_) {
+                    // ignore storage write errors (private mode, restricted storage)
+                }
             }
 
             const count = data.count || 0;
-            const countStr = String(count).padStart(5, '0');
+            const countStr = String(count).padStart(6, '0');
             
             const counters = document.querySelectorAll('.visitor-count');
             counters.forEach(el => {

@@ -381,6 +381,43 @@
       filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.45));
     }
 
+    .visitor-counter-wrap {
+      position: fixed;
+      right: 18px;
+      bottom: 14px;
+      z-index: 220;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: rgba(0, 0, 0, 0.56);
+      pointer-events: none;
+      user-select: none;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .visitor-counter-wrap:not(.hidden) {
+      opacity: 1;
+    }
+
+    .visitor-count-shell {
+      display: inline-flex;
+      align-items: center;
+      gap: 0;
+    }
+
+    .visitor-count-shell::before {
+      content: "[";
+      opacity: 0.7;
+      margin-right: 1px;
+    }
+
+    .visitor-count-shell::after {
+      content: "]";
+      opacity: 0.7;
+      margin-left: 1px;
+    }
+
     @keyframes stickerFloat {
 
       0%,
@@ -434,6 +471,12 @@
 
       .sticker {
         width: clamp(62px, 21vw, var(--sticker-size));
+      }
+
+      .visitor-counter-wrap {
+        right: 12px;
+        bottom: 10px;
+        font-size: 10px;
       }
     }
   </style>
@@ -602,6 +645,10 @@
       <div class="link-preview-title" id="preview-title"></div>
       <div class="link-preview-desc" id="preview-desc"></div>
     </div>
+  </div>
+
+  <div class="visitor-counter-wrap hidden" aria-hidden="true">
+    <span class="visitor-count-shell"><span class="visitor-count">000000</span></span>
   </div>
 
   <footer class="hidden"></footer>
