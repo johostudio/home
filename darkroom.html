@@ -1193,6 +1193,7 @@
             document.head.appendChild(s);
         })();
     </script>
+    <script src="scripts/html-safe.js"></script>
     <script>
         /* ════════════════════════════════════════════
            CLOUDFLARE STORAGE CONFIG
@@ -1589,16 +1590,39 @@
                 }
 
                 const grid = document.getElementById('gallery-grid');
+                const HS = window.jhHtmlSafe;
                 data.forEach(row => {
-                    const item = document.createElement('div'); item.className = 'gallery-item';
+                    const safeSrc = HS ? HS.sanitizeHttpUrl(row.image_url) : '';
+                    if (!safeSrc) return;
+                    const item = document.createElement('div');
+                    item.className = 'gallery-item';
+                    const img = document.createElement('img');
+                    img.alt = 'strip';
+                    img.loading = 'lazy';
+                    img.decoding = 'async';
+                    img.src = safeSrc;
                     const rawAuthor = (row.author || 'anonymous').trim();
                     const isHandle = rawAuthor.startsWith('@');
                     const handle = isHandle ? rawAuthor.slice(1) : rawAuthor;
-                    const authorHtml = isHandle
-                        ? `<a class="gallery-author" href="https://instagram.com/${encodeURIComponent(handle)}" target="_blank" rel="noopener">${rawAuthor}</a>`
-                        : `<span class="gallery-author">${rawAuthor}</span>`;
-                    item.innerHTML = `<img src="${row.image_url}" alt="strip" loading="lazy">${authorHtml}`;
-                    item.querySelector('img').addEventListener('click', () => openLb(row.image_url));
+                    const authorWrap = isHandle
+                        ? (function () {
+                            const a = document.createElement('a');
+                            a.className = 'gallery-author';
+                            a.href = 'https://instagram.com/' + encodeURIComponent(handle);
+                            a.target = '_blank';
+                            a.rel = 'noopener noreferrer';
+                            a.textContent = rawAuthor;
+                            return a;
+                        })()
+                        : (function () {
+                            const span = document.createElement('span');
+                            span.className = 'gallery-author';
+                            span.textContent = rawAuthor;
+                            return span;
+                        })();
+                    img.addEventListener('click', () => openLb(safeSrc));
+                    item.appendChild(img);
+                    item.appendChild(authorWrap);
                     grid.appendChild(item);
                 });
             } catch (err) {

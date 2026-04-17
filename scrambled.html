@@ -4,6 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="preconnect" href="https://unpkg.com" crossorigin />
   <title>a scrambled mind</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <link rel="stylesheet" href="styles/tailwind-prod.css">
@@ -290,8 +291,10 @@
     <div class="text-sm mt-2">ALL RIGHTS RESERVED. ®</div>
   </footer>
 
+  <script src="scripts/html-safe.js"></script>
   <script>
     // Define the graph data (an "obsidian-like" network of thoughts/journals)
+    const HS = window.jhHtmlSafe;
     const gData = {
       nodes: [
         { id: 'start', name: 'START', group: 1, val: 20, content: 'welcome to my mind. as an avid obsidian user, this was the best way to visualize my thoughts (i thought it would look cool..)\nall the songs linked are something i listened from that day or moment.', date: '04/14/2026', nowPlaying: 'joon', nowPlayingUrl: 'https://open.spotify.com/track/6QjOGPQeddAY9UOuu7a2ZL?si=c61c265e97df4bdc' },
@@ -362,7 +365,8 @@
       .linkColor(() => 'rgba(255,255,255,0.15)')
       .linkWidth(1.5)
       .nodeLabel(function (node) {
-        return '<div style="font-family:Helvetica,Arial,sans-serif;font-size:9px;font-weight:400;letter-spacing:-0.04em;line-height:1.15;padding:3px 5px;border:1px solid rgba(192,132,252,0.25);background:rgba(8,10,18,0.92);border-radius:6px;color:#e6eef6;text-transform:lowercase;">' + node.name + '</div>';
+        var label = HS ? HS.escapeHtml(node.name || '') : String(node.name || '');
+        return '<div style="font-family:Helvetica,Arial,sans-serif;font-size:9px;font-weight:400;letter-spacing:-0.04em;line-height:1.15;padding:3px 5px;border:1px solid rgba(192,132,252,0.25);background:rgba(8,10,18,0.92);border-radius:6px;color:#e6eef6;text-transform:lowercase;">' + label + '</div>';
       })
       .nodeCanvasObject((node, ctx, globalScale) => {
         if (node.img) {
@@ -404,20 +408,46 @@
         document.getElementById('panel-date').innerText = node.date || '';
         var nowPlaying = document.getElementById('panel-now-playing');
         var nowPlayingText = node.nowPlaying || 'add a song here';
-        if (node.nowPlayingUrl) {
-          nowPlaying.innerHTML = 'now playing: <a href="' + node.nowPlayingUrl + '" target="_blank" rel="noopener">' + nowPlayingText + '</a>';
+        nowPlaying.textContent = '';
+        if (node.nowPlayingUrl && HS) {
+          var songUrl = HS.sanitizeHttpUrl(node.nowPlayingUrl);
+          nowPlaying.appendChild(document.createTextNode('now playing: '));
+          if (songUrl) {
+            var a = document.createElement('a');
+            a.href = songUrl;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.textContent = nowPlayingText;
+            nowPlaying.appendChild(a);
+          } else {
+            nowPlaying.appendChild(document.createTextNode(nowPlayingText));
+          }
         } else {
           nowPlaying.textContent = 'now playing: ' + nowPlayingText;
         }
 
-        let html = (node.content || '').replace(/\n/g, '<br/>');
-        if (node.img) {
-          html = `<img src="${node.img}" class="panel-node-image" loading="lazy" decoding="async" alt="node reference">` + html;
+        var panelContent = document.getElementById('panel-content');
+        panelContent.textContent = '';
+        if (node.img && HS) {
+          var imgUrl = HS.sanitizeHttpUrl(node.img);
+          if (imgUrl) {
+            var imgEl = document.createElement('img');
+            imgEl.src = imgUrl;
+            imgEl.className = 'panel-node-image';
+            imgEl.loading = 'lazy';
+            imgEl.decoding = 'async';
+            imgEl.alt = 'node reference';
+            panelContent.appendChild(imgEl);
+          }
           panel.classList.add('panel-has-image');
         } else {
           panel.classList.remove('panel-has-image');
         }
-        document.getElementById('panel-content').innerHTML = html;
+        var lines = String(node.content || '').split('\n');
+        for (var i = 0; i < lines.length; i++) {
+          if (i) panelContent.appendChild(document.createElement('br'));
+          panelContent.appendChild(document.createTextNode(lines[i]));
+        }
 
         panel.classList.remove('closing');
         panel.classList.add('visible');

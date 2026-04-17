@@ -7,6 +7,15 @@
  * Usage (projects/ pages): <script src="../scripts/site-header.js"></script>
  */
 ; (function () {
+  function safeHttpImageUrl(raw) {
+    if (!raw || typeof raw !== 'string') return '';
+    try {
+      var u = new URL(raw, window.location.href);
+      if (u.protocol === 'https:' || u.protocol === 'http:') return u.href;
+    } catch (_e) {}
+    return '';
+  }
+
   /* ── 1. Detect location ── */
   var path = window.location.pathname;
   var inSub = path.indexOf('/projects/') !== -1;
@@ -495,9 +504,10 @@
     }
 
     function openImageLightbox(src, alt) {
-      if (!src) return;
+      var safe = safeHttpImageUrl(src);
+      if (!safe) return;
       ensureImageLightbox();
-      imageLightboxImg.src = src;
+      imageLightboxImg.src = safe;
       imageLightboxImg.alt = alt || 'Expanded image';
       imageLightbox.classList.add('open');
       document.body.classList.add('jh-image-lightbox-open');
@@ -528,7 +538,7 @@
       if (img.getAttribute('data-no-lightbox') === 'true') return;
 
       var src = img.currentSrc || img.getAttribute('src') || '';
-      if (!src) return;
+      if (!safeHttpImageUrl(src)) return;
 
       event.preventDefault();
       event.stopPropagation();

@@ -1691,7 +1691,7 @@ it really brought an interesting argument, often pushed myself to compare to my 
           badgeHtml += '<span class="book-modal-badge" data-state="reading">reading</span>';
         }
         if (yearValue) {
-          badgeHtml += '<span class="book-modal-badge">year: ' + yearValue + '</span>';
+          badgeHtml += '<span class="book-modal-badge">year: ' + escapeHtml(String(yearValue)) + '</span>';
         }
         var badgesEl = document.getElementById('book-modal-badges');
         if (badgesEl) badgesEl.innerHTML = badgeHtml;

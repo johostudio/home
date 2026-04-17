@@ -18,6 +18,31 @@
 
   var md = mdBlock.textContent;
 
+  function escapeHtml(value) {
+    if (value == null) return '';
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function sanitizeHttpUrl(raw) {
+    if (raw == null || typeof raw !== 'string') return '';
+    var s = raw.trim();
+    if (!s) return '';
+    try {
+      var u = new URL(s, window.location.href);
+      if (u.protocol === 'https:' || u.protocol === 'http:') return u.href;
+      if (u.protocol === 'mailto:') {
+        var path = (u.pathname || '') + (u.search || '');
+        if (/^[^\s<>"]+$/.test(path)) return u.href;
+      }
+    } catch (_e) {}
+    return '';
+  }
+
   // ── Simple Markdown parser ──
   function renderMarkdown(src) {
     var lines = src.split('\n');
@@ -45,10 +70,19 @@
     }
 
     function inlineFormat(text) {
+      text = escapeHtml(text);
       // Images: ![alt](src)
-      text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1">');
+      text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, function (_m, alt, url) {
+        var u = sanitizeHttpUrl(url);
+        if (!u) return alt;
+        return '<img src="' + u + '" alt="' + alt + '" loading="lazy" decoding="async">';
+      });
       // Links: [text](url)
-      text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+      text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function (_m, label, url) {
+        var u = sanitizeHttpUrl(url);
+        if (!u) return label;
+        return '<a href="' + u + '" target="_blank" rel="noopener noreferrer">' + label + '</a>';
+      });
       // Bold: **text** or __text__
       text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
       text = text.replace(/__(.+?)__/g, '<strong>$1</strong>');
@@ -178,7 +212,7 @@
     for (var k = 0; k < headings.length; k++) {
       var hd = headings[k];
       var indent = hd.tagName === 'H3' ? ' jumpbar-indent' : '';
-      jumpInner += '<a href="#' + hd.id + '" class="jumpbar-link' + indent + '" data-target="' + hd.id + '">' + hd.textContent + '</a>';
+      jumpInner += '<a href="#' + escapeHtml(hd.id) + '" class="jumpbar-link' + indent + '" data-target="' + escapeHtml(hd.id) + '">' + escapeHtml(hd.textContent) + '</a>';
     }
     jumpbar.innerHTML = jumpInner;
 

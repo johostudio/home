@@ -4,6 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="preconnect" href="https://api.mapbox.com" crossorigin />
   <title>my colourful atlas</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <link rel="stylesheet" href="styles/tailwind-prod.css">
@@ -1067,6 +1068,7 @@
       window.setTimeout(finish, 1200);
     };
   </script>
+  <script src="scripts/html-safe.js"></script>
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
   <script>
     window.MAPBOX_ACCESS_TOKEN = window.MAPBOX_ACCESS_TOKEN || '';
@@ -1075,6 +1077,12 @@
     window.__atlasStart = function () {
       if (window.__atlasBooted) return;
       window.__atlasBooted = true;
+
+      var HS = window.jhHtmlSafe;
+      if (!HS) {
+        console.error('atlas: missing scripts/html-safe.js');
+        return;
+      }
 
       var overlay = document.getElementById('atlas-overlay');
       var overlayBlur = document.getElementById('atlas-overlay-blur');
@@ -1422,19 +1430,21 @@
         var photos = Array.isArray(entry.photos) ? entry.photos.filter(Boolean) : [];
         if (!photos.length) return '';
         return '<div class="atlas-city-photos">' + photos.slice(0, 6).map(function (src) {
-          return '<img src="' + src + '" alt="city photo" loading="lazy">';
+          var u = HS.sanitizeHttpUrl(src);
+          if (!u) return '';
+          return '<img src="' + u + '" alt="city photo" loading="lazy" decoding="async">';
         }).join('') + '</div>';
       }
 
       function renderStampLine(entry) {
         if (!entry.stamp) return '';
-        return '<div class="meta" style="margin-top:0.3rem;color:rgba(255,255,255,0.72);">stamp: ' + stampLabel(entry.stamp) + '</div>';
+        return '<div class="meta" style="margin-top:0.3rem;color:rgba(255,255,255,0.72);">stamp: ' + HS.escapeHtml(stampLabel(entry.stamp)) + '</div>';
       }
 
       function popupHtml(entry) {
         var type = markerTypes[entry.type] || markerTypes.visited;
-        var stamp = entry.stamp ? (' <span style="font-size:0.8em;opacity:0.88;">(' + stampLabel(entry.stamp) + ')</span>') : '';
-        return '<div class="atlas-popup"><h3>' + entry.city + stamp + '</h3><div class="meta" style="color:' + type.color + '">' + type.label + '</div><p>' + entry.note + '</p>' + renderStampLine(entry) + renderCityPhotos(entry) + '</div>';
+        var stamp = entry.stamp ? (' <span style="font-size:0.8em;opacity:0.88;">(' + HS.escapeHtml(stampLabel(entry.stamp)) + ')</span>') : '';
+        return '<div class="atlas-popup"><h3>' + HS.escapeHtml(entry.city) + stamp + '</h3><div class="meta" style="color:' + type.color + '">' + HS.escapeHtml(type.label) + '</div><p>' + HS.escapeHtml(entry.note) + '</p>' + renderStampLine(entry) + renderCityPhotos(entry) + '</div>';
       }
 
       var seenEntryIds = {};
@@ -1459,7 +1469,7 @@
         var item = markerTypes[key];
         var li = document.createElement('li');
         li.className = 'legend-item';
-        li.innerHTML = '<span class="legend-dot" style="background:' + item.color + '"></span>' + item.label;
+        li.innerHTML = '<span class="legend-dot" style="background:' + item.color + '"></span>' + HS.escapeHtml(item.label);
         legend.appendChild(li);
       });
 

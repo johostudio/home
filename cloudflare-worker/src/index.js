@@ -1,13 +1,13 @@
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      'content-type': 'application/json; charset=utf-8',
-      'access-control-allow-origin': '*',
-      'access-control-allow-methods': 'GET,POST,DELETE,OPTIONS',
-      'access-control-allow-headers': 'content-type,x-client-id,x-admin-token'
-    }
-  });
+function json(data, status = 200, cacheControl = null) {
+  var headers = {
+    'content-type': 'application/json; charset=utf-8',
+    'access-control-allow-origin': '*',
+    'access-control-allow-methods': 'GET,POST,DELETE,OPTIONS',
+    'access-control-allow-headers': 'content-type,x-client-id,x-admin-token',
+    'x-content-type-options': 'nosniff'
+  };
+  if (cacheControl) headers['cache-control'] = cacheControl;
+  return new Response(JSON.stringify(data), { status, headers });
 }
 
 function text(message, status = 200) {
@@ -17,7 +17,8 @@ function text(message, status = 200) {
       'content-type': 'text/plain; charset=utf-8',
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,POST,DELETE,OPTIONS',
-      'access-control-allow-headers': 'content-type,x-client-id,x-admin-token'
+      'access-control-allow-headers': 'content-type,x-client-id,x-admin-token',
+      'x-content-type-options': 'nosniff'
     }
   });
 }
@@ -28,12 +29,13 @@ function corsPreflight() {
     headers: {
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,POST,DELETE,OPTIONS',
-      'access-control-allow-headers': 'content-type,x-client-id,x-admin-token'
+      'access-control-allow-headers': 'content-type,x-client-id,x-admin-token',
+      'x-content-type-options': 'nosniff'
     }
   });
 }
 
-function hasAtlasAdminAccess(request, env) {
+async function hasAtlasAdminAccess(request, env) {
   var configuredToken = safeText(env.ATLAS_ADMIN_TOKEN || '', 256);
   if (!configuredToken && env.ATLAS_ADMIN_PASSWORD) {
     configuredToken = safeText(env.ATLAS_ADMIN_PASSWORD || '', 256);
@@ -43,7 +45,14 @@ function hasAtlasAdminAccess(request, env) {
   if (!providedToken && request.headers.get('x-admin-password')) {
     providedToken = safeText(request.headers.get('x-admin-password') || '', 256);
   }
-  return !!providedToken && providedToken === configuredToken;
+  if (!providedToken) return false;
+  var enc = new TextEncoder();
+  var digestProvided = await crypto.subtle.digest('SHA-256', enc.encode(providedToken));
+  var digestConfigured = await crypto.subtle.digest('SHA-256', enc.encode(configuredToken));
+  return crypto.subtle.timingSafeEqual(
+    new Uint8Array(digestProvided),
+    new Uint8Array(digestConfigured)
+  );
 }
 
 function makeId() {
@@ -179,11 +188,11 @@ async function uploadStrip(request, env) {
   return json({ id: id, image_url: imageUrl, author: author, created_at: createdAt }, 201);
 }
 
-async function listStrips(env) {
+async function listStrips(env, cacheControl) {
   var result = await env.DB.prepare(
     'SELECT id, image_url, author, created_at FROM strips ORDER BY created_at DESC LIMIT 60'
   ).all();
-  return json(result.results || []);
+  return json(result.results || [], 200, cacheControl);
 }
 
 async function readVisitorCount(env) {
@@ -207,19 +216,12 @@ async function readVisitorCount(env) {
 
 async function incrementVisitorCount(env) {
   var now = Date.now();
-
   await env.DB.prepare(
-    'INSERT OR IGNORE INTO visitor_counter (id, count, updated_at) VALUES (1, 0, ?1)'
+    'INSERT INTO visitor_counter (id, count, updated_at) VALUES (1, 1, ?1) ' +
+      'ON CONFLICT(id) DO UPDATE SET count = count + 1, updated_at = excluded.updated_at'
   )
     .bind(now)
     .run();
-
-  await env.DB.prepare(
-    'UPDATE visitor_counter SET count = count + 1, updated_at = ?1 WHERE id = 1'
-  )
-    .bind(now)
-    .run();
-
   return readVisitorCount(env);
 }
 
@@ -297,7 +299,7 @@ async function deleteAtlasPoint(id, request, env) {
     return json({ error: 'atlas point id is required' }, 400);
   }
 
-  if (!hasAtlasAdminAccess(request, env)) {
+  if (!(await hasAtlasAdminAccess(request, env))) {
     return json({ error: 'admin token required' }, 403);
   }
 
@@ -350,11 +352,15 @@ async function uploadAtlasStamp(request, env) {
 }
 
 function publicConfig(env) {
-  return json({
-    mapboxPublicToken: (env.MAPBOX_PUBLIC_TOKEN || '').trim(),
-    openLibraryEnabled: true,
-    openLibraryQuery: (env.OPEN_LIBRARY_QUERY || '').trim()
-  });
+  return json(
+    {
+      mapboxPublicToken: (env.MAPBOX_PUBLIC_TOKEN || '').trim(),
+      openLibraryEnabled: true,
+      openLibraryQuery: (env.OPEN_LIBRARY_QUERY || '').trim()
+    },
+    200,
+    'public, max-age=300, stale-while-revalidate=86400'
+  );
 }
 
 export default {
@@ -376,7 +382,7 @@ export default {
 
     if (request.method === 'GET' && path === '/song-recs') {
       var songs = await listSongRecommendations(env);
-      return json(songs);
+      return json(songs, 200, 'public, max-age=30, stale-while-revalidate=120');
     }
 
     if (request.method === 'POST' && path === '/song-recs') {
@@ -393,22 +399,22 @@ export default {
     }
 
     if (request.method === 'GET' && path === '/strips') {
-      return listStrips(env);
+      return listStrips(env, 'public, max-age=60, stale-while-revalidate=300');
     }
 
     if (request.method === 'GET' && path === '/visitor-count') {
       var visitorCount = await readVisitorCount(env);
-      return json(visitorCount);
+      return json(visitorCount, 200, 'public, max-age=5, stale-while-revalidate=30');
     }
 
     if (request.method === 'POST' && path === '/visitor-count/increment') {
       var updatedVisitorCount = await incrementVisitorCount(env);
-      return json(updatedVisitorCount);
+      return json(updatedVisitorCount, 200, 'no-store');
     }
 
     if (request.method === 'GET' && path === '/atlas-points') {
       var points = await listAtlasPoints(env);
-      return json(points);
+      return json(points, 200, 'public, max-age=30, stale-while-revalidate=180');
     }
 
     if (request.method === 'POST' && path === '/atlas-points') {
