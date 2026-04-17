@@ -31,7 +31,10 @@ document.addEventListener('DOMContentLoaded', () => {
             : workerBase + '/visitor-count';
         const method = shouldIncrement ? 'POST' : 'GET';
 
-        const response = await fetch(endpoint, { method, cache: 'no-store' });
+        const response = await fetch(endpoint, {
+            method,
+            cache: shouldIncrement ? 'no-store' : 'default'
+        });
         if (!response.ok) {
             throw new Error('cloudflare counter failed: ' + response.status);
         }
@@ -46,15 +49,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const fallbackEndpoint = shouldIncrement
             ? 'https://api.counterapi.dev/v1/johostudio/portfolio/up/'
             : 'https://api.counterapi.dev/v1/johostudio/portfolio';
+        const cacheMode = shouldIncrement ? 'no-store' : 'default';
 
         try {
-            const response = await fetch(primaryEndpoint, { cache: 'no-store' });
+            const response = await fetch(primaryEndpoint, { cache: cacheMode });
             if (!response.ok) {
                 throw new Error('counter request failed: ' + response.status);
             }
             return response.json();
         } catch (_) {
-            const response = await fetch(fallbackEndpoint, { cache: 'no-store' });
+            const response = await fetch(fallbackEndpoint, { cache: cacheMode });
             if (!response.ok) {
                 throw new Error('counter fallback failed: ' + response.status);
             }
@@ -88,7 +92,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const shouldIncrement = isNewVisitor && !isLocalHost;
 
-    fetchCount(shouldIncrement)
+    function runCounterFetch() {
+        fetchCount(shouldIncrement)
         .then(data => {
             if (shouldIncrement) {
                 try {
@@ -119,4 +124,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderCount(0);
             }
         });
+    }
+
+    if (shouldIncrement) {
+        runCounterFetch();
+    } else if (typeof requestIdleCallback === 'function') {
+        requestIdleCallback(() => runCounterFetch(), { timeout: 3000 });
+    } else {
+        setTimeout(runCounterFetch, 0);
+    }
 });

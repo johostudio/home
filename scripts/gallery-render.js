@@ -3,6 +3,9 @@
  * Renders the project gallery grid and filter pills from GALLERY_PROJECTS data.
  */
 ;(function () {
+  var HS = window.jhHtmlSafe;
+  if (!HS) return;
+
   var grid = document.getElementById('gallery-grid');
   var filtersNav = document.getElementById('gallery-filters');
   if (!grid || !filtersNav) return;
@@ -56,10 +59,15 @@
       var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
       var dateStr = months[parseInt(dateParts[1], 10) - 1] + ' ' + dateParts[0];
 
-      // Thumbnail
+      var thumbSrc = project.thumb ? HS.sanitizeHttpUrl(project.thumb) : '';
       var thumbHTML = '';
-      if (project.thumb) {
-        thumbHTML = '<div class="project-thumb"><img src="' + project.thumb + '" alt="' + project.title + '"></div>';
+      if (thumbSrc) {
+        thumbHTML =
+          '<div class="project-thumb"><img src="' +
+          thumbSrc +
+          '" alt="' +
+          HS.escapeHtml(project.title) +
+          '" loading="lazy" decoding="async"></div>';
       } else {
         thumbHTML = '<div class="project-thumb"><div class="project-thumb-placeholder">✦</div></div>';
       }
@@ -68,11 +76,19 @@
         thumbHTML +
         '<div class="project-info">' +
           '<div class="project-meta-row">' +
-            '<span class="project-date">' + dateStr + '</span>' +
-            '<span class="project-category-tag">' + catLabel + '</span>' +
+            '<span class="project-date">' +
+            HS.escapeHtml(dateStr) +
+            '</span>' +
+            '<span class="project-category-tag">' +
+            HS.escapeHtml(catLabel) +
+            '</span>' +
           '</div>' +
-          '<div class="project-title">' + project.title + '</div>' +
-          '<div class="project-desc">' + project.description + '</div>' +
+          '<div class="project-title">' +
+          HS.escapeHtml(project.title) +
+          '</div>' +
+          '<div class="project-desc">' +
+          HS.escapeHtml(project.description) +
+          '</div>' +
           '<span class="project-read-more">Read more →</span>' +
         '</div>';
 
