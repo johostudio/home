@@ -10,7 +10,6 @@
   <link rel="stylesheet" href="styles/tailwind-prod.css">
   <link rel="stylesheet" href="styles/clocks.css">
   <style>
-    /* ── Home overlay ── */
     #home-overlay {
       position: fixed;
       bottom: 0;
@@ -163,9 +162,6 @@
       transform: translate(-50%, 0);
     }
 
-    /* ──────────────────────────────────────────
-       Hover-preview chip
-    ────────────────────────────────────────── */
     .home-bio-link {
       font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
       font-size: 12px;
@@ -204,7 +200,6 @@
       outline: none;
     }
 
-    /* Hover preview card */
     .link-preview {
       display: none;
       position: fixed;
@@ -431,7 +426,6 @@
       }
     }
 
-    /* Mobile */
     @media (max-width: 600px) {
       #home-overlay {
         padding: 0 18px 72px;
@@ -484,11 +478,9 @@
 </head>
 
 <body class="bg-[#000] text-white m-0 overflow-hidden h-screen w-screen relative">
-  <!-- Cables Patch -->
   <iframe id="home-cables-frame" data-src="https://cables.gl/view/mFYiLg" loading="lazy"
     allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"></iframe>
 
-  <!-- Self-injecting site header -->
   <script src="scripts/site-header.js"></script>
 
   <div class="sticker-layer" data-sticker-layer data-safe-bottom="120" data-random-spawn="off">
@@ -498,13 +490,6 @@
     </button>
   </div>
 
-  <!-- ── Home overlay ── -->
-  <!--
-    ✏️ EDIT YOUR BIO HERE:
-    Each <li> is one bullet point.
-    Use <a class="home-bio-link" href="URL" data-preview-title="Title" data-preview-desc="Short description" data-preview-img="optional-screenshot.png">label</a>
-    for linked chips with hover previews.
-  -->
   <div id="home-overlay">
     <div class="home-socials mb-5">
       <a class="home-bio-link social-icon-link" href="https://www.youtube.com/channel/UCm9AkiBCwALnpblVcV7E65g"
@@ -639,7 +624,6 @@
     </ul>
   </div>
 
-  <!-- Hover link preview card -->
   <div class="link-preview" id="link-preview">
     <img class="link-preview-img" id="preview-img" src="" alt="">
     <div class="link-preview-body">
@@ -762,7 +746,6 @@
     })();
   </script>
   <script>
-    /* ── Hover preview logic ── */
     (function () {
       var preview = document.getElementById('link-preview');
       var previewImg = document.getElementById('preview-img');
@@ -804,7 +787,6 @@
           previewImg.style.display = 'none';
         }
 
-        // Position: next to cursor nicely
         var rx = Math.min(clientX + 16, window.innerWidth - 276);
         var ry = clientY + 24;
         if (ry + 160 > window.innerHeight) ry = clientY - 160;
@@ -868,7 +850,7 @@
 
           if (armedLink === link) {
             clearTapArmed();
-            return; // second tap proceeds to link navigation
+            return;
           }
 
           event.preventDefault();

@@ -1,5 +1,3 @@
-/* ── Gallery Page Styles ── */
-
 .gallery-main {
   max-width: 1160px;
   margin: 0 auto;
@@ -15,7 +13,6 @@
   width: 100%;
 }
 
-/* Header */
 .gallery-header {
   margin-bottom: 34px;
   text-align: center;
@@ -44,7 +41,6 @@
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
-/* ── Filter pills ── */
 .gallery-filters {
   display: flex;
   flex-wrap: wrap;
@@ -81,7 +77,6 @@
   background: rgba(208, 228, 255, 0.12);
 }
 
-/* ── Project cards ── */
 .gallery-grid {
   display: flex;
   flex-direction: column;
@@ -115,7 +110,6 @@
   color: #f8fbff;
 }
 
-/* Thumbnail */
 .project-thumb {
   width: 112px;
   height: 112px;
@@ -142,7 +136,6 @@
   opacity: 0.3;
 }
 
-/* Info */
 .project-info {
   flex: 1;
   min-width: 0;
@@ -267,7 +260,6 @@
   }
 }
 
-/* ── Empty state ── */
 .gallery-empty {
   text-align: center;
   padding: 60px 0;
@@ -276,7 +268,6 @@
   font-style: italic;
 }
 
-/* ── Responsive ── */
 @media (max-width: 600px) {
   .gallery-main {
     padding-top: calc(var(--clocks-top-mobile, 160px) + 118px) !important;

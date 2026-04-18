@@ -1,22 +1,11 @@
-/**
- * site-header.js
- * Self-injecting site header. Drop ONE script tag at the top of <body> on every page.
- * Automatically detects root vs projects/ and marks the current page active.
- *
- * Usage (root pages):      <script src="scripts/site-header.js"></script>
- * Usage (projects/ pages): <script src="../scripts/site-header.js"></script>
- */
 ; (function () {
-  /* ── 1. Detect location ── */
   var path = window.location.pathname;
   var inSub = path.indexOf('/projects/') !== -1;
   var base = inSub ? '../' : '';
   var isArchivePage = path.indexOf('archives') !== -1 || path.indexOf('atlas') !== -1 || path.indexOf('bookshelf') !== -1 || path.indexOf('scrambled') !== -1;
-  var isDarkroomPage = path.indexOf('darkroom') !== -1;
   
   var isHome = (path === '/' || path.endsWith('/index.html') || path.endsWith('/index') || path === '' || path.indexOf('index') !== -1);
 
-  /* ── 2. Detect current section ── */
   var cur = '';
   if (path.indexOf('links') !== -1) cur = 'links';
   else if (path.indexOf('gallery') !== -1 || path.indexOf('writeups') !== -1) cur = 'gallery';
@@ -25,13 +14,10 @@
   else if (path.indexOf('hoshii') !== -1) cur = 'hoshii';
   else if (path.indexOf('resume') !== -1) cur = 'resume';
   else if (isArchivePage) cur = 'archives';
-  else if (isDarkroomPage) cur = 'darkroom';
 
-  /* ── 3. Inject styles into <head> synchronously ── */
   var style = document.createElement('style');
   style.id = 'jh-header-styles';
   style.textContent = [
-    /* ── Base header ── */
     '* { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important; }',
     '.jh-header {',
     '  position: fixed;',
@@ -80,7 +66,6 @@
     '  box-shadow: 0 24px 34px -30px var(--jh-fade-color);',
     '}',
     '',
-    '    /* ── Home Page Black Text ── */',
     '.jh-home-header .jh-logo { color: #000 !important; }',
     '.jh-home-header .jh-nav { background: rgba(208, 208, 208, 0.56); border: 1px solid rgba(0, 0, 0, 0.14); border-radius: 999px; padding: 0.44rem 1.05rem; }',
     '.jh-home-header .jh-nav a { color: rgba(0, 0, 0, 0.68) !important; }',
@@ -92,19 +77,12 @@
     '.jh-archives-header { --jh-fade-color: rgba(0, 0, 0, 0.84); --jh-fade-mid: rgba(0, 0, 0, 0.3); }',
     '.jh-archives-header .jh-nav { background: rgba(0, 0, 0, 0.7); border: 1px solid rgba(255, 255, 255, 0.14); }',
     '.jh-archives-header .jh-nav a:hover, .jh-archives-header .jh-nav a.jh-cur { color: #fff !important; }',
-    '.jh-darkroom-header.jh-scrolled { background: rgba(24, 17, 11, 0.84) !important; }',
-    '.jh-darkroom-header { --jh-fade-color: rgba(24, 17, 11, 0.88); --jh-fade-mid: rgba(24, 17, 11, 0.34); }',
-    '.jh-darkroom-header .jh-nav { background: rgba(31, 22, 14, 0.82); border: 1px solid rgba(200, 169, 110, 0.26); }',
-    '.jh-darkroom-header .jh-nav a { color: rgba(230, 210, 176, 0.64); }',
-    '.jh-darkroom-header .jh-nav a:hover, .jh-darkroom-header .jh-nav a.jh-cur { color: #e6c98a !important; }',
     '',
-    '/* Home page: black clocks */',
     '.home-dark-clocks .clock-container { color: rgba(0, 0, 0, 0.5) !important; }',
     '.home-dark-clocks .clock-label { color: rgba(0, 0, 0, 0.4) !important; }',
     '.home-dark-clocks .clock-time { color: rgba(0, 0, 0, 0.6) !important; }',
     '.home-dark-clocks .clock-date { color: rgba(0, 0, 0, 0.4) !important; }',
     '',
-    /* ── Logo ── */
     '.jh-logo {',
     '  pointer-events: auto;',
     '  text-decoration: none;',
@@ -126,7 +104,6 @@
     '  image-rendering: auto;',
     '}',
     '',
-    /* ── Desktop nav (horizontal) ── */
     '.jh-nav {',
     '  display: flex;',
     '  align-items: center;',
@@ -174,7 +151,6 @@
     '.jh-nav a:hover { color: #e6eef6; }',
     '.jh-nav a.jh-cur { color: #e6eef6; }',
     '',
-    /* ── Hamburger button (hidden on desktop) ── */
     '.jh-hamburger {',
     '  display: none;',
     '  pointer-events: auto;',
@@ -195,13 +171,11 @@
     '',
     '.jh-hamburger:hover { transform: translateY(-50%) scale(1.1); }',
     '',
-    /* ── Mobile dropdown wrapper (hidden on desktop) ── */
     '.jh-mobile-dropdown {',
     '  display: none;',
     '  pointer-events: auto;',
     '}',
     '',
-    /* ── Mobile styles ── */
     '@media (max-width: 768px) {',
     '',
     '  .jh-header {',
@@ -214,13 +188,10 @@
     '    height: 124px;',
     '  }',
     '',
-    '  /* Hide horizontal nav on mobile */',
     '  .jh-nav { display: none !important; }',
     '',
-    '  /* Show hamburger button */',
     '  .jh-hamburger { display: block; right: 0.65rem; }',
     '',
-    '  /* Mobile dropdown */',
     '  .jh-mobile-dropdown {',
     '    display: block;',
     '    width: 100%;',
@@ -276,22 +247,6 @@
     '    background: rgba(255, 255, 255, 0.08);',
     '  }',
 
-    '  .jh-darkroom-header .jh-mobile-dropdown-inner {',
-    '    background: rgba(23, 15, 9, 0.96);',
-    '    border-bottom: 1px solid rgba(200, 169, 110, 0.24);',
-    '  }',
-
-    '  .jh-darkroom-header .jh-mobile-dropdown-inner a {',
-    '    color: rgba(230, 210, 176, 0.64);',
-    '  }',
-
-    '  .jh-darkroom-header .jh-mobile-dropdown-inner a:hover,',
-    '  .jh-darkroom-header .jh-mobile-dropdown-inner a:active,',
-    '  .jh-darkroom-header .jh-mobile-dropdown-inner a.jh-cur {',
-    '    color: #e6c98a;',
-    '    background: rgba(200, 169, 110, 0.12);',
-    '  }',
-    '',
     '  .jh-mobile-dropdown-inner a {',
     '    display: block;',
     '    width: 100%;',
@@ -321,12 +276,10 @@
 
   document.head.appendChild(style);
 
-  /* ── 4. Build nav HTML ── */
   var items = [
     { key: 'gallery', label: 'gallery', href: base + 'gallery' },
     { key: 'archives', label: 'archives', href: base + 'archives' },
     { key: 'hoshii', label: 'hsoh', href: base + 'hoshii' },
-    { key: 'darkroom', label: 'darkroom', href: base + 'darkroom' },
     { key: 'resume', label: 'resume', href: base + 'resume' },
     { key: 'about', label: 'about', href: base + 'about' }
   ];
@@ -341,7 +294,6 @@
     return '<a href="' + item.href + '"' + cls + '>' + item.label + '</a>';
   }).join('');
 
-  /* ── 5. Build & insert header element ── */
   var header = document.createElement('header');
   header.className = 'jh-header';
   if (isHome) {
@@ -349,9 +301,6 @@
   }
   if (isArchivePage && !isHome) {
     header.className += ' jh-archives-header';
-  }
-  if (isDarkroomPage) {
-    header.className += ' jh-darkroom-header';
   }
   header.innerHTML =
     '<div class="jh-header-top">' +
@@ -367,7 +316,6 @@
     '<div class="jh-mobile-dropdown-inner">' + mobileNavLinks + '</div>' +
     '</div>';
 
-  /* ── 6. Hamburger toggle ── */
   var hamburger = header.querySelector('.jh-hamburger');
   var dropdown = header.querySelector('.jh-mobile-dropdown');
   var isOpen = false;
@@ -386,7 +334,6 @@
     }
   });
 
-  /* Close dropdown when a link is tapped */
   dropdown.addEventListener('click', function (e) {
     if (e.target.tagName === 'A') {
       isOpen = false;
@@ -396,7 +343,6 @@
     }
   });
 
-  /* Close dropdown when clicking outside */
   document.addEventListener('click', function (e) {
     if (isOpen && !header.contains(e.target)) {
       isOpen = false;
@@ -406,7 +352,6 @@
     }
   });
 
-  /* ── 7. Global image lightbox ── */
   if (!window.__jhImageLightboxInit) {
     window.__jhImageLightboxInit = true;
 
@@ -545,7 +490,6 @@
     ensureImageLightbox();
   }
 
-  /* ── 8. Scroll Listener ── */
   var isScrolled = false;
   function updateScroll() {
     var y = window.scrollY || 0;
@@ -568,9 +512,8 @@
       updateScroll();
     });
   }, { passive: true });
-  updateScroll(); // Initial check
+  updateScroll();
 
-  /* Insert as very first child of <body> */
   if (document.body) {
     document.body.insertBefore(header, document.body.firstChild);
   } else {

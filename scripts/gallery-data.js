@@ -1,15 +1,3 @@
-/**
- * gallery-data.js
- * 
- * Central project data. To add a new project, just push an object here.
- * Each project links to a writeup page at /writeups/<slug>.html
- * 
- * Categories:
- *   engineering, graphic-design, brand-design, ui-ux,
- *   videography, photography, production, motion-graphics,
- *   illustration, misc
- */
-
 var GALLERY_CATEGORIES = [
   { key: 'engineering', label: 'engineering projects' },
   { key: 'graphic-design', label: 'graphic design' },
@@ -26,7 +14,6 @@ var GALLERY_CATEGORIES = [
 ];
 
 var GALLERY_PROJECTS = [
-  // ─── Engineering Projects ───
   {
     slug: 'bioboat',
     title: 'bioboat @ sfu see',
@@ -52,7 +39,6 @@ var GALLERY_PROJECTS = [
     thumb: null
   },
 
-  // ─── Videography ───
   {
     slug: 'what-used-to-be',
     title: 'what used to be',
@@ -86,7 +72,6 @@ var GALLERY_PROJECTS = [
     thumb: 'gif/thumbnails/FINAL PHOTO_15.1.2 (1) (1).png'
   },
 
-  // ─── Photography ───
   {
     slug: 'hobbies',
     title: 'hobbies',
@@ -107,7 +92,6 @@ var GALLERY_PROJECTS = [
     href: 'projects/photography-client'
   },
 
-  // ─── Motion Graphics ───
   {
     slug: 'newjeans-right-now',
     title: 'newjeans — "right now" kinetic typography',
@@ -117,34 +101,6 @@ var GALLERY_PROJECTS = [
     thumb: 'gif/thumbnails/NWJNS-RIGHTNOW.png'
   },
 
-  // ─── Graphic Design ───
-  // Add your projects here!
-  // {
-  //   slug: 'forum-graphics',
-  //   title: 'The Forum — Event Graphics',
-  //   category: 'graphic-design',
-  //   date: '2025-08',
-  //   description: 'Event graphics and social media content for The Forum @ SFU.',
-  //   thumb: null
-  // },
-
-  // ─── UI / UX ───
-  // {
-  //   slug: 'ukiyo',
-  //   title: 'Ukiyo',
-  //   category: 'ui-ux',
-  //   date: '2026-06',
-  //   description: 'An app that lets you lead your own life. TBA.',
-  //   thumb: null
-  // },
-
-  // ─── Brand Design ───
-
-  // ─── Production ───
-
-  // ─── Illustration ───
-
-  // ─── Miscellaneous ───
   {
     slug: 'vancouver',
     title: 'project:vancouver',
@@ -152,7 +108,7 @@ var GALLERY_PROJECTS = [
     date: '2021-01',
     description: 'A set of twelve "projects" set across all different mediums and fields. My dreams and goals.',
     thumb: null,
-    href: 'projects/vancouver'  // external page override
+    href: 'projects/vancouver'
   },
   {
     slug: 'sustainable-food',

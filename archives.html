@@ -9,10 +9,8 @@
   <link rel="stylesheet" href="styles/tailwind-prod.css">
   <link rel="stylesheet" href="styles/dot-grid.css">
   <link rel="stylesheet" href="styles/clocks.css">
-  <!-- GSAP for project gallery -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <style>
-    /* ── Base ── */
     html,
     body {
       margin: 0;
@@ -24,7 +22,6 @@
     }
 
 
-    /* ── Archives content ── */
     #archives-content {
       display: block;
     }
@@ -173,7 +170,6 @@
       }
     }
 
-    /* ── Shared fixed nav overlay (over both sections) ── */
     #archives-nav {
       position: fixed;
       top: 0;
@@ -229,7 +225,6 @@
       opacity: 1;
     }
 
-    /* ── Section 1: Sphere ── */
     #sphere-section {
       position: relative;
       height: 100vh;
@@ -243,7 +238,6 @@
       left: 0;
       right: 0;
       bottom: 56px;
-      /* leave room for scroll bar */
     }
 
     #cables-wrap iframe {
@@ -256,7 +250,6 @@
       touch-action: pan-x pan-y;
     }
 
-    /* Scroll strip at bottom of sphere */
     #scroll-strip {
       position: absolute;
       bottom: 0;
@@ -309,7 +302,6 @@
       }
     }
 
-    /* ── Section 2: Project Gallery ── */
     #gallery-section {
       background: transparent;
       min-height: 100vh;
@@ -351,7 +343,6 @@
       text-transform: lowercase;
     }
 
-    /* Carousel */
     .carousel-outer {
       position: relative;
       max-width: 900px;
@@ -369,7 +360,6 @@
       will-change: transform;
     }
 
-    /* Project card */
     .proj-card {
       min-width: 100%;
       display: grid;
@@ -483,7 +473,6 @@
       flex-shrink: 0;
     }
 
-    /* Nav arrows */
     .carousel-btn {
       position: absolute;
       top: 50%;
@@ -516,7 +505,6 @@
       right: 0;
     }
 
-    /* Dots */
     .carousel-dots {
       display: flex;
       justify-content: center;
@@ -537,7 +525,6 @@
       background: #c084fc;
     }
 
-    /* back btn */
     .back-btn {
       z-index: 110;
     }
@@ -596,18 +583,13 @@
 </head>
 
 <body>
-  <!-- Dot Grid Background (covers whole page incl. password gate) -->
   <div class="dot-grid-wrapper"></div>
-  <!-- Self-injecting site header -->
   <script src="scripts/site-header.js"></script>
 
-  <!-- Back button -->
   <a href="/" class="back-btn" style="position:fixed;top:1rem;left:1rem;z-index:9998;">← back</a>
 
-  <!-- Archives Content -->
   <div id="archives-content">
 
-    <!-- ── Section 1: Minimal Archives Nav ── -->
     <div id="gardens-section">
       <div class="archives-title">
         <h1>archives</h1>
@@ -672,7 +654,6 @@
       </div>
     </div>
 
-    <!-- ── Section 2: cables.gl Sphere ── -->
     <div id="sphere-section" style="position:relative; height:100vh;">
       <div id="cables-wrap" style="position:absolute; top:0; left:0; right:0; bottom:0;">
         <iframe id="archives-cables-frame" src="https://cables.gl/view/5YDGDb" loading="eager"
@@ -686,7 +667,7 @@
       <div class="text-sm mt-2">ALL RIGHTS RESERVED. ®</div>
     </footer>
 
-  </div><!-- /#archives-content -->
+  </div>
 
   <button id="back-to-top" type="button" aria-label="back to top">back to top</button>
 

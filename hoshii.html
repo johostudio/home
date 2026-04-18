@@ -11,9 +11,6 @@
   <link rel="stylesheet" href="styles/dot-grid.css">
   <link rel="stylesheet" href="styles/clocks.css">
   <style>
-    /* ──────────────────────────────────────────
-       Hover-preview chip (from index.html)
-    ────────────────────────────────────────── */
     .home-bio-link {
       font-weight: 400;
       text-decoration: none;
@@ -366,10 +363,8 @@
 </head>
 
 <body class="min-h-screen bg-[#071021] text-[#e6eef6] flex flex-col">
-  <!-- Dot Grid Background -->
   <div class="dot-grid-wrapper"></div>
 
-  <!-- Self-injecting site header -->
   <script src="scripts/site-header.js"></script>
 
   <div class="sticker-layer" data-sticker-layer data-safe-bottom="0">
@@ -416,7 +411,6 @@
         style="font-family:'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight:400;">a music production project,
         @hsoh.wav / 2026 q2+3</p>
 
-      <!-- Weekly Pick (embedded Spotify player) -->
       <div class="mt-6 p-6">
         <h2 class="text-xl font-normal mb-3 text-center"
           style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:-0.045em;text-transform:lowercase;">
@@ -432,7 +426,6 @@
 
       </div>
 
-      <!-- hsoh.tech link -->
       <div class="mt-8 p-2 text-center relative">
         <h2 class="hsoh-main-title mb-2 relative z-10" id="hsoh-dial" tabindex="0" role="button"
           aria-label="randomize studio dial code">+86</h2>
@@ -469,7 +462,6 @@
     <div class="text-sm mt-2">ALL RIGHTS RESERVED. ®</div>
   </footer>
 
-  <!-- Hover link preview card -->
   <div class="link-preview" id="link-preview">
     <img class="link-preview-img" id="preview-img" src="" alt="">
     <div class="link-preview-body">
@@ -790,7 +782,6 @@
       loadSongs();
     })();
 
-    /* ── Hover preview logic ── */
     (function () {
       var preview = document.getElementById('link-preview');
       var previewImg = document.getElementById('preview-img');

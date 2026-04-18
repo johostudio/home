@@ -1,4 +1,3 @@
-/* Dual Clocks - Vancouver (right) & Nanchang (left) */
 .clock-container {
   position: fixed;
   top: var(--clocks-top, 164px);
@@ -60,7 +59,6 @@
   margin-top: 1px;
 }
 
-/* Keep main content below clock lane on mobile */
 @media (max-width: 768px) {
   #gardens-section {
     padding-top: calc(var(--clocks-top-mobile, 160px) + 54px) !important;
@@ -76,7 +74,6 @@
   }
 }
 
-/* ── Mobile clock spacing fixes ── */
 @media (max-width: 768px) {
   .clocks-wrapper {
     pointer-events: none;
@@ -108,7 +105,6 @@
   }
 }
 
-/* Very small screens — stack clocks as a centered row */
 @media (max-width: 480px) {
   .clocks-wrapper {
     position: fixed;

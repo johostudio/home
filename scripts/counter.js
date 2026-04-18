@@ -94,7 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     localStorage.setItem(VISITOR_KEY, 'true');
                 } catch (_) {
-                    // ignore storage write errors (private mode, restricted storage)
                 }
             }
 
@@ -105,7 +104,6 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 localStorage.setItem(LAST_COUNT_KEY, String(count));
             } catch (_) {
-                // ignore storage write errors
             }
         })
         .catch(err => {
