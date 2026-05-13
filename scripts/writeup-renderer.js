@@ -129,6 +129,13 @@
   }
 
   target.innerHTML = renderMarkdown(md);
+  var renderedImages = target.querySelectorAll('img');
+  for (var imgIndex = 0; imgIndex < renderedImages.length; imgIndex++) {
+    var image = renderedImages[imgIndex];
+    image.loading = imgIndex === 0 ? 'eager' : 'lazy';
+    image.decoding = 'async';
+    image.fetchPriority = imgIndex === 0 ? 'high' : 'low';
+  }
 
   var headings = target.querySelectorAll('h1, h2, h3');
   if (headings.length > 1) {
