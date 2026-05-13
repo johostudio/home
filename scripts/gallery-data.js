@@ -111,7 +111,7 @@ var GALLERY_PROJECTS = [
     date: '2026-04',
     description: 'gallery of my everyday objects around me',
     thumb: 'gif/thumbnails/1600.jpg',
-    href: 'projects/photography'
+    href: 'projects/hobbies'
   },
 
   {
