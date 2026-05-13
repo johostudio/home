@@ -63,7 +63,7 @@
     <section class="card">
       <div class="field full">
         <label for="admin-token">admin token</label>
-        <input id="admin-token" type="password" placeholder="SCRAMBLED_ADMIN_TOKEN (or ATLAS_ADMIN_TOKEN fallback)" autocomplete="off" />
+        <input id="admin-token" type="password" placeholder="PHOTOGRAPHY_ADMIN_TOKEN" autocomplete="off" />
       </div>
 
       <div class="grid mt-3">
@@ -130,6 +130,7 @@
       </div>
       <div class="btn-row">
         <button id="add-link-btn" type="button">add link</button>
+        <button id="import-local-btn" type="button">import existing nodes</button>
       </div>
       <p class="status" id="status"></p>
     </section>
@@ -167,6 +168,8 @@
         linkTarget: document.getElementById('link-target')
       };
 
+      var dbGraph = { nodes: [], links: [] };
+      var localGraph = { nodes: [], links: [] };
       var graph = { nodes: [], links: [] };
 
       function setStatus(message) {
@@ -200,6 +203,59 @@
         return text.slice(0, 117) + '...';
       }
 
+      function parseLocalGDataFromHtml(html) {
+        var match = html.match(/const gData =([\s\S]*?)\r?\n\s*let Graph;/);
+        if (!match || !match[1]) return { nodes: [], links: [] };
+        try {
+          var raw = match[1].trim();
+          if (raw.endsWith(';')) raw = raw.slice(0, -1);
+          var parsed = (new Function('return (' + raw + ');'))();
+          return {
+            nodes: Array.isArray(parsed && parsed.nodes) ? parsed.nodes : [],
+            links: Array.isArray(parsed && parsed.links) ? parsed.links : []
+          };
+        } catch (_e) {
+          return { nodes: [], links: [] };
+        }
+      }
+
+      function mergeGraphs() {
+        var nodeMap = new Map();
+        (localGraph.nodes || []).forEach(function (node) {
+          if (!node || !node.id) return;
+          nodeMap.set(String(node.id), Object.assign({}, node, { _source: 'local' }));
+        });
+        (dbGraph.nodes || []).forEach(function (node) {
+          if (!node || !node.id) return;
+          nodeMap.set(String(node.id), Object.assign({}, node, { _source: 'db' }));
+        });
+
+        var linkMap = new Map();
+        (localGraph.links || []).forEach(function (link) {
+          if (!link || !link.source || !link.target) return;
+          var key = String(link.source) + '->' + String(link.target);
+          linkMap.set(key, {
+            id: '',
+            source: String(link.source),
+            target: String(link.target),
+            _source: 'local'
+          });
+        });
+        (dbGraph.links || []).forEach(function (link) {
+          if (!link || !link.source || !link.target) return;
+          var key = String(link.source) + '->' + String(link.target);
+          linkMap.set(key, {
+            id: link.id || '',
+            source: String(link.source),
+            target: String(link.target),
+            _source: 'db'
+          });
+        });
+
+        graph.nodes = Array.from(nodeMap.values());
+        graph.links = Array.from(linkMap.values());
+      }
+
       function toNodeId(name) {
         var base = String(name || '')
           .toLowerCase()
@@ -228,19 +284,20 @@
 
       function renderNodes() {
         if (!graph.nodes.length) {
-          nodesListEl.innerHTML = '<div class="list-item">no nodes in database yet.</div>';
+          nodesListEl.innerHTML = '<div class="list-item">no nodes found.</div>';
           return;
         }
 
         nodesListEl.innerHTML = graph.nodes.map(function (node) {
+          var sourceLabel = node._source === 'db' ? 'database' : 'existing page';
           return [
             '<article class="list-item">',
             '<strong>', esc(node.id), '</strong> — ', esc(node.name || ''), ' (group ', esc(node.group), ')',
-            '<div class="small">date: ', esc(node.date || 'n/a'), ' | now playing: ', esc(node.nowPlaying || 'n/a'), '</div>',
+            '<div class="small">source: ', esc(sourceLabel), ' | date: ', esc(node.date || 'n/a'), ' | now playing: ', esc(node.nowPlaying || 'n/a'), '</div>',
             '<div class="short">', esc(shortText(node.content)), '</div>',
             '<div class="btn-row">',
             '<button data-edit-node="', esc(node.id), '" type="button">edit</button>',
-            '<button data-delete-node="', esc(node.id), '" type="button">delete</button>',
+            (node._source === 'db' ? ('<button data-delete-node="' + esc(node.id) + '" type="button">delete</button>') : ''),
             '</div>',
             '</article>'
           ].join('');
@@ -249,15 +306,17 @@
 
       function renderLinks() {
         if (!graph.links.length) {
-          linksListEl.innerHTML = '<div class="list-item">no links in database yet.</div>';
+          linksListEl.innerHTML = '<div class="list-item">no links found.</div>';
           return;
         }
 
         linksListEl.innerHTML = graph.links.map(function (link) {
+          var sourceLabel = link._source === 'db' ? 'database' : 'existing page';
           return [
             '<article class="list-item">',
             '<strong>', esc(link.source), '</strong> → <strong>', esc(link.target), '</strong>',
-            '<div class="btn-row"><button data-delete-link="', esc(link.id || ''), '" type="button">delete</button></div>',
+            '<div class="small">source: ', esc(sourceLabel), '</div>',
+            (link._source === 'db' ? ('<div class="btn-row"><button data-delete-link="' + esc(link.id || '') + '" type="button">delete</button></div>') : ''),
             '</article>'
           ].join('');
         }).join('');
@@ -278,14 +337,90 @@
             return res.json();
           })
           .then(function (data) {
-            graph.nodes = Array.isArray(data.nodes) ? data.nodes : [];
-            graph.links = Array.isArray(data.links) ? data.links : [];
+            dbGraph.nodes = Array.isArray(data.nodes) ? data.nodes : [];
+            dbGraph.links = Array.isArray(data.links) ? data.links : [];
+            mergeGraphs();
             renderAll();
-            setStatus('loaded ' + graph.nodes.length + ' nodes and ' + graph.links.length + ' links.');
+            setStatus('loaded ' + dbGraph.nodes.length + ' db nodes + ' + localGraph.nodes.length + ' existing-page nodes.');
           })
           .catch(function (err) {
             setStatus(err && err.message ? err.message : 'failed to load graph');
           });
+      }
+
+      function loadLocalGraph() {
+        fetch('../scrambled.html', { cache: 'no-store' })
+          .then(function (res) {
+            if (!res.ok) throw new Error('failed to load local graph source');
+            return res.text();
+          })
+          .then(function (html) {
+            localGraph = parseLocalGDataFromHtml(html);
+            mergeGraphs();
+            renderAll();
+          })
+          .catch(function () {
+            localGraph = { nodes: [], links: [] };
+            mergeGraphs();
+            renderAll();
+          });
+      }
+
+      async function importLocalGraph() {
+        if (!ensureWorker()) return;
+        if (!token()) {
+          setStatus('admin token is required.');
+          return;
+        }
+        if (!localGraph.nodes.length) {
+          setStatus('no existing page nodes found to import.');
+          return;
+        }
+        saveToken();
+        setStatus('importing existing nodes and links...');
+        try {
+          for (var i = 0; i < localGraph.nodes.length; i += 1) {
+            var node = localGraph.nodes[i];
+            var nodeRes = await fetch(workerUrl + '/scrambled-nodes/' + encodeURIComponent(node.id), {
+              method: 'PUT',
+              headers: {
+                'content-type': 'application/json',
+                'x-admin-token': token()
+              },
+              body: JSON.stringify({
+                id: node.id || '',
+                name: node.name || '',
+                group: Number(node.group || 2),
+                val: Number(node.val || 8),
+                content: node.content || '',
+                date: node.date || '',
+                nowPlaying: node.nowPlaying || '',
+                nowPlayingUrl: node.nowPlayingUrl || '',
+                img: node.img || ''
+              })
+            });
+            if (!nodeRes.ok) throw new Error('node import failed');
+          }
+          for (var j = 0; j < localGraph.links.length; j += 1) {
+            var link = localGraph.links[j];
+            var linkRes = await fetch(workerUrl + '/scrambled-links', {
+              method: 'POST',
+              headers: {
+                'content-type': 'application/json',
+                'x-admin-token': token()
+              },
+              body: JSON.stringify({
+                source: link.source || '',
+                target: link.target || ''
+              })
+            });
+            if (!linkRes.ok) throw new Error('link import failed');
+          }
+          setStatus('import complete.');
+          loadGraph();
+        } catch (_e) {
+          setStatus('import failed. check token and worker logs.');
+        }
       }
 
       function clearNodeForm() {
@@ -481,8 +616,10 @@
         setStatus('node form cleared.');
       });
       document.getElementById('add-link-btn').addEventListener('click', addLink);
+      document.getElementById('import-local-btn').addEventListener('click', importLocalGraph);
 
       loadToken();
+      loadLocalGraph();
       loadGraph();
     })();
   </script>

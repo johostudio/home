@@ -60,7 +60,10 @@ function hasPhotoAdminAccess(request, env) {
 }
 
 function hasScrambledAdminAccess(request, env) {
-  var configuredToken = safeText(env.SCRAMBLED_ADMIN_TOKEN || '', 256);
+  var configuredToken = safeText(env.PHOTOGRAPHY_ADMIN_TOKEN || '', 256);
+  if (!configuredToken) {
+    configuredToken = safeText(env.SCRAMBLED_ADMIN_TOKEN || '', 256);
+  }
   if (!configuredToken) {
     configuredToken = safeText(env.ATLAS_ADMIN_TOKEN || '', 256);
   }
