@@ -52,11 +52,22 @@
   }
 
   var path = window.location.pathname || '';
+  var isHeavyContentPage = /gallery\.html$|\/writeups\/|projects\/hobbies|projects\/photography-client/i.test(path);
   var isArchivePage = /archives|scrambled|bookshelf|atlas/.test(path);
+  var disableTextMask = false;
   if (isArchivePage) {
     config.baseAlpha = 0.085;
     config.activeAlpha = 0.28;
     textDim = 0.35;
+  }
+  if (isHeavyContentPage) {
+    // Lighter mode for image-heavy or long-text pages.
+    targetFrameMs = 1000 / 30;
+    config.maxDots = Math.min(config.maxDots, 2600);
+    config.baseAlpha = Math.min(config.baseAlpha, 0.04);
+    config.activeAlpha = Math.min(config.activeAlpha, 0.16);
+    config.speedTrigger = 999999;
+    disableTextMask = true;
   }
 
   function hexToRgb(hex) {
@@ -72,6 +83,10 @@
 
   /* ---- text element detection ---- */
   function refreshTextRects() {
+    if (disableTextMask) {
+      textRects = [];
+      return;
+    }
     // Query actual text-bearing elements inside content areas and password gate
     var selectors = '.z-10 h1, .z-10 h2, .z-10 h3, .z-10 p, .z-10 li, .z-10 a, .z-10 small, .z-10 span, .z-10 div[contenteditable], #password-gate p, #password-gate input';
     var els = document.querySelectorAll(selectors);
@@ -114,6 +129,7 @@
 
   // Returns 0-1: textDim when inside text, 1 when far from text, smooth fade between
   function textFadeAt(x, y) {
+    if (disableTextMask) return 1;
     if (textRects.length === 0) return 1;
     var closest = Infinity;
     for (var i = 0; i < textRects.length; i++) {
@@ -401,13 +417,15 @@
   });
 
   // Refresh text rects on scroll (positions shift)
-  window.addEventListener('scroll', function () {
-    if (scrollRaf) return;
-    scrollRaf = requestAnimationFrame(function () {
-      scrollRaf = 0;
-      refreshTextRects();
-    });
-  }, { passive: true });
+  if (!disableTextMask) {
+    window.addEventListener('scroll', function () {
+      if (scrollRaf) return;
+      scrollRaf = requestAnimationFrame(function () {
+        scrollRaf = 0;
+        refreshTextRects();
+      });
+    }, { passive: true });
+  }
 
   document.addEventListener('mousemove', onMove, { passive: true });
   document.addEventListener('touchmove', onMove, { passive: true });

@@ -130,11 +130,13 @@
 
   target.innerHTML = renderMarkdown(md);
   var renderedImages = target.querySelectorAll('img');
+  var saveData = !!(navigator.connection && navigator.connection.saveData);
+  var eagerAllowed = !saveData && renderedImages.length <= 2;
   for (var imgIndex = 0; imgIndex < renderedImages.length; imgIndex++) {
     var image = renderedImages[imgIndex];
-    image.loading = imgIndex === 0 ? 'eager' : 'lazy';
+    image.loading = (imgIndex === 0 && eagerAllowed) ? 'eager' : 'lazy';
     image.decoding = 'async';
-    image.fetchPriority = imgIndex === 0 ? 'high' : 'low';
+    image.fetchPriority = (imgIndex === 0 && eagerAllowed) ? 'high' : 'low';
   }
 
   var headings = target.querySelectorAll('h1, h2, h3');
@@ -182,7 +184,14 @@
         }
       }
     }
-    window.addEventListener('scroll', updateJumpbar, { passive: true });
+    var jumpbarRaf = 0;
+    window.addEventListener('scroll', function () {
+      if (jumpbarRaf) return;
+      jumpbarRaf = window.requestAnimationFrame(function () {
+        jumpbarRaf = 0;
+        updateJumpbar();
+      });
+    }, { passive: true });
     updateJumpbar();
 
     jumpbar.addEventListener('click', function(e) {
