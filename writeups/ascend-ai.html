@@ -18,7 +18,7 @@
     <a href="../gallery.html" class="writeup-back">&larr; back to gallery</a>
 
     <header class="writeup-header">
-      <h1>ascend.ai</h1>
+      <h1>ascend.ai - A Personalized Financial Advisor Engine</h1>
       <div class="writeup-meta">
         <span class="writeup-date">Jan 2026</span>
         <span class="writeup-tag">UI / UX</span>
@@ -29,9 +29,78 @@
   </main>
 
   <script type="text/markdown" id="writeup-md">
-## Overview
+## Description
 
-As quality financial advice becomes less accessible, ascend.ai focuses on personalized recommendations that adapt to real user constraints and context-aware decisions.
+As quality financial advice becomes less accessible, ascend.ai tackles challenges that gap. Powered by it's own engine, it adapts advice to real user constraints and delivers context-aware decisions.
+
+## Inspiration
+
+Access to good financial advice is broken, and personalized guidance is expensive, while free tools offer generic, one-size-fits-all answers. We wanted to build a system that delivers meaningful, personalized financial advice to people who are usually overlooked.
+
+Most financial planning tools use generic templates or black-box AI that can't explain its reasoning. We built a custom recommendation engine that combines structured logic with intelligent personalization, giving users transparent, actionable advice they can trust.
+
+## What it does
+
+Ascend.ai is a personalized financial advisor engine that adapts its recommendations based on user context. Using the same underlying engine, it produces different advice for different users by accounting for age, income, debt, investments, risk tolerance, and financial goals.
+
+The engine processes a user's complete financial profile and generates a staged roadmap organized into short-term, medium-term, and long-term actions. Each recommendation includes dependencies, so users understand not just what to do, but the logical sequence. When users adjust their profile through interactive toggles, the entire roadmap recalculates instantly.
+
+## How we built it
+
+We built a heuristic-based decision framework that sits above any AI model. User personas and constraints guide the reasoning process, while AI supports explanation rather than driving decisions blindly.
+
+The core innovation is our custom recommendation engine, built entirely from scratch in Python. This isn't a wrapper around existing APIs. We constructed a modular system with six components: an input normalizer that handles diverse inputs and computes financial health indicators, an action registry with 50+ financial actions, a multi-factor scorer that evaluates actions across eight weighted dimensions, a DAG builder that constructs a dependency graph ensuring logical sequencing, a recommendation engine that groups actions by time horizon, and a personalization layer that generates contextual descriptions.
+
+The DAG builder is critical. It ensures building an emergency fund always comes before investing. Without this dependency system, you'd just get a ranked list that might not make logical sense. All of this runs through a Flask REST API with sub-100ms response times, serving a React frontend with Firebase authentication.
+
+## Challenges we ran into
+
+Balancing personalization with reliability was difficult. Pure AI approaches hallucinate or overgeneralize, while rigid logic feels inflexible. Designing heuristics that were both expressive and robust took significant iteration.
+
+Building the dependency graph was particularly challenging. We needed to ensure recommendations always made logical sense, no investments before emergency funds, no debt strategies ignoring income constraints. We implemented cycle detection and topological sorting, but getting the dependency rules right required many rounds of testing.
+
+Making the scoring system transparent while keeping it sophisticated was another challenge. We ended up with a multi-factor approach that provides score breakdowns, showing exactly how each dimension contributed to a recommendation's final score. Performance optimization to maintain sub-100ms response times required careful attention to data structures and algorithm efficiency.
+
+## Accomplishments that we're proud of
+
+We demonstrated that the same engine can generate vastly different, sensible advice for different users. A 22-year-old with student debt gets a completely different roadmap than a 45-year-old homeowner with investments.
+
+We built a system that prioritizes trust and transparency. Every recommendation can be explained through score breakdowns, and the dependency graph ensures logical consistency. The real-time adaptation feature works seamlessly, users adjust their profile and watch their roadmap recalculate instantly.
+
+We're particularly proud of the engine's architecture. It's modular and extensible, meaning new financial actions can be added easily, scoring weights can be customized, and the system can be adapted for different financial products or regulations. This makes it more than a hackathon project, it's a foundation that could power real financial planning applications.
+
+## What we learned
+
+Context is more important than raw intelligence in financial decision-making. AI is most effective when paired with deterministic logic and clear constraints. Explainability and trust matter just as much as accuracy.
+
+Building a recommendation engine from scratch taught us that transparency is essential for financial applications. Users need to understand why they're being recommended certain actions. Our multi-factor scoring system provides this transparency while maintaining sophisticated personalization.
+
+We also learned that dependency management is crucial. Simply ranking actions by score doesn't work, you need to understand which actions depend on others. The DAG structure we built handles this elegantly, something generic recommendation systems often miss.
+
+## What's next for Ascend.ai
+
+Further additions would include expanding the heuristic system, adding real user inputs, and integrating verified financial data sources.
+
+We'd like to add more financial actions around tax optimization, insurance planning, and retirement strategies. We're interested in integrating with financial APIs to automatically pull user account data for seamless profile setup and progress tracking.
+
+The scoring system could be enhanced with machine learning models trained on user outcomes, but we'd keep the heuristic foundation to maintain transparency. For enterprise applications, we'd build compliance modules, analytics dashboards, and mobile SDKs. The modular architecture makes all of these extensions straightforward.
+
+## Built With
+
+- adobe-illustrator
+- css
+- figma
+- firebase
+- html
+- javascript
+- python
+- rest-api
+
+## Try it out
+
+- github.com: https://github.com/ExxML/ascend.ai
+- www.figma.com: https://www.figma.com/design/1keORwjVNMbIRln7QP8j4e/ASCEND.AI-FINAL-FRAMEWORK?node-id=0-1&t=GGaNmI9cCHG4Prdq-1
+- www.figma.com: https://www.figma.com/slides/Fqoan5F2J0Vt0r2l0cUvCl/ASCEND.AI-FINAL-Slides?node-id=10-961&t=QXqPh6PITwXbgBgp-1
 
 ## Devpost
 

@@ -107,7 +107,8 @@
 
     <header class="photo-header mt-4">
       <h1>photography</h1>
-      <p>photo gallery. edit `projects/photography-client-data.json` to add photos.</p>
+      <p>photo gallery. edit `projects/photography-client-data.json` to add photos, dates, and locations.</p>
+      <p>use `file` for local images in `projects/photography-client-images/`, or `image` for full URLs.</p>
       <p class="photo-status" id="photo-status" hidden></p>
     </header>
 
@@ -118,6 +119,7 @@
     (function () {
       var grid = document.getElementById('photo-grid');
       var status = document.getElementById('photo-status');
+      var localImagePrefix = './photography-client-images/';
 
       function esc(value) {
         return String(value || '')
@@ -139,8 +141,26 @@
         status.textContent = message;
       }
 
+      function resolveImage(entry) {
+        if (!entry || typeof entry !== 'object') return '';
+        var direct = typeof entry.image === 'string' ? entry.image.trim() : '';
+        if (direct) return direct;
+        var file = typeof entry.file === 'string' ? entry.file.trim() : '';
+        if (!file) return '';
+        return localImagePrefix + encodeURI(file);
+      }
+
       function render(entries) {
-        var list = Array.isArray(entries) ? entries : [];
+        var list = Array.isArray(entries) ? entries.map(function (entry) {
+          return {
+            image: resolveImage(entry),
+            date: entry && entry.date ? entry.date : '',
+            location: entry && entry.location ? entry.location : ''
+          };
+        }).filter(function (entry) {
+          return !!entry.image;
+        }) : [];
+
         if (!list.length) {
           grid.innerHTML = '';
           setStatus('no photos yet. add entries to projects/photography-client-data.json');
@@ -152,9 +172,9 @@
           var tilt = rotations[index % rotations.length];
           return [
             '<article class="photo-card" style="transform: rotate(', tilt, 'deg);">',
-            '<img src="', esc(entry.image), '" alt="photo" loading="lazy">',
+            '<img src="', esc(entry.image), '" alt="photo" loading="lazy" decoding="async">',
             '<div class="photo-note">',
-            '<div class="meta">', esc(entry.date), ' @ ', esc(entry.location), '</div>',
+            '<div class="meta">', esc(entry.date || 'date tbd'), ' @ ', esc(entry.location || 'location tbd'), '</div>',
             '</div>',
             '</article>'
           ].join('');

@@ -166,11 +166,21 @@
 .writeup-body img {
   max-width: 100%;
   border-radius: 8px;
-  margin: 20px 0;
+  margin: 20px auto;
   border: 1px solid rgba(255, 255, 255, 0.06);
   display: block;
   content-visibility: auto;
   contain-intrinsic-size: 900px 560px;
+}
+
+.writeup-body iframe {
+  width: min(100%, 900px);
+  aspect-ratio: 16 / 9;
+  height: auto;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  display: block;
+  margin: 20px auto;
 }
 
 .writeup-body hr {
