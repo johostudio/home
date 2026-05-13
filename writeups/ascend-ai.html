@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ascend.ai - joho's studio</title>
+  <link rel="icon" type="image/x-icon" href="../favicon.ico" />
+  <link rel="stylesheet" href="../styles/tailwind-prod.css">
+  <link rel="stylesheet" href="../styles/dot-grid.css">
+  <link rel="stylesheet" href="../styles/clocks.css">
+  <link rel="stylesheet" href="../styles/writeup.css">
+</head>
+<body class="min-h-screen bg-[#071021] text-[#e6eef6]">
+  <div class="dot-grid-wrapper"></div>
+  <script src="../scripts/site-header.js"></script>
+
+  <main class="writeup-main relative z-10">
+    <a href="../gallery.html" class="writeup-back">&larr; back to gallery</a>
+
+    <header class="writeup-header">
+      <h1>ascend.ai</h1>
+      <div class="writeup-meta">
+        <span class="writeup-date">Jan 2026</span>
+        <span class="writeup-tag">UI / UX</span>
+      </div>
+    </header>
+
+    <div class="writeup-body" id="writeup-body"></div>
+  </main>
+
+  <script type="text/markdown" id="writeup-md">
+## Overview
+
+As quality financial advice becomes less accessible, ascend.ai focuses on personalized recommendations that adapt to real user constraints and context-aware decisions.
+
+## Devpost
+
+- [View project on Devpost](https://devpost.com/software/ascend-ai-a-personalized-financial-advisor-engine)
+
+## Project Images
+
+![ascend.ai screenshot 1](https://d112y698adiu2z.cloudfront.net/photos/production/software_photos/004/175/357/datas/original.png)
+![ascend.ai screenshot 2](https://d112y698adiu2z.cloudfront.net/photos/production/software_photos/004/175/358/datas/original.png)
+![ascend.ai screenshot 3](https://d112y698adiu2z.cloudfront.net/photos/production/software_photos/004/175/359/datas/original.png)
+  </script>
+
+  <footer class="text-center mt-16 w-full mb-10 relative z-10">
+    <small>&copy; <span id="year"></span> joho's studio</small>
+    <div class="text-sm mt-2">ALL RIGHTS RESERVED.</div>
+  </footer>
+
+  <script>
+    const y = document.getElementById('year');
+    if (y) y.textContent = new Date().getFullYear();
+  </script>
+  <script src="../scripts/writeup-renderer.js"></script>
+  <script src="../scripts/page-transitions.js"></script>
+  <script src="../scripts/dot-grid.js"></script>
+  <script src="../scripts/clocks.js"></script>
+</body>
+</html>

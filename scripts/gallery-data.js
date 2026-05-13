@@ -38,6 +38,38 @@ var GALLERY_PROJECTS = [
     description: 'Personal portfolio site built from scratch, learning to make things work (and still look pretty).',
     thumb: null
   },
+  {
+    slug: 'verdant',
+    title: 'Verdant',
+    category: 'ui-ux',
+    date: '2026-02',
+    description: 'Hackathon project for climate resilience planning using AI-integrated urban mapping.',
+    thumb: 'https://d112y698adiu2z.cloudfront.net/photos/production/software_thumbnail_photos/004/234/335/datas/medium.jpg'
+  },
+  {
+    slug: 'ascend-ai',
+    title: 'ascend.ai',
+    category: 'ui-ux',
+    date: '2026-01',
+    description: 'Personalized financial advisor engine designed to adapt to real user constraints.',
+    thumb: 'https://d112y698adiu2z.cloudfront.net/photos/production/software_thumbnail_photos/004/174/899/datas/medium.png'
+  },
+  {
+    slug: 'bussin',
+    title: 'Bussin!',
+    category: 'ui-ux',
+    date: '2026-02',
+    description: 'Transit-focused hackathon app for planning commutes and seeing route context.',
+    thumb: 'https://d112y698adiu2z.cloudfront.net/photos/production/software_thumbnail_photos/004/260/525/datas/medium.png'
+  },
+  {
+    slug: 'carbon-compass',
+    title: 'Carbon Compass',
+    category: 'ui-ux',
+    date: '2025-10',
+    description: 'Sustainability navigation experience to track footprint and compare eco-friendly routes.',
+    thumb: 'https://d112y698adiu2z.cloudfront.net/photos/production/software_thumbnail_photos/003/819/016/datas/medium.png'
+  },
 
   {
     slug: 'what-used-to-be',
