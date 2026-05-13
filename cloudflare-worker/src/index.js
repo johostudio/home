@@ -46,6 +46,19 @@ function hasAtlasAdminAccess(request, env) {
   return !!providedToken && providedToken === configuredToken;
 }
 
+function hasPhotoAdminAccess(request, env) {
+  var configuredToken = safeText(env.PHOTOGRAPHY_ADMIN_TOKEN || '', 256);
+  if (!configuredToken) {
+    configuredToken = safeText(env.ATLAS_ADMIN_TOKEN || '', 256);
+  }
+  if (!configuredToken && env.ATLAS_ADMIN_PASSWORD) {
+    configuredToken = safeText(env.ATLAS_ADMIN_PASSWORD || '', 256);
+  }
+  if (!configuredToken) return false;
+  var providedToken = safeText(request.headers.get('x-admin-token') || '', 256);
+  return !!providedToken && providedToken === configuredToken;
+}
+
 function makeId() {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
@@ -75,6 +88,17 @@ function safePhotos(value) {
     .map((entry) => safeText(entry, 800))
     .filter(Boolean)
     .slice(0, 10);
+}
+
+function safeDate(value) {
+  if (typeof value !== 'string') return '';
+  var date = value.trim().slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return '';
+  return date;
+}
+
+function safeLocation(value) {
+  return safeText(value, 120);
 }
 
 async function listSongRecommendations(env) {
@@ -349,6 +373,97 @@ async function uploadAtlasStamp(request, env) {
   }, 201);
 }
 
+async function listClientPhotos(env) {
+  var result = await env.DB.prepare(
+    'SELECT id, image_url, shoot_date, location, created_at FROM client_photos ORDER BY shoot_date DESC, created_at DESC LIMIT 2000'
+  ).all();
+
+  return json(result.results || []);
+}
+
+async function uploadClientPhoto(request, env) {
+  if (!hasPhotoAdminAccess(request, env)) {
+    return json({ error: 'admin token required' }, 403);
+  }
+
+  var formData;
+  try {
+    formData = await request.formData();
+  } catch (_e) {
+    return json({ error: 'invalid form data' }, 400);
+  }
+
+  var file = formData.get('file');
+  if (!(file instanceof File)) {
+    return json({ error: 'file is required' }, 400);
+  }
+
+  var shootDate = safeDate(formData.get('date'));
+  var location = safeLocation(formData.get('location'));
+  if (!shootDate || !location) {
+    return json({ error: 'date (YYYY-MM-DD) and location are required' }, 400);
+  }
+
+  var id = makeId();
+  var ext = (file.name && file.name.includes('.')) ? file.name.split('.').pop().toLowerCase() : 'jpg';
+  var key = 'client-photos/' + id + '.' + ext;
+  var createdAt = Date.now();
+  var publicBaseUrl = (env.R2_PUBLIC_BASE_URL || '').replace(/\/$/, '');
+
+  if (!publicBaseUrl) {
+    return json({ error: 'R2_PUBLIC_BASE_URL is not configured' }, 500);
+  }
+
+  await env.STRIPS_BUCKET.put(key, await file.arrayBuffer(), {
+    httpMetadata: {
+      contentType: file.type || 'image/jpeg'
+    }
+  });
+
+  var imageUrl = publicBaseUrl + '/' + key;
+
+  await env.DB.prepare(
+    'INSERT INTO client_photos (id, image_url, r2_key, shoot_date, location, created_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6)'
+  )
+    .bind(id, imageUrl, key, shootDate, location, createdAt)
+    .run();
+
+  return json({
+    id: id,
+    image_url: imageUrl,
+    date: shootDate,
+    location: location,
+    created_at: createdAt
+  }, 201);
+}
+
+async function deleteClientPhoto(id, request, env) {
+  if (!id) {
+    return json({ error: 'photo id is required' }, 400);
+  }
+
+  if (!hasPhotoAdminAccess(request, env)) {
+    return json({ error: 'admin token required' }, 403);
+  }
+
+  var record = await env.DB.prepare(
+    'SELECT id, r2_key FROM client_photos WHERE id = ?1'
+  )
+    .bind(id)
+    .first();
+
+  if (!record) {
+    return json({ error: 'photo not found' }, 404);
+  }
+
+  if (record.r2_key) {
+    await env.STRIPS_BUCKET.delete(record.r2_key);
+  }
+
+  await env.DB.prepare('DELETE FROM client_photos WHERE id = ?1').bind(id).run();
+  return json({ ok: true, id: id });
+}
+
 function publicConfig(env) {
   return json({
     mapboxPublicToken: (env.MAPBOX_PUBLIC_TOKEN || '').trim(),
@@ -422,6 +537,19 @@ export default {
 
     if (request.method === 'POST' && path === '/atlas-stamp-upload') {
       return uploadAtlasStamp(request, env);
+    }
+
+    if (request.method === 'GET' && path === '/client-photos') {
+      return listClientPhotos(env);
+    }
+
+    if (request.method === 'POST' && path === '/client-photos') {
+      return uploadClientPhoto(request, env);
+    }
+
+    if (request.method === 'DELETE' && path.startsWith('/client-photos/')) {
+      var clientPhotoId = path.slice('/client-photos/'.length);
+      return deleteClientPhoto(clientPhotoId, request, env);
     }
 
     return json({ error: 'not found' }, 404);

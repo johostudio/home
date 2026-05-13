@@ -38,3 +38,15 @@ CREATE TABLE IF NOT EXISTS visitor_counter (
   count INTEGER NOT NULL DEFAULT 0,
   updated_at INTEGER NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS client_photos (
+  id TEXT PRIMARY KEY,
+  image_url TEXT NOT NULL,
+  r2_key TEXT NOT NULL,
+  shoot_date TEXT NOT NULL,
+  location TEXT NOT NULL,
+  created_at INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_client_photos_created_at
+ON client_photos(created_at DESC);

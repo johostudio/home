@@ -6,6 +6,7 @@ This worker powers:
 - Home page global visitor counter (`/visitor-count`)
 - Atlas saved cities + stamps (`/atlas-points`)
 - Atlas stamp image uploads to R2 (`/atlas-stamp-upload`)
+- Photography client gallery database + uploads (`/client-photos`)
 
 ## 1) Prereqs
 
@@ -36,6 +37,7 @@ Edit `cloudflare-worker/wrangler.toml`:
 - Set `MAPBOX_PUBLIC_TOKEN` (public `pk...` token used by atlas)
 - Set `OPEN_LIBRARY_QUERY` for bookshelf page (Open Library search query)
 - Set `ATLAS_ADMIN_TOKEN` or `ATLAS_ADMIN_PASSWORD` (required for atlas entry deletes from UI)
+- Set `PHOTOGRAPHY_ADMIN_TOKEN` (required for photography uploads/deletes from admin page)
 
 If you do not have a custom domain for R2 yet, create a public bucket domain in Cloudflare and use that URL.
 
@@ -70,6 +72,8 @@ Bookshelf will auto-fetch Open Library query from the same endpoint when local v
 This URL is consumed by both:
 - `hoshii.html` song catalogue
 - `darkroom.html` upload/gallery endpoints
+- `projects/photography-client.html` gallery read endpoint (`/client-photos`)
+- `projects/photography-client-admin.html` admin upload/delete endpoint (`/client-photos`)
 
 ## 7) API overview
 
@@ -86,9 +90,13 @@ This URL is consumed by both:
 - `POST /atlas-points` -> save atlas city/stamp point
 - `DELETE /atlas-points/:id` -> delete atlas point (requires `x-admin-token` or `x-admin-password` header)
 - `POST /atlas-stamp-upload` -> upload atlas stamp image to R2
+- `GET /client-photos` -> list client gallery photos (public)
+- `POST /client-photos` -> upload a client photo to R2 + D1 (requires `x-admin-token`)
+- `DELETE /client-photos/:id` -> delete a client photo (requires `x-admin-token`)
 
 ## Notes
 
 - Song deletes are owner-scoped using a browser client id (`x-client-id`).
 - Anyone can add songs; only the creator (same browser identity) can remove their own entries.
 - Atlas delete is admin-scoped using `ATLAS_ADMIN_TOKEN`/`ATLAS_ADMIN_PASSWORD` and request admin header.
+- Photography upload/delete is admin-scoped using `PHOTOGRAPHY_ADMIN_TOKEN` and `x-admin-token`.

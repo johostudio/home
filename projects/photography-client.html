@@ -101,6 +101,7 @@
 <body class="min-h-screen">
   <div class="dot-grid-wrapper"></div>
   <script src="../scripts/site-header.js"></script>
+  <script src="../scripts/cloudflare-config.js"></script>
 
   <main class="photo-page">
     <a href="../gallery.html" class="text-white/45 text-sm hover:text-white transition-colors">← back to gallery</a>
@@ -153,8 +154,8 @@
       function render(entries) {
         var list = Array.isArray(entries) ? entries.map(function (entry) {
           return {
-            image: resolveImage(entry),
-            date: entry && entry.date ? entry.date : '',
+            image: resolveImage(entry) || (entry && entry.image_url ? entry.image_url : ''),
+            date: entry && (entry.date || entry.shoot_date) ? (entry.date || entry.shoot_date) : '',
             location: entry && entry.location ? entry.location : ''
           };
         }).filter(function (entry) {
@@ -183,17 +184,37 @@
         setStatus('');
       }
 
-      fetch('./photography-client-data.json', { cache: 'no-store' })
-        .then(function (res) {
-          if (!res.ok) throw new Error('failed to load gallery data');
-          return res.json();
+      var workerUrl = typeof window.CLOUDFLARE_WORKER_URL === 'string'
+        ? window.CLOUDFLARE_WORKER_URL.replace(/\/$/, '')
+        : '';
+
+      function loadFromLocalJson() {
+        return fetch('./photography-client-data.json', { cache: 'no-store' })
+          .then(function (res) {
+            if (!res.ok) throw new Error('failed to load local gallery data');
+            return res.json();
+          });
+      }
+
+      function loadFromWorker() {
+        if (!workerUrl) return Promise.reject(new Error('worker url missing'));
+        return fetch(workerUrl + '/client-photos', { cache: 'no-store' })
+          .then(function (res) {
+            if (!res.ok) throw new Error('worker gallery request failed');
+            return res.json();
+          });
+      }
+
+      loadFromWorker()
+        .catch(function () {
+          return loadFromLocalJson();
         })
-        .then(function (entries) {
-          render(entries);
+        .then(function (res) {
+          render(res);
         })
         .catch(function () {
           render([]);
-          setStatus('could not load data file. check projects/photography-client-data.json');
+          setStatus('could not load worker or local data. check Cloudflare config and projects/photography-client-data.json');
         });
     })();
   </script>
