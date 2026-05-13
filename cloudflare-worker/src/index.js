@@ -4,7 +4,7 @@ function json(data, status = 200) {
     headers: {
       'content-type': 'application/json; charset=utf-8',
       'access-control-allow-origin': '*',
-      'access-control-allow-methods': 'GET,POST,DELETE,OPTIONS',
+      'access-control-allow-methods': 'GET,POST,PUT,DELETE,OPTIONS',
       'access-control-allow-headers': 'content-type,x-client-id,x-admin-token'
     }
   });
@@ -16,7 +16,7 @@ function text(message, status = 200) {
     headers: {
       'content-type': 'text/plain; charset=utf-8',
       'access-control-allow-origin': '*',
-      'access-control-allow-methods': 'GET,POST,DELETE,OPTIONS',
+      'access-control-allow-methods': 'GET,POST,PUT,DELETE,OPTIONS',
       'access-control-allow-headers': 'content-type,x-client-id,x-admin-token'
     }
   });
@@ -27,7 +27,7 @@ function corsPreflight() {
     status: 204,
     headers: {
       'access-control-allow-origin': '*',
-      'access-control-allow-methods': 'GET,POST,DELETE,OPTIONS',
+      'access-control-allow-methods': 'GET,POST,PUT,DELETE,OPTIONS',
       'access-control-allow-headers': 'content-type,x-client-id,x-admin-token'
     }
   });
@@ -99,6 +99,13 @@ function safeDate(value) {
 
 function safeLocation(value) {
   return safeText(value, 120);
+}
+
+function safeImageUrl(value) {
+  var url = safeText(value, 1200);
+  if (!url) return '';
+  if (!/^https?:\/\//i.test(url)) return '';
+  return url;
 }
 
 async function listSongRecommendations(env) {
@@ -381,6 +388,33 @@ async function listClientPhotos(env) {
   return json(result.results || []);
 }
 
+async function insertClientPhoto(env, payload) {
+  var id = makeId();
+  var createdAt = Date.now();
+  var imageUrl = safeImageUrl(payload.image_url);
+  var shootDate = safeDate(payload.date || payload.shoot_date);
+  var location = safeLocation(payload.location);
+  var r2Key = safeText(payload.r2_key || '', 400);
+
+  if (!imageUrl || !shootDate || !location) {
+    return null;
+  }
+
+  await env.DB.prepare(
+    'INSERT INTO client_photos (id, image_url, r2_key, shoot_date, location, created_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6)'
+  )
+    .bind(id, imageUrl, r2Key, shootDate, location, createdAt)
+    .run();
+
+  return {
+    id: id,
+    image_url: imageUrl,
+    date: shootDate,
+    location: location,
+    created_at: createdAt
+  };
+}
+
 async function uploadClientPhoto(request, env) {
   if (!hasPhotoAdminAccess(request, env)) {
     return json({ error: 'admin token required' }, 403);
@@ -407,7 +441,6 @@ async function uploadClientPhoto(request, env) {
   var id = makeId();
   var ext = (file.name && file.name.includes('.')) ? file.name.split('.').pop().toLowerCase() : 'jpg';
   var key = 'client-photos/' + id + '.' + ext;
-  var createdAt = Date.now();
   var publicBaseUrl = (env.R2_PUBLIC_BASE_URL || '').replace(/\/$/, '');
 
   if (!publicBaseUrl) {
@@ -420,21 +453,136 @@ async function uploadClientPhoto(request, env) {
     }
   });
 
-  var imageUrl = publicBaseUrl + '/' + key;
+  var record = await insertClientPhoto(env, {
+    image_url: publicBaseUrl + '/' + key,
+    r2_key: key,
+    date: shootDate,
+    location: location
+  });
+
+  if (!record) {
+    return json({ error: 'failed to create photo record' }, 500);
+  }
+
+  return json(record, 201);
+}
+
+async function batchImportClientPhotos(request, env) {
+  if (!hasPhotoAdminAccess(request, env)) {
+    return json({ error: 'admin token required' }, 403);
+  }
+
+  var body;
+  try {
+    body = await request.json();
+  } catch (_e) {
+    return json({ error: 'invalid json body' }, 400);
+  }
+
+  var photos = body && Array.isArray(body.photos) ? body.photos : [];
+  if (!photos.length) {
+    return json({ error: 'photos array is required' }, 400);
+  }
+
+  var maxCount = 300;
+  if (photos.length > maxCount) {
+    return json({ error: 'photos array exceeds limit of ' + maxCount }, 400);
+  }
+
+  var inserted = [];
+  var skipped = [];
+
+  for (var i = 0; i < photos.length; i++) {
+    var item = photos[i] || {};
+    var imageUrl = safeImageUrl(item.image_url || item.image || '');
+    var shootDate = safeDate(item.date || item.shoot_date || '');
+    var location = safeLocation(item.location || '');
+    if (!imageUrl || !shootDate || !location) {
+      skipped.push({ index: i, reason: 'invalid image_url/date/location' });
+      continue;
+    }
+
+    var existing = await env.DB.prepare(
+      'SELECT id FROM client_photos WHERE image_url = ?1 LIMIT 1'
+    )
+      .bind(imageUrl)
+      .first();
+
+    if (existing) {
+      skipped.push({ index: i, reason: 'duplicate image_url' });
+      continue;
+    }
+
+    var created = await insertClientPhoto(env, {
+      image_url: imageUrl,
+      r2_key: '',
+      date: shootDate,
+      location: location
+    });
+
+    if (created) {
+      inserted.push(created);
+    } else {
+      skipped.push({ index: i, reason: 'failed to insert record' });
+    }
+  }
+
+  return json({
+    ok: true,
+    inserted_count: inserted.length,
+    skipped_count: skipped.length,
+    inserted: inserted,
+    skipped: skipped
+  }, 201);
+}
+
+async function updateClientPhoto(id, request, env) {
+  if (!id) {
+    return json({ error: 'photo id is required' }, 400);
+  }
+
+  if (!hasPhotoAdminAccess(request, env)) {
+    return json({ error: 'admin token required' }, 403);
+  }
+
+  var record = await env.DB.prepare(
+    'SELECT id, image_url, shoot_date, location FROM client_photos WHERE id = ?1'
+  )
+    .bind(id)
+    .first();
+
+  if (!record) {
+    return json({ error: 'photo not found' }, 404);
+  }
+
+  var body;
+  try {
+    body = await request.json();
+  } catch (_e) {
+    return json({ error: 'invalid json body' }, 400);
+  }
+
+  var nextDate = safeDate(body && body.date ? body.date : record.shoot_date);
+  var nextLocation = safeLocation(body && body.location ? body.location : record.location);
+  var nextImageUrl = safeImageUrl(body && body.image_url ? body.image_url : record.image_url);
+
+  if (!nextDate || !nextLocation || !nextImageUrl) {
+    return json({ error: 'valid date/location/image_url are required' }, 400);
+  }
 
   await env.DB.prepare(
-    'INSERT INTO client_photos (id, image_url, r2_key, shoot_date, location, created_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6)'
+    'UPDATE client_photos SET image_url = ?1, shoot_date = ?2, location = ?3 WHERE id = ?4'
   )
-    .bind(id, imageUrl, key, shootDate, location, createdAt)
+    .bind(nextImageUrl, nextDate, nextLocation, id)
     .run();
 
   return json({
+    ok: true,
     id: id,
-    image_url: imageUrl,
-    date: shootDate,
-    location: location,
-    created_at: createdAt
-  }, 201);
+    image_url: nextImageUrl,
+    date: nextDate,
+    location: nextLocation
+  });
 }
 
 async function deleteClientPhoto(id, request, env) {
@@ -545,6 +693,15 @@ export default {
 
     if (request.method === 'POST' && path === '/client-photos') {
       return uploadClientPhoto(request, env);
+    }
+
+    if (request.method === 'POST' && path === '/client-photos/batch') {
+      return batchImportClientPhotos(request, env);
+    }
+
+    if (request.method === 'PUT' && path.startsWith('/client-photos/')) {
+      var clientPhotoEditId = path.slice('/client-photos/'.length);
+      return updateClientPhoto(clientPhotoEditId, request, env);
     }
 
     if (request.method === 'DELETE' && path.startsWith('/client-photos/')) {

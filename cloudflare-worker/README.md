@@ -92,6 +92,8 @@ This URL is consumed by both:
 - `POST /atlas-stamp-upload` -> upload atlas stamp image to R2
 - `GET /client-photos` -> list client gallery photos (public)
 - `POST /client-photos` -> upload a client photo to R2 + D1 (requires `x-admin-token`)
+- `POST /client-photos/batch` -> import existing photo URLs + metadata in bulk (requires `x-admin-token`)
+- `PUT /client-photos/:id` -> edit existing photo metadata (date/location/url) (requires `x-admin-token`)
 - `DELETE /client-photos/:id` -> delete a client photo (requires `x-admin-token`)
 
 ## Notes
@@ -100,3 +102,7 @@ This URL is consumed by both:
 - Anyone can add songs; only the creator (same browser identity) can remove their own entries.
 - Atlas delete is admin-scoped using `ATLAS_ADMIN_TOKEN`/`ATLAS_ADMIN_PASSWORD` and request admin header.
 - Photography upload/delete is admin-scoped using `PHOTOGRAPHY_ADMIN_TOKEN` and `x-admin-token`.
+- Use `projects/photography-client-admin.html` for:
+  - multi-file upload (same date/location per batch)
+  - URL batch import for legacy photos
+  - inline edit (save date/location) for already-uploaded photos
