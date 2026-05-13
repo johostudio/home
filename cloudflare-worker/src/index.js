@@ -59,6 +59,19 @@ function hasPhotoAdminAccess(request, env) {
   return !!providedToken && providedToken === configuredToken;
 }
 
+function hasScrambledAdminAccess(request, env) {
+  var configuredToken = safeText(env.SCRAMBLED_ADMIN_TOKEN || '', 256);
+  if (!configuredToken) {
+    configuredToken = safeText(env.ATLAS_ADMIN_TOKEN || '', 256);
+  }
+  if (!configuredToken && env.ATLAS_ADMIN_PASSWORD) {
+    configuredToken = safeText(env.ATLAS_ADMIN_PASSWORD || '', 256);
+  }
+  if (!configuredToken) return false;
+  var providedToken = safeText(request.headers.get('x-admin-token') || '', 256);
+  return !!providedToken && providedToken === configuredToken;
+}
+
 function makeId() {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
@@ -106,6 +119,23 @@ function safeImageUrl(value) {
   if (!url) return '';
   if (!/^https?:\/\//i.test(url)) return '';
   return url;
+}
+
+function safeNodeGroup(value) {
+  var n = Number(value);
+  if (!Number.isFinite(n)) return 2;
+  n = Math.round(n);
+  if (n < 1) n = 1;
+  if (n > 5) n = 5;
+  return n;
+}
+
+function safeNodeVal(value) {
+  var n = Number(value);
+  if (!Number.isFinite(n)) return 8;
+  if (n < 1) n = 1;
+  if (n > 60) n = 60;
+  return n;
 }
 
 async function listSongRecommendations(env) {
@@ -612,6 +642,167 @@ async function deleteClientPhoto(id, request, env) {
   return json({ ok: true, id: id });
 }
 
+async function listScrambledGraph(env) {
+  var nodesResult = await env.DB.prepare(
+    'SELECT id, name, node_group, node_val, content, date_text, now_playing, now_playing_url, image_url FROM scrambled_nodes ORDER BY updated_at DESC LIMIT 3000'
+  ).all();
+  var linksResult = await env.DB.prepare(
+    'SELECT id, source_id, target_id FROM scrambled_links ORDER BY created_at DESC LIMIT 6000'
+  ).all();
+
+  var nodes = (nodesResult.results || []).map(function (row) {
+    return {
+      id: row.id,
+      name: row.name,
+      group: row.node_group,
+      val: row.node_val,
+      content: row.content,
+      date: row.date_text,
+      nowPlaying: row.now_playing,
+      nowPlayingUrl: row.now_playing_url,
+      img: row.image_url || ''
+    };
+  });
+
+  var links = (linksResult.results || []).map(function (row) {
+    return {
+      id: row.id,
+      source: row.source_id,
+      target: row.target_id
+    };
+  });
+
+  return json({ nodes: nodes, links: links });
+}
+
+async function createOrUpdateScrambledNode(request, env, idOverride) {
+  if (!hasScrambledAdminAccess(request, env)) {
+    return json({ error: 'admin token required' }, 403);
+  }
+
+  var body;
+  try {
+    body = await request.json();
+  } catch (_e) {
+    return json({ error: 'invalid json body' }, 400);
+  }
+
+  var id = safeText(idOverride || (body && body.id) || '', 120);
+  var name = safeText(body && body.name, 180);
+  var group = safeNodeGroup(body && body.group);
+  var val = safeNodeVal(body && body.val);
+  var content = safeText(body && body.content, 5000);
+  var dateText = safeText(body && body.date, 80);
+  var nowPlaying = safeText(body && body.nowPlaying, 280);
+  var nowPlayingUrl = safeText(body && body.nowPlayingUrl, 1200);
+  var imageUrl = safeText(body && body.img, 1200);
+  var now = Date.now();
+
+  if (!id || !name || !content) {
+    return json({ error: 'id, name, and content are required' }, 400);
+  }
+
+  var existing = await env.DB.prepare(
+    'SELECT id FROM scrambled_nodes WHERE id = ?1'
+  )
+    .bind(id)
+    .first();
+
+  if (existing) {
+    await env.DB.prepare(
+      'UPDATE scrambled_nodes SET name = ?1, node_group = ?2, node_val = ?3, content = ?4, date_text = ?5, now_playing = ?6, now_playing_url = ?7, image_url = ?8, updated_at = ?9 WHERE id = ?10'
+    )
+      .bind(name, group, val, content, dateText, nowPlaying, nowPlayingUrl, imageUrl, now, id)
+      .run();
+  } else {
+    await env.DB.prepare(
+      'INSERT INTO scrambled_nodes (id, name, node_group, node_val, content, date_text, now_playing, now_playing_url, image_url, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)'
+    )
+      .bind(id, name, group, val, content, dateText, nowPlaying, nowPlayingUrl, imageUrl, now, now)
+      .run();
+  }
+
+  return json({
+    ok: true,
+    node: {
+      id: id,
+      name: name,
+      group: group,
+      val: val,
+      content: content,
+      date: dateText,
+      nowPlaying: nowPlaying,
+      nowPlayingUrl: nowPlayingUrl,
+      img: imageUrl
+    }
+  });
+}
+
+async function deleteScrambledNode(id, request, env) {
+  if (!id) return json({ error: 'node id is required' }, 400);
+  if (!hasScrambledAdminAccess(request, env)) {
+    return json({ error: 'admin token required' }, 403);
+  }
+
+  await env.DB.prepare('DELETE FROM scrambled_nodes WHERE id = ?1').bind(id).run();
+  await env.DB.prepare('DELETE FROM scrambled_links WHERE source_id = ?1 OR target_id = ?1').bind(id).run();
+  return json({ ok: true, id: id });
+}
+
+async function createScrambledLink(request, env) {
+  if (!hasScrambledAdminAccess(request, env)) {
+    return json({ error: 'admin token required' }, 403);
+  }
+
+  var body;
+  try {
+    body = await request.json();
+  } catch (_e) {
+    return json({ error: 'invalid json body' }, 400);
+  }
+
+  var source = safeText(body && body.source, 120);
+  var target = safeText(body && body.target, 120);
+  if (!source || !target) {
+    return json({ error: 'source and target are required' }, 400);
+  }
+
+  var sourceNode = await env.DB.prepare('SELECT id FROM scrambled_nodes WHERE id = ?1').bind(source).first();
+  var targetNode = await env.DB.prepare('SELECT id FROM scrambled_nodes WHERE id = ?1').bind(target).first();
+  if (!sourceNode || !targetNode) {
+    return json({ error: 'source and target must both exist as nodes' }, 400);
+  }
+
+  var existing = await env.DB.prepare(
+    'SELECT id FROM scrambled_links WHERE source_id = ?1 AND target_id = ?2'
+  )
+    .bind(source, target)
+    .first();
+
+  if (existing) {
+    return json({ ok: true, id: existing.id, source: source, target: target });
+  }
+
+  var id = makeId();
+  var now = Date.now();
+  await env.DB.prepare(
+    'INSERT INTO scrambled_links (id, source_id, target_id, created_at) VALUES (?1, ?2, ?3, ?4)'
+  )
+    .bind(id, source, target, now)
+    .run();
+
+  return json({ ok: true, id: id, source: source, target: target }, 201);
+}
+
+async function deleteScrambledLink(id, request, env) {
+  if (!id) return json({ error: 'link id is required' }, 400);
+  if (!hasScrambledAdminAccess(request, env)) {
+    return json({ error: 'admin token required' }, 403);
+  }
+  await env.DB.prepare('DELETE FROM scrambled_links WHERE id = ?1').bind(id).run();
+  return json({ ok: true, id: id });
+}
+
 function publicConfig(env) {
   return json({
     mapboxPublicToken: (env.MAPBOX_PUBLIC_TOKEN || '').trim(),
@@ -707,6 +898,33 @@ export default {
     if (request.method === 'DELETE' && path.startsWith('/client-photos/')) {
       var clientPhotoId = path.slice('/client-photos/'.length);
       return deleteClientPhoto(clientPhotoId, request, env);
+    }
+
+    if (request.method === 'GET' && path === '/scrambled-graph') {
+      return listScrambledGraph(env);
+    }
+
+    if (request.method === 'POST' && path === '/scrambled-nodes') {
+      return createOrUpdateScrambledNode(request, env, '');
+    }
+
+    if (request.method === 'PUT' && path.startsWith('/scrambled-nodes/')) {
+      var editNodeId = path.slice('/scrambled-nodes/'.length);
+      return createOrUpdateScrambledNode(request, env, editNodeId);
+    }
+
+    if (request.method === 'DELETE' && path.startsWith('/scrambled-nodes/')) {
+      var deleteNodeId = path.slice('/scrambled-nodes/'.length);
+      return deleteScrambledNode(deleteNodeId, request, env);
+    }
+
+    if (request.method === 'POST' && path === '/scrambled-links') {
+      return createScrambledLink(request, env);
+    }
+
+    if (request.method === 'DELETE' && path.startsWith('/scrambled-links/')) {
+      var deleteLinkId = path.slice('/scrambled-links/'.length);
+      return deleteScrambledLink(deleteLinkId, request, env);
     }
 
     return json({ error: 'not found' }, 404);

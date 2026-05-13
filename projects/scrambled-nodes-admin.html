@@ -26,6 +26,10 @@
       padding: 0.62rem 0.72rem;
       font-size: 0.85rem;
     }
+    select, option {
+      background: #0c1425;
+      color: #e6eef6;
+    }
     textarea { min-height: 120px; resize: vertical; font-family: "Courier New", monospace; line-height: 1.45; }
     .btn-row { display: flex; flex-wrap: wrap; gap: 0.55rem; margin-top: 0.9rem; }
     button {
@@ -39,33 +43,30 @@
     }
     button:hover { background: rgba(255,255,255,0.16); }
     .status { margin-top: 0.65rem; font-size: 0.8rem; color: rgba(194,205,221,0.9); }
-    .list { font-size: 0.8rem; line-height: 1.45; color: rgba(220,228,241,0.92); }
-    .list-item { border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 0.6rem; margin-top: 0.5rem; }
+    .list-item { border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 0.65rem; margin-top: 0.5rem; }
     .list-item strong { color: #fff; }
-    pre {
-      white-space: pre-wrap;
-      word-break: break-word;
-      margin: 0;
-      font-size: 0.8rem;
-      line-height: 1.5;
-      font-family: "Courier New", monospace;
-      min-height: 160px;
-    }
-    .out-title { font-size: 0.78rem; margin-bottom: 0.45rem; color: rgba(194,205,221,0.85); text-transform: lowercase; }
+    .small { color: rgba(194,205,221,0.78); font-size: 0.78rem; margin-top: 0.2rem; line-height: 1.4; }
+    .short { margin-top: 0.35rem; font-size: 0.8rem; color: rgba(223,231,244,0.94); }
     @media (max-width: 840px) { .grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body class="min-h-screen">
   <div class="dot-grid-wrapper"></div>
   <script src="../scripts/site-header.js"></script>
+  <script src="../scripts/cloudflare-config.js"></script>
 
   <main class="page">
     <a href="../scrambled.html" class="text-white/45 text-sm hover:text-white transition-colors">&larr; open scrambled mind</a>
     <h1 class="mt-3">scrambled nodes admin</h1>
-    <p class="sub">build node + link snippets quickly. save drafts locally and copy output into <code>scrambled.html</code> (<code>gData.nodes</code> and <code>gData.links</code>).</p>
+    <p class="sub">add/edit nodes directly in cloudflare. no snippets required. existing nodes are listed below with short descriptions for easier linking.</p>
 
     <section class="card">
-      <div class="grid">
+      <div class="field full">
+        <label for="admin-token">admin token</label>
+        <input id="admin-token" type="password" placeholder="SCRAMBLED_ADMIN_TOKEN (or ATLAS_ADMIN_TOKEN fallback)" autocomplete="off" />
+      </div>
+
+      <div class="grid mt-3">
         <div class="field">
           <label for="node-id">node id</label>
           <input id="node-id" type="text" placeholder="idea_7" />
@@ -106,25 +107,25 @@
         </div>
         <div class="field full">
           <label for="node-content">content</label>
-          <textarea id="node-content" placeholder="node text, line breaks allowed"></textarea>
+          <textarea id="node-content" placeholder="node content here"></textarea>
         </div>
       </div>
 
       <div class="btn-row">
-        <button id="add-node-btn" type="button">add / update node</button>
-        <button id="clear-node-form-btn" type="button">clear form</button>
+        <button id="save-node-btn" type="button">save node</button>
+        <button id="clear-node-btn" type="button">clear node form</button>
       </div>
     </section>
 
     <section class="card">
       <div class="grid">
         <div class="field">
-          <label for="link-source">link source id</label>
-          <input id="link-source" type="text" placeholder="start" />
+          <label for="link-source">link source</label>
+          <select id="link-source"></select>
         </div>
         <div class="field">
-          <label for="link-target">link target id</label>
-          <input id="link-target" type="text" placeholder="idea_7" />
+          <label for="link-target">link target</label>
+          <select id="link-target"></select>
         </div>
       </div>
       <div class="btn-row">
@@ -134,41 +135,23 @@
     </section>
 
     <section class="card">
-      <div class="out-title">current nodes</div>
-      <div class="list" id="nodes-list"></div>
-      <div class="out-title mt-4">current links</div>
-      <div class="list" id="links-list"></div>
+      <h2 class="text-lg mb-2">existing nodes</h2>
+      <div id="nodes-list"></div>
     </section>
 
     <section class="card">
-      <div class="btn-row">
-        <button id="generate-btn" type="button">generate node/link snippets</button>
-        <button id="copy-nodes-btn" type="button">copy nodes snippet</button>
-        <button id="copy-links-btn" type="button">copy links snippet</button>
-        <button id="save-btn" type="button">save draft</button>
-        <button id="reset-btn" type="button">reset all</button>
-      </div>
-    </section>
-
-    <section class="card">
-      <div class="out-title">nodes snippet</div>
-      <pre id="nodes-output"></pre>
-    </section>
-
-    <section class="card">
-      <div class="out-title">links snippet</div>
-      <pre id="links-output"></pre>
+      <h2 class="text-lg mb-2">existing links</h2>
+      <div id="links-list"></div>
     </section>
   </main>
 
   <script>
     (function () {
-      var KEY = 'scrambled_nodes_admin_v1';
+      var workerUrl = (window.CLOUDFLARE_WORKER_URL || '').replace(/\/$/, '');
+      var tokenEl = document.getElementById('admin-token');
       var statusEl = document.getElementById('status');
       var nodesListEl = document.getElementById('nodes-list');
       var linksListEl = document.getElementById('links-list');
-      var nodesOutput = document.getElementById('nodes-output');
-      var linksOutput = document.getElementById('links-output');
 
       var form = {
         id: document.getElementById('node-id'),
@@ -184,57 +167,128 @@
         linkTarget: document.getElementById('link-target')
       };
 
-      var state = { nodes: [], links: [] };
+      var graph = { nodes: [], links: [] };
 
-      function setStatus(message) { statusEl.textContent = message || ''; }
-      function escSingle(value) { return String(value || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'"); }
-
-      function load() {
-        try {
-          var raw = localStorage.getItem(KEY);
-          if (!raw) return;
-          var parsed = JSON.parse(raw);
-          state.nodes = Array.isArray(parsed.nodes) ? parsed.nodes : [];
-          state.links = Array.isArray(parsed.links) ? parsed.links : [];
-        } catch (_e) {}
+      function setStatus(message) {
+        statusEl.textContent = message || '';
       }
 
-      function save() {
-        localStorage.setItem(KEY, JSON.stringify(state));
+      function token() {
+        return (tokenEl.value || '').trim();
       }
 
-      function render() {
-        if (!state.nodes.length) {
-          nodesListEl.innerHTML = '<div class="list-item">no nodes yet.</div>';
-        } else {
-          nodesListEl.innerHTML = state.nodes.map(function (node) {
-            return (
-              '<div class="list-item">' +
-              '<strong>' + node.id + '</strong> &mdash; ' + (node.name || '') + ' (group ' + node.group + ')' +
-              '<div class="mt-2 flex gap-2">' +
-              '<button data-edit-node="' + node.id + '" type="button">edit</button>' +
-              '<button data-delete-node="' + node.id + '" type="button">delete</button>' +
-              '</div>' +
-              '</div>'
-            );
-          }).join('');
+      function saveToken() {
+        localStorage.setItem('scrambled_admin_token', token());
+      }
+
+      function loadToken() {
+        tokenEl.value = localStorage.getItem('scrambled_admin_token') || '';
+      }
+
+      function esc(value) {
+        return String(value || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function shortText(value) {
+        var text = String(value || '').replace(/\s+/g, ' ').trim();
+        if (text.length <= 120) return text;
+        return text.slice(0, 117) + '...';
+      }
+
+      function toNodeId(name) {
+        var base = String(name || '')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '_')
+          .replace(/^_+|_+$/g, '')
+          .slice(0, 60);
+        if (!base) base = 'node';
+        return base + '_' + Date.now().toString(36).slice(-5);
+      }
+
+      function ensureWorker() {
+        if (!workerUrl) {
+          setStatus('CLOUDFLARE_WORKER_URL is missing in scripts/cloudflare-config.js');
+          return false;
+        }
+        return true;
+      }
+
+      function populateNodeSelects() {
+        var opts = graph.nodes.map(function (node) {
+          return '<option value="' + esc(node.id) + '">' + esc(node.id + ' - ' + node.name) + '</option>';
+        }).join('');
+        form.linkSource.innerHTML = opts;
+        form.linkTarget.innerHTML = opts;
+      }
+
+      function renderNodes() {
+        if (!graph.nodes.length) {
+          nodesListEl.innerHTML = '<div class="list-item">no nodes in database yet.</div>';
+          return;
         }
 
-        if (!state.links.length) {
-          linksListEl.innerHTML = '<div class="list-item">no links yet.</div>';
-        } else {
-          linksListEl.innerHTML = state.links.map(function (link, index) {
-            return (
-              '<div class="list-item">' +
-              '<strong>' + link.source + '</strong> &rarr; <strong>' + link.target + '</strong>' +
-              '<div class="mt-2"><button data-delete-link="' + index + '" type="button">delete</button></div>' +
-              '</div>'
-            );
-          }).join('');
-        }
+        nodesListEl.innerHTML = graph.nodes.map(function (node) {
+          return [
+            '<article class="list-item">',
+            '<strong>', esc(node.id), '</strong> — ', esc(node.name || ''), ' (group ', esc(node.group), ')',
+            '<div class="small">date: ', esc(node.date || 'n/a'), ' | now playing: ', esc(node.nowPlaying || 'n/a'), '</div>',
+            '<div class="short">', esc(shortText(node.content)), '</div>',
+            '<div class="btn-row">',
+            '<button data-edit-node="', esc(node.id), '" type="button">edit</button>',
+            '<button data-delete-node="', esc(node.id), '" type="button">delete</button>',
+            '</div>',
+            '</article>'
+          ].join('');
+        }).join('');
       }
 
-      function clearForm() {
+      function renderLinks() {
+        if (!graph.links.length) {
+          linksListEl.innerHTML = '<div class="list-item">no links in database yet.</div>';
+          return;
+        }
+
+        linksListEl.innerHTML = graph.links.map(function (link) {
+          return [
+            '<article class="list-item">',
+            '<strong>', esc(link.source), '</strong> → <strong>', esc(link.target), '</strong>',
+            '<div class="btn-row"><button data-delete-link="', esc(link.id || ''), '" type="button">delete</button></div>',
+            '</article>'
+          ].join('');
+        }).join('');
+      }
+
+      function renderAll() {
+        renderNodes();
+        renderLinks();
+        populateNodeSelects();
+      }
+
+      function loadGraph() {
+        if (!ensureWorker()) return;
+        setStatus('loading graph...');
+        fetch(workerUrl + '/scrambled-graph', { cache: 'no-store' })
+          .then(function (res) {
+            if (!res.ok) throw new Error('failed to load graph');
+            return res.json();
+          })
+          .then(function (data) {
+            graph.nodes = Array.isArray(data.nodes) ? data.nodes : [];
+            graph.links = Array.isArray(data.links) ? data.links : [];
+            renderAll();
+            setStatus('loaded ' + graph.nodes.length + ' nodes and ' + graph.links.length + ' links.');
+          })
+          .catch(function (err) {
+            setStatus(err && err.message ? err.message : 'failed to load graph');
+          });
+      }
+
+      function clearNodeForm() {
         form.id.value = '';
         form.name.value = '';
         form.group.value = '2';
@@ -246,106 +300,156 @@
         form.content.value = '';
       }
 
-      function upsertNode() {
+      function saveNode() {
+        if (!ensureWorker()) return;
+        if (!token()) {
+          setStatus('admin token is required.');
+          return;
+        }
         var id = form.id.value.trim();
-        if (!id) { setStatus('Node id is required.'); return; }
-        var node = {
-          id: id,
-          name: form.name.value.trim(),
-          group: Number(form.group.value || 2),
-          val: Number(form.val.value || 8),
-          content: form.content.value || '',
-          date: form.date.value.trim(),
-          nowPlaying: form.nowPlaying.value.trim(),
-          nowPlayingUrl: form.nowPlayingUrl.value.trim()
-        };
-        if (form.img.value.trim()) node.img = form.img.value.trim();
+        var name = form.name.value.trim();
+        var content = form.content.value || '';
+        if (!name || !content.trim()) {
+          setStatus('name and content are required.');
+          return;
+        }
+        var isCreate = !id;
+        if (isCreate) {
+          id = toNodeId(name);
+          form.id.value = id;
+        }
 
-        var idx = state.nodes.findIndex(function (n) { return n.id === id; });
-        if (idx >= 0) state.nodes[idx] = node;
-        else state.nodes.push(node);
+        saveToken();
+        setStatus(isCreate ? 'creating node...' : 'saving node...');
+        fetch(isCreate ? (workerUrl + '/scrambled-nodes') : (workerUrl + '/scrambled-nodes/' + encodeURIComponent(id)), {
+          method: isCreate ? 'POST' : 'PUT',
+          headers: {
+            'content-type': 'application/json',
+            'x-admin-token': token()
+          },
+          body: JSON.stringify({
+            id: id,
+            name: name,
+            group: Number(form.group.value || 2),
+            val: Number(form.val.value || 8),
+            content: content,
+            date: form.date.value.trim(),
+            nowPlaying: form.nowPlaying.value.trim(),
+            nowPlayingUrl: form.nowPlayingUrl.value.trim(),
+            img: form.img.value.trim()
+          })
+        })
+          .then(function (res) {
+            if (!res.ok) return res.json().then(function (d) { throw new Error(d.error || 'save failed'); });
+            return res.json();
+          })
+          .then(function () {
+            setStatus(isCreate ? ('node created: ' + id) : 'node saved.');
+            loadGraph();
+          })
+          .catch(function (err) {
+            setStatus(err && err.message ? err.message : 'save failed');
+          });
+      }
 
-        render();
-        setStatus(idx >= 0 ? 'Node updated.' : 'Node added.');
+      function deleteNode(id) {
+        if (!ensureWorker()) return;
+        if (!token()) {
+          setStatus('admin token is required.');
+          return;
+        }
+        if (!confirm('delete node ' + id + '? this removes related links too.')) return;
+
+        saveToken();
+        setStatus('deleting node...');
+        fetch(workerUrl + '/scrambled-nodes/' + encodeURIComponent(id), {
+          method: 'DELETE',
+          headers: { 'x-admin-token': token() }
+        })
+          .then(function (res) {
+            if (!res.ok) return res.json().then(function (d) { throw new Error(d.error || 'delete failed'); });
+            return res.json();
+          })
+          .then(function () {
+            setStatus('node deleted.');
+            clearNodeForm();
+            loadGraph();
+          })
+          .catch(function (err) {
+            setStatus(err && err.message ? err.message : 'delete failed');
+          });
       }
 
       function addLink() {
-        var source = form.linkSource.value.trim();
-        var target = form.linkTarget.value.trim();
-        if (!source || !target) { setStatus('Link source and target are required.'); return; }
-        var exists = state.links.some(function (l) { return l.source === source && l.target === target; });
-        if (exists) { setStatus('Link already exists.'); return; }
-        state.links.push({ source: source, target: target });
-        render();
-        setStatus('Link added.');
+        if (!ensureWorker()) return;
+        if (!token()) {
+          setStatus('admin token is required.');
+          return;
+        }
+        var source = form.linkSource.value;
+        var target = form.linkTarget.value;
+        if (!source || !target) {
+          setStatus('select source and target.');
+          return;
+        }
+
+        saveToken();
+        setStatus('adding link...');
+        fetch(workerUrl + '/scrambled-links', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            'x-admin-token': token()
+          },
+          body: JSON.stringify({ source: source, target: target })
+        })
+          .then(function (res) {
+            if (!res.ok) return res.json().then(function (d) { throw new Error(d.error || 'add link failed'); });
+            return res.json();
+          })
+          .then(function () {
+            setStatus('link saved.');
+            loadGraph();
+          })
+          .catch(function (err) {
+            setStatus(err && err.message ? err.message : 'add link failed');
+          });
       }
 
-      function nodeToSnippet(node) {
-        var parts = [];
-        parts.push("{ id: '" + escSingle(node.id) + "'");
-        if (node.name) parts.push("name: '" + escSingle(node.name) + "'");
-        if (Number.isFinite(node.group)) parts.push('group: ' + node.group);
-        if (Number.isFinite(node.val)) parts.push('val: ' + node.val);
-        if (node.img) parts.push("img: '" + escSingle(node.img) + "'");
-        parts.push("content: '" + escSingle((node.content || '').replace(/\r?\n/g, '\\n')) + "'");
-        if (node.date) parts.push("date: '" + escSingle(node.date) + "'");
-        if (node.nowPlaying) parts.push("nowPlaying: '" + escSingle(node.nowPlaying) + "'");
-        if (node.nowPlayingUrl) parts.push("nowPlayingUrl: '" + escSingle(node.nowPlayingUrl) + "'");
-        return parts.join(', ') + ' }';
+      function deleteLink(id) {
+        if (!ensureWorker()) return;
+        if (!token()) {
+          setStatus('admin token is required.');
+          return;
+        }
+        if (!id) {
+          setStatus('missing link id.');
+          return;
+        }
+        saveToken();
+        setStatus('deleting link...');
+        fetch(workerUrl + '/scrambled-links/' + encodeURIComponent(id), {
+          method: 'DELETE',
+          headers: { 'x-admin-token': token() }
+        })
+          .then(function (res) {
+            if (!res.ok) return res.json().then(function (d) { throw new Error(d.error || 'delete link failed'); });
+            return res.json();
+          })
+          .then(function () {
+            setStatus('link deleted.');
+            loadGraph();
+          })
+          .catch(function (err) {
+            setStatus(err && err.message ? err.message : 'delete link failed');
+          });
       }
-
-      function generateSnippets() {
-        nodesOutput.textContent = state.nodes.map(nodeToSnippet).join(',\n');
-        linksOutput.textContent = state.links.map(function (link) {
-          return "{ source: '" + escSingle(link.source) + "', target: '" + escSingle(link.target) + "' }";
-        }).join(',\n');
-      }
-
-      document.getElementById('add-node-btn').addEventListener('click', function () {
-        upsertNode();
-      });
-      document.getElementById('clear-node-form-btn').addEventListener('click', function () {
-        clearForm();
-        setStatus('Node form cleared.');
-      });
-      document.getElementById('add-link-btn').addEventListener('click', function () {
-        addLink();
-      });
-      document.getElementById('generate-btn').addEventListener('click', function () {
-        generateSnippets();
-        setStatus('Snippets generated.');
-      });
-      document.getElementById('copy-nodes-btn').addEventListener('click', function () {
-        if (!nodesOutput.textContent) generateSnippets();
-        navigator.clipboard.writeText(nodesOutput.textContent).then(function () {
-          setStatus('Nodes snippet copied.');
-        }).catch(function () { setStatus('Copy failed.'); });
-      });
-      document.getElementById('copy-links-btn').addEventListener('click', function () {
-        if (!linksOutput.textContent) generateSnippets();
-        navigator.clipboard.writeText(linksOutput.textContent).then(function () {
-          setStatus('Links snippet copied.');
-        }).catch(function () { setStatus('Copy failed.'); });
-      });
-      document.getElementById('save-btn').addEventListener('click', function () {
-        save();
-        setStatus('Draft saved in browser.');
-      });
-      document.getElementById('reset-btn').addEventListener('click', function () {
-        state = { nodes: [], links: [] };
-        save();
-        render();
-        nodesOutput.textContent = '';
-        linksOutput.textContent = '';
-        clearForm();
-        setStatus('All reset.');
-      });
 
       nodesListEl.addEventListener('click', function (event) {
         var editBtn = event.target.closest('[data-edit-node]');
         if (editBtn) {
           var id = editBtn.getAttribute('data-edit-node');
-          var node = state.nodes.find(function (n) { return n.id === id; });
+          var node = graph.nodes.find(function (n) { return n.id === id; });
           if (!node) return;
           form.id.value = node.id || '';
           form.name.value = node.name || '';
@@ -355,32 +459,31 @@
           form.nowPlaying.value = node.nowPlaying || '';
           form.nowPlayingUrl.value = node.nowPlayingUrl || '';
           form.img.value = node.img || '';
-          form.content.value = (node.content || '').replace(/\\n/g, '\n');
-          setStatus('Loaded node for editing.');
+          form.content.value = node.content || '';
+          setStatus('node loaded into form.');
           return;
         }
         var delBtn = event.target.closest('[data-delete-node]');
         if (delBtn) {
-          var delId = delBtn.getAttribute('data-delete-node');
-          state.nodes = state.nodes.filter(function (n) { return n.id !== delId; });
-          state.links = state.links.filter(function (l) { return l.source !== delId && l.target !== delId; });
-          render();
-          setStatus('Node deleted.');
+          deleteNode(delBtn.getAttribute('data-delete-node'));
         }
       });
 
       linksListEl.addEventListener('click', function (event) {
         var delBtn = event.target.closest('[data-delete-link]');
         if (!delBtn) return;
-        var idx = Number(delBtn.getAttribute('data-delete-link'));
-        if (!Number.isFinite(idx)) return;
-        state.links.splice(idx, 1);
-        render();
-        setStatus('Link deleted.');
+        deleteLink(delBtn.getAttribute('data-delete-link'));
       });
 
-      load();
-      render();
+      document.getElementById('save-node-btn').addEventListener('click', saveNode);
+      document.getElementById('clear-node-btn').addEventListener('click', function () {
+        clearNodeForm();
+        setStatus('node form cleared.');
+      });
+      document.getElementById('add-link-btn').addEventListener('click', addLink);
+
+      loadToken();
+      loadGraph();
     })();
   </script>
 

@@ -50,3 +50,30 @@ CREATE TABLE IF NOT EXISTS client_photos (
 
 CREATE INDEX IF NOT EXISTS idx_client_photos_created_at
 ON client_photos(created_at DESC);
+
+CREATE TABLE IF NOT EXISTS scrambled_nodes (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  node_group INTEGER NOT NULL,
+  node_val REAL NOT NULL,
+  content TEXT NOT NULL,
+  date_text TEXT NOT NULL,
+  now_playing TEXT NOT NULL,
+  now_playing_url TEXT NOT NULL,
+  image_url TEXT NOT NULL,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS scrambled_links (
+  id TEXT PRIMARY KEY,
+  source_id TEXT NOT NULL,
+  target_id TEXT NOT NULL,
+  created_at INTEGER NOT NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_scrambled_links_unique
+ON scrambled_links(source_id, target_id);
+
+CREATE INDEX IF NOT EXISTS idx_scrambled_nodes_updated_at
+ON scrambled_nodes(updated_at DESC);

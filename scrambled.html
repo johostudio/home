@@ -264,6 +264,7 @@
   <div class="dot-grid-wrapper"></div>
   <!-- Self-injecting site header -->
   <script src="scripts/site-header.js"></script>
+  <script src="scripts/cloudflare-config.js"></script>
 
   <a href="archives.html" class="back-btn relative z-50 text-[13px] text-white/50 hover:text-white transition-colors"
     style="position:fixed; top:24px; left:24px; pointer-events:auto;">← back</a>
@@ -347,91 +348,135 @@
       ]
     };
 
-    // Initialize the Force Graph
-    const Graph = ForceGraph()
-      (document.getElementById('graph-container'))
-      .graphData(gData)
-      .backgroundColor('rgba(0,0,0,0)')
-      .nodeColor(node => {
-        if (node.group === 1) return '#c084fc';
-        if (node.group === 2) return '#e6eef6';
-        if (node.group === 3) return '#818cf8';
-        return '#9ca3af';
-      })
-      .nodeRelSize(1.65)
-      .linkColor(() => 'rgba(255,255,255,0.15)')
-      .linkWidth(1.5)
-      .nodeLabel(function (node) {
-        return '<div style="font-family:Helvetica,Arial,sans-serif;font-size:9px;font-weight:400;letter-spacing:-0.04em;line-height:1.15;padding:3px 5px;border:1px solid rgba(192,132,252,0.25);background:rgba(8,10,18,0.92);border-radius:6px;color:#e6eef6;text-transform:lowercase;">' + node.name + '</div>';
-      })
-      .nodeCanvasObject((node, ctx, globalScale) => {
-        if (node.img) {
-          const size = node.val || 12;
-          if (!node.imgObj) {
-            node.imgObj = new Image();
-            node.imgObj.src = node.img;
+    let Graph;
+    function initGraph(graphData) {
+      Graph = ForceGraph()
+        (document.getElementById('graph-container'))
+        .graphData(graphData)
+        .backgroundColor('rgba(0,0,0,0)')
+        .nodeColor(node => {
+          if (node.group === 1) return '#c084fc';
+          if (node.group === 2) return '#e6eef6';
+          if (node.group === 3) return '#818cf8';
+          return '#9ca3af';
+        })
+        .nodeRelSize(1.65)
+        .linkColor(() => 'rgba(255,255,255,0.15)')
+        .linkWidth(1.5)
+        .nodeLabel(function (node) {
+          return '<div style="font-family:Helvetica,Arial,sans-serif;font-size:9px;font-weight:400;letter-spacing:-0.04em;line-height:1.15;padding:3px 5px;border:1px solid rgba(192,132,252,0.25);background:rgba(8,10,18,0.92);border-radius:6px;color:#e6eef6;text-transform:lowercase;">' + node.name + '</div>';
+        })
+        .nodeCanvasObject((node, ctx, globalScale) => {
+          if (node.img) {
+            const size = node.val || 12;
+            if (!node.imgObj) {
+              node.imgObj = new Image();
+              node.imgObj.src = node.img;
+            }
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, size / 2, 0, 2 * Math.PI, false);
+            ctx.clip();
+            try {
+              ctx.drawImage(node.imgObj, node.x - size / 2, node.y - size / 2, size, size);
+            } catch (e) { }
+            ctx.restore();
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, size / 2, 0, 2 * Math.PI, false);
+            ctx.strokeStyle = '#c084fc';
+            ctx.lineWidth = 1.5 / globalScale;
+            ctx.stroke();
+          } else {
+            const size = node.val ? Math.sqrt(node.val) * 2 : 6;
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, size, 0, 2 * Math.PI);
+            let color = '#9ca3af';
+            if (node.group === 1) color = '#c084fc';
+            if (node.group === 2) color = '#e6eef6';
+            if (node.group === 3) color = '#818cf8';
+            ctx.fillStyle = color;
+            ctx.fill();
           }
-          ctx.save();
-          ctx.beginPath();
-          ctx.arc(node.x, node.y, size / 2, 0, 2 * Math.PI, false);
-          ctx.clip();
-          try {
-            ctx.drawImage(node.imgObj, node.x - size / 2, node.y - size / 2, size, size);
-          } catch (e) { }
-          ctx.restore();
-          ctx.beginPath();
-          ctx.arc(node.x, node.y, size / 2, 0, 2 * Math.PI, false);
-          ctx.strokeStyle = '#c084fc';
-          ctx.lineWidth = 1.5 / globalScale;
-          ctx.stroke();
-        } else {
-          const size = node.val ? Math.sqrt(node.val) * 2 : 6;
-          ctx.beginPath();
-          ctx.arc(node.x, node.y, size, 0, 2 * Math.PI);
-          let color = '#9ca3af';
-          if (node.group === 1) color = '#c084fc';
-          if (node.group === 2) color = '#e6eef6';
-          if (node.group === 3) color = '#818cf8';
-          ctx.fillStyle = color;
-          ctx.fill();
-        }
-      })
-      .onNodeClick(node => {
-        // Open info panel
-        const panel = document.getElementById('info-panel');
-        const backdrop = document.getElementById('panel-backdrop');
-        document.getElementById('panel-title').innerText = node.name;
-        document.getElementById('panel-date').innerText = node.date || '';
-        var nowPlaying = document.getElementById('panel-now-playing');
-        var nowPlayingText = node.nowPlaying || 'add a song here';
-        if (node.nowPlayingUrl) {
-          nowPlaying.innerHTML = 'now playing: <a href="' + node.nowPlayingUrl + '" target="_blank" rel="noopener">' + nowPlayingText + '</a>';
-        } else {
-          nowPlaying.textContent = 'now playing: ' + nowPlayingText;
-        }
+        })
+        .onNodeClick(node => {
+          // Open info panel
+          const panel = document.getElementById('info-panel');
+          const backdrop = document.getElementById('panel-backdrop');
+          document.getElementById('panel-title').innerText = node.name;
+          document.getElementById('panel-date').innerText = node.date || '';
+          var nowPlaying = document.getElementById('panel-now-playing');
+          var nowPlayingText = node.nowPlaying || 'add a song here';
+          if (node.nowPlayingUrl) {
+            nowPlaying.innerHTML = 'now playing: <a href="' + node.nowPlayingUrl + '" target="_blank" rel="noopener">' + nowPlayingText + '</a>';
+          } else {
+            nowPlaying.textContent = 'now playing: ' + nowPlayingText;
+          }
 
-        let html = (node.content || '').replace(/\n/g, '<br/>');
-        if (node.img) {
-          html = `<img src="${node.img}" class="panel-node-image" loading="lazy" decoding="async" alt="node reference">` + html;
-          panel.classList.add('panel-has-image');
-        } else {
-          panel.classList.remove('panel-has-image');
-        }
-        document.getElementById('panel-content').innerHTML = html;
+          let html = (node.content || '').replace(/\n/g, '<br/>');
+          if (node.img) {
+            html = `<img src="${node.img}" class="panel-node-image" loading="lazy" decoding="async" alt="node reference">` + html;
+            panel.classList.add('panel-has-image');
+          } else {
+            panel.classList.remove('panel-has-image');
+          }
+          document.getElementById('panel-content').innerHTML = html;
 
-        panel.classList.remove('closing');
-        panel.classList.add('visible');
-        if (backdrop) backdrop.classList.add('visible');
-        panel.style.left = '';
-        panel.style.top = '';
-        panel.style.right = 'clamp(1rem, 3vw, 2rem)';
-        panel.style.bottom = '';
-        panel.style.transform = 'translateY(-50%)';
+          panel.classList.remove('closing');
+          panel.classList.add('visible');
+          if (backdrop) backdrop.classList.add('visible');
+          panel.style.left = '';
+          panel.style.top = '';
+          panel.style.right = 'clamp(1rem, 3vw, 2rem)';
+          panel.style.bottom = '';
+          panel.style.transform = 'translateY(-50%)';
 
-        // Center chart on node
-        Graph.centerAt(node.x, node.y, 1000);
-        Graph.zoom(4.2, 1600);
-      });
+          // Center chart on node
+          Graph.centerAt(node.x, node.y, 1000);
+          Graph.zoom(4.2, 1600);
+        });
+    }
+
+    function loadGraphFromWorker() {
+      var workerUrl = (window.CLOUDFLARE_WORKER_URL || '').replace(/\/$/, '');
+      if (!workerUrl || !Graph) return;
+      fetch(workerUrl + '/scrambled-graph', { cache: 'no-store' })
+        .then(function (res) {
+          if (!res.ok) throw new Error('worker graph request failed');
+          return res.json();
+        })
+        .then(function (data) {
+          var remoteNodes = Array.isArray(data && data.nodes) ? data.nodes : [];
+          var remoteLinks = Array.isArray(data && data.links) ? data.links : [];
+          if (!remoteNodes.length) return;
+          var mappedNodes = remoteNodes.map(function (n) {
+            return {
+              id: String(n.id || ''),
+              name: String(n.name || ''),
+              group: Number(n.group || 2),
+              val: Number(n.val || 8),
+              content: String(n.content || ''),
+              date: String(n.date || ''),
+              nowPlaying: String(n.nowPlaying || ''),
+              nowPlayingUrl: String(n.nowPlayingUrl || ''),
+              img: String(n.img || '')
+            };
+          }).filter(function (n) { return !!n.id; });
+          var mappedLinks = remoteLinks.map(function (l) {
+            return {
+              source: String(l.source || ''),
+              target: String(l.target || '')
+            };
+          }).filter(function (l) { return !!l.source && !!l.target; });
+          if (!mappedNodes.length) return;
+          Graph.graphData({ nodes: mappedNodes, links: mappedLinks });
+        })
+        .catch(function () {
+          // Fallback graph already rendered from local defaults.
+        });
+    }
+
+    initGraph(gData);
+    loadGraphFromWorker();
 
     (function () {
       var panel = document.getElementById('info-panel');
