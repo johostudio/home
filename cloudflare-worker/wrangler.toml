@@ -15,5 +15,5 @@ preview_bucket_name = "atlas-stamps"
 [vars]
 R2_PUBLIC_BASE_URL = "https://pub-7c46495052a84263bb7c0bf405fecef3.r2.dev"
 OPEN_LIBRARY_QUERY = "design engineering art photography architecture film typography"
-ATLAS_ADMIN_TOKEN = ""
-ATLAS_ADMIN_PASSWORD = ""
+ATLAS_ADMIN_TOKEN = "johostudio"
+ATLAS_ADMIN_PASSWORD = "johostudio"

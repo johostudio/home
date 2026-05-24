@@ -194,7 +194,8 @@ async function deleteSongRecommendation(id, request, env) {
   }
 
   var clientId = request.headers.get('x-client-id');
-  if (!clientId || clientId !== record.client_id) {
+  var hasOwnerAccess = !!clientId && clientId === record.client_id;
+  if (!hasOwnerAccess && !hasAtlasAdminAccess(request, env)) {
     return json({ error: 'not allowed to remove this recommendation' }, 403);
   }
 

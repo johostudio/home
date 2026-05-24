@@ -2,10 +2,13 @@
   var grid = document.getElementById('gallery-grid');
   var filtersNav = document.getElementById('gallery-filters');
   if (!grid || !filtersNav) return;
+  var FILTER_STORAGE_KEY = 'jh_gallery_filter';
 
   var categoryLabelByKey = {};
+  var validFilters = { all: true };
   GALLERY_CATEGORIES.forEach(function (cat) {
     categoryLabelByKey[cat.key] = cat.label;
+    validFilters[cat.key] = true;
     var btn = document.createElement('button');
     btn.className = 'filter-pill';
     btn.setAttribute('data-filter', cat.key);
@@ -17,6 +20,54 @@
     return b.date.localeCompare(a.date);
   });
   var sortedByCategory = {};
+  var currentFilter = 'all';
+
+  function normalizeFilter(raw) {
+    var value = String(raw || '').trim().toLowerCase();
+    if (!value) return 'all';
+    return validFilters[value] ? value : 'all';
+  }
+
+  function readFilterFromUrl() {
+    var params = new URLSearchParams(window.location.search || '');
+    return normalizeFilter(params.get('category') || params.get('galleryCategory'));
+  }
+
+  function persistFilter(filter) {
+    try {
+      window.sessionStorage.setItem(FILTER_STORAGE_KEY, filter);
+    } catch (err) {
+    }
+  }
+
+  function readStoredFilter() {
+    try {
+      return normalizeFilter(window.sessionStorage.getItem(FILTER_STORAGE_KEY));
+    } catch (err) {
+      return 'all';
+    }
+  }
+
+  function updateGalleryUrl(filter) {
+    if (!window.history || !window.history.replaceState) return;
+    var url = new URL(window.location.href);
+    url.searchParams.delete('galleryCategory');
+    if (filter === 'all') {
+      url.searchParams.delete('category');
+    } else {
+      url.searchParams.set('category', filter);
+    }
+    window.history.replaceState(window.history.state, '', url.toString());
+  }
+
+  function toProjectHref(project, filter) {
+    var baseHref = project.href ? project.href : 'writeups/' + project.slug + '.html';
+    if (!filter || filter === 'all') return baseHref;
+    var url = new URL(baseHref, window.location.href);
+    if (url.origin !== window.location.origin) return url.toString();
+    url.searchParams.set('galleryCategory', filter);
+    return url.pathname + url.search + url.hash;
+  }
 
   function getFiltered(filter) {
     if (filter === 'all') return sortedAll;
@@ -40,7 +91,7 @@
     filtered.forEach(function (project) {
       var card = document.createElement('a');
       card.className = 'project-card';
-      card.href = project.href ? project.href : 'writeups/' + project.slug + '.html';
+      card.href = toProjectHref(project, filter);
       card.setAttribute('aria-label', project.title);
 
       var catLabel = categoryLabelByKey[project.category] || project.category;
@@ -73,16 +124,39 @@
     grid.appendChild(frag);
   }
 
+  function setActiveFilter(filter) {
+    currentFilter = normalizeFilter(filter);
+    filtersNav.querySelectorAll('.filter-pill').forEach(function (p) {
+      p.classList.toggle('active', p.getAttribute('data-filter') === currentFilter);
+    });
+    updateGalleryUrl(currentFilter);
+    persistFilter(currentFilter);
+    renderProjects(currentFilter);
+  }
+
   filtersNav.addEventListener('click', function (e) {
     var btn = e.target.closest('.filter-pill');
     if (!btn) return;
-
-    filtersNav.querySelectorAll('.filter-pill').forEach(function (p) {
-      p.classList.remove('active');
-    });
-    btn.classList.add('active');
-    renderProjects(btn.getAttribute('data-filter'));
+    setActiveFilter(btn.getAttribute('data-filter'));
   });
 
-  renderProjects('all');
+  window.addEventListener('popstate', function () {
+    setActiveFilter(readFilterFromUrl());
+  });
+
+  var initial = readFilterFromUrl();
+  if (initial === 'all') {
+    try {
+      if (document.referrer) {
+        var refUrl = new URL(document.referrer, window.location.href);
+        var fromDetail = refUrl.origin === window.location.origin &&
+          (/\/writeups\//.test(refUrl.pathname) || /\/projects\//.test(refUrl.pathname));
+        if (fromDetail) {
+          initial = readStoredFilter();
+        }
+      }
+    } catch (err) {
+    }
+  }
+  setActiveFilter(initial);
 })();

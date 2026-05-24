@@ -47,6 +47,15 @@ var GALLERY_PROJECTS = [
     thumb: 'https://d112y698adiu2z.cloudfront.net/photos/production/software_thumbnail_photos/004/234/335/datas/medium.jpg'
   },
   {
+    slug: 'instagram-moments-ui',
+    title: 'Instagram Moments',
+    category: 'ui-ux',
+    date: '2026-05',
+    description: 'Instagram Moments web experience made at SparkJam 2026.',
+    thumb: 'gif/thumbnails/moments.png',
+    href: 'https://moments-xi-five.vercel.app/'
+  },
+  {
     slug: 'ascend-ai',
     title: 'ascend.ai',
     category: 'ui-ux',
@@ -102,6 +111,14 @@ var GALLERY_PROJECTS = [
     date: '2026-03',
     description: '"old photos", a message lost and found between generations. [IAT 202 Spring 2026]',
     thumb: 'gif/thumbnails/FINAL PHOTO_15.1.2 (1) (1).png'
+  },
+  {
+    slug: 'instagram-moments-film',
+    title: 'Instagram Moments',
+    category: 'videography',
+    date: '2026-05',
+    description: '\'Instagram Moments\', a cinematic. Made at SparkJam 2026 (in under 30ish hours...).',
+    thumb: 'gif/thumbnails/moments.png'
   },
 
   {
