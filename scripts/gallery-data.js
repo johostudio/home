@@ -9,8 +9,7 @@ var GALLERY_CATEGORIES = [
   { key: 'motion-graphics', label: 'motion graphics' },
   { key: 'illustration', label: 'illustration' },
   { key: 'urban-architecture', label: 'urban+architecture' },
-  { key: 'diy-projects', label: 'diy projects' },
-  { key: 'misc', label: 'misc' }
+  { key: 'diy-projects', label: 'diy projects' }
 ];
 
 var GALLERY_PROJECTS = [
@@ -52,7 +51,7 @@ var GALLERY_PROJECTS = [
     category: 'ui-ux',
     date: '2026-05',
     description: 'Instagram Moments web experience made at SparkJam 2026.',
-    thumb: 'gif/thumbnails/moments.png',
+    thumb: 'gif/SPARKJAM HEADER.png',
     href: 'https://moments-xi-five.vercel.app/'
   },
   {

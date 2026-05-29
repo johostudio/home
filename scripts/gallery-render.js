@@ -19,6 +19,9 @@
   var sortedAll = GALLERY_PROJECTS.slice().sort(function (a, b) {
     return b.date.localeCompare(a.date);
   });
+  var sortedAllVisible = sortedAll.filter(function (p) {
+    return p.category !== 'misc';
+  });
   var sortedByCategory = {};
   var currentFilter = 'all';
 
@@ -70,7 +73,7 @@
   }
 
   function getFiltered(filter) {
-    if (filter === 'all') return sortedAll;
+    if (filter === 'all') return sortedAllVisible;
     if (sortedByCategory[filter]) return sortedByCategory[filter];
     sortedByCategory[filter] = sortedAll.filter(function (p) {
       return p.category === filter;

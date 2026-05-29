@@ -223,6 +223,15 @@
       outline: none;
     }
 
+    .home-tagline-separator {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.66);
+      letter-spacing: -0.01em;
+      margin: 0 2px;
+    }
+
     .link-preview {
       display: none;
       position: fixed;
@@ -464,6 +473,10 @@
         margin-bottom: 12px;
       }
 
+      .home-tagline-separator {
+        font-size: 10px;
+      }
+
       .home-bio-list {
         gap: 4px;
       }
@@ -523,16 +536,10 @@
       <a class="home-bio-link social-icon-link" href="https://www.youtube.com/channel/UCm9AkiBCwALnpblVcV7E65g"
         target="_blank" data-preview-title="youtube" data-preview-desc="@lifeofjoho / films+v-logs" data-label="youtube"
         aria-label="youtube">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-          <path
-            d="M21.582 6.186a2.6 2.6 0 0 0-1.826-1.84C18.145 3.9 12 3.9 12 3.9s-6.145 0-7.756.446a2.6 2.6 0 0 0-1.826 1.84C2 7.82 2 12 2 12s0 4.18.418 5.814a2.6 2.6 0 0 0 1.826 1.84C5.855 20.1 12 20.1 12 20.1s6.145 0 7.756-.446a2.6 2.6 0 0 0 1.826-1.84C22 16.18 22 12 22 12s0-4.18-.418-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-        </svg>
-      </a>
-      <a class="home-bio-link social-icon-link" href="https://www.tiktok.com/@lifeofjoho" target="_blank"
-        data-preview-title="tiktok" data-preview-desc="@lifeofjoho" data-label="tiktok" aria-label="tiktok">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-          <path
-            d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 2.23-1.13 4.41-2.9 5.61-1.61 1.09-3.69 1.43-5.59 1.01-1.99-.44-3.71-1.8-4.52-3.66-.54-1.25-.66-2.67-.4-4.01.27-1.39 1.05-2.66 2.19-3.51 1.17-.87 2.64-1.22 4.07-1.11.11 1.34.02 2.68.04 4.02-.75-.08-1.55.05-2.22.42-.51.28-.9.76-1.07 1.32-.19.64-.1 1.35.25 1.91.43.68 1.18 1.1 1.99 1.16.8.06 1.62-.2 2.2-.74.62-.57.99-1.4.98-2.28-.05-5.91-.01-11.82-.03-17.73h4.04z" />
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9"
+          stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2.8" y="5.4" width="18.4" height="13.2" rx="4.2" ry="4.2"></rect>
+          <path d="M10 9.3 15.3 12 10 14.7z"></path>
         </svg>
       </a>
       <a class="home-bio-link social-icon-link" href="https://instagram.com/96joho" target="_blank"
@@ -549,8 +556,9 @@
         data-label="creative archive" aria-label="my creative archive">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 21c3 0 4-1 4-4 0-1 1-2 2-2h2l8-8a2.5 2.5 0 1 0-3.5-3.5l-8 8v2c0 1-1 2-2 2-3 0-4 1-4 4z"></path>
-          <path d="m14.5 5.5 4 4"></path>
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
         </svg>
       </a>
       <a class="home-bio-link social-icon-link" href="https://instagram.com/hosh.autumn" target="_blank"
@@ -565,9 +573,11 @@
       <a class="home-bio-link social-icon-link" href="https://ko-fi.com/johostudio" target="_blank"
         data-preview-title="ko-fi" data-preview-desc="ko-fi / tba shop / support my work" data-label="ko-fi"
         aria-label="ko-fi">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-          <path
-            d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.034-3.954-.709-.965-1.041-2.7-.091-3.71.951-1.01 3.005-1.086 4.363.407 0 0 1.565-1.782 3.468-.963 1.904.82 1.832 3.011.723 4.311zm6.173.478c-.928.116-1.682.028-1.682.028V7.284h1.77s1.971.551 1.971 2.638c0 1.913-.985 2.667-2.059 3.015z" />
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 9h1.4a3.6 3.6 0 1 1 0 7.2H18"></path>
+          <path d="M3 9h15v7.7A3.3 3.3 0 0 1 14.7 20H6.3A3.3 3.3 0 0 1 3 16.7V9z"></path>
+          <path d="M8.2 13.4c0-.8.6-1.4 1.4-1.4.6 0 1 .3 1.4.8.4-.5.8-.8 1.4-.8.8 0 1.4.6 1.4 1.4 0 1.5-2.8 3.1-2.8 3.1s-2.8-1.6-2.8-3.1z"></path>
         </svg>
       </a>
       <a class="home-bio-link social-icon-link" href="https://www.buymeacoffee.com/johostudio" target="_blank"
@@ -598,18 +608,18 @@
         data-preview-desc="SEE program overview"
         data-preview-img="https://www.tradelineinc.com/sites/default/files/styles/article_feature/public/2019-05/simon_2.jpg?itok=eEiBGL1g">sustainable
         energy engineering</a>
-      +
+      <span class="home-tagline-separator">+</span>
       <a href="https://www.sfu.ca/siat.html" target="_blank" class="home-bio-link home-tagline-link"
         data-preview-title="interactive arts & technology @ sfu" data-preview-desc="SIAT program overview"
         data-preview-img="https://www.sfu.ca/content/sfu/siat/contact/jcr:content/main_content/textimage/image.img.640.medium.jpg/1629221274072.jpg">interactive
         arts &amp; technology</a>
-      w/
+      <span class="home-tagline-separator">w/</span>
       <a href="https://www.sfu.ca/chang-institute/home.html" target="_blank" class="home-bio-link home-tagline-link"
         data-preview-title="chang institute innovation+entrepreneurship certificate @ sfu"
         data-preview-desc="Chang I&E cert overview"
         data-preview-img="https://www.sfu.ca/content/sfu/students/admission/programs/jcr:content/main_content/image.img.640.medium.jpg/1692298308611.jpg">innovation+
         entrepreneurship</a>
-      @ <a target="_blank" class="home-bio-link home-tagline-link" data-preview-title="simon fraser university"
+      <span class="home-tagline-separator">@</span><a target="_blank" class="home-bio-link home-tagline-link" data-preview-title="simon fraser university"
         data-preview-desc="@ burnaby + surrey, BC"
         data-preview-img="https://www.sfu.ca/content/sfu/fas/study/surrey-campus/jcr:content/main_content/textimage/image.img.640.medium.jpg/1741030492840.jpg">sfu</a>
     </p>
