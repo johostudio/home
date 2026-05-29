@@ -7,9 +7,20 @@
   <title>joho's studio</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
   <link rel="stylesheet" href="styles/tailwind-prod.css">
   <link rel="stylesheet" href="styles/clocks.css">
   <style>
+    :root {
+      --home-icon-color: rgba(0, 0, 0, 0.68);
+      --home-icon-hover-color: rgba(0, 0, 0, 0.95);
+    }
+
+    html.home-frame-fallback {
+      --home-icon-color: rgba(255, 255, 255, 0.86);
+      --home-icon-hover-color: #fff;
+    }
+
     #home-overlay {
       position: fixed;
       bottom: 0;
@@ -22,6 +33,16 @@
       flex-direction: column;
       justify-content: flex-end;
       gap: 0;
+      max-height: 100dvh;
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    #home-overlay::-webkit-scrollbar {
+      display: none;
     }
 
     #home-cables-frame {
@@ -135,37 +156,36 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      color: rgba(0, 0, 0, 0.68);
+      color: var(--home-icon-color);
       text-decoration: none;
       position: relative;
       transition: color 0.2s ease, transform 0.2s ease;
     }
 
-    .social-icon-glyph {
-      display: block;
-    }
-
-    .social-icon-glyph-youtube {
-      transform: translateY(-1px);
-    }
-
-    .social-icon-glyph-kofi {
-      transform: translateY(-1px);
-    }
-
     .social-icon-link:hover,
     .social-icon-link:focus-visible {
-      color: rgba(0, 0, 0, 0.95);
+      color: var(--home-icon-hover-color);
       background: transparent !important;
       transform: translateY(-1px);
       outline: none;
     }
 
     .social-icon-link.tap-armed {
-      color: rgba(0, 0, 0, 0.95);
+      color: var(--home-icon-hover-color);
       background: transparent !important;
       transform: translateY(-1px);
       outline: none;
+    }
+
+    .social-icon-link svg {
+      display: block;
+      flex: 0 0 auto;
+      vector-effect: non-scaling-stroke;
+      stroke: currentColor;
+      fill: none;
+      overflow: visible;
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
     }
 
     .social-icon-link::after {
@@ -242,10 +262,6 @@
       color: rgba(0, 0, 0, 0.66);
       letter-spacing: -0.01em;
       margin: 0 2px;
-    }
-
-    .home-tagline-break-group {
-      display: inline;
     }
 
     .link-preview {
@@ -476,7 +492,9 @@
 
     @media (max-width: 600px) {
       #home-overlay {
-        padding: 0 18px calc(env(safe-area-inset-bottom, 0px) + 28px);
+        padding: 74px 18px 72px;
+        justify-content: flex-start;
+        pointer-events: auto;
       }
 
       .home-name {
@@ -491,11 +509,6 @@
 
       .home-tagline-separator {
         font-size: 10px;
-      }
-
-      .home-tagline-break-group {
-        display: block;
-        margin-top: 3px;
       }
 
       .home-bio-list {
@@ -557,8 +570,8 @@
       <a class="home-bio-link social-icon-link" href="https://www.youtube.com/channel/UCm9AkiBCwALnpblVcV7E65g"
         target="_blank" data-preview-title="youtube" data-preview-desc="@lifeofjoho / films+v-logs" data-label="youtube"
         aria-label="youtube">
-        <svg class="social-icon-glyph social-icon-glyph-youtube" viewBox="0 0 24 24" width="22" height="22"
-          fill="none" stroke="currentColor" stroke-width="1.9"
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none"
+          stroke="currentColor" stroke-width="1.9"
           stroke-linecap="round" stroke-linejoin="round">
           <rect x="2.8" y="5.4" width="18.4" height="13.2" rx="4.2" ry="4.2"></rect>
           <path d="M10 9.3 15.3 12 10 14.7z"></path>
@@ -567,7 +580,8 @@
       <a class="home-bio-link social-icon-link" href="https://instagram.com/joho.studio" target="_blank"
         data-preview-title="@joho.studio" data-preview-desc="creative archive @joho.studio"
         data-label="creative archive" aria-label="my creative archive">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none"
+          stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round">
           <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
           <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
@@ -577,7 +591,8 @@
       <a class="home-bio-link social-icon-link" href="https://instagram.com/hosh.autumn" target="_blank"
         data-preview-title="hosh's autumn" data-preview-desc="photography archive @hosh.autumn"
         data-label="hosh's autumn" aria-label="photography archive">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none"
+          stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round">
           <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
           <circle cx="12" cy="13" r="4"></circle>
@@ -586,18 +601,21 @@
       <a class="home-bio-link social-icon-link" href="https://ko-fi.com/johostudio" target="_blank"
         data-preview-title="ko-fi" data-preview-desc="ko-fi / tba shop / support my work" data-label="ko-fi"
         aria-label="ko-fi">
-        <svg class="social-icon-glyph social-icon-glyph-kofi" viewBox="0 0 24 24" width="22" height="22" fill="none"
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none"
           stroke="currentColor" stroke-width="1.9"
           stroke-linecap="round" stroke-linejoin="round">
           <path d="M18 9h1.4a3.6 3.6 0 1 1 0 7.2H18"></path>
           <path d="M3 9h15v7.7A3.3 3.3 0 0 1 14.7 20H6.3A3.3 3.3 0 0 1 3 16.7V9z"></path>
-          <path d="M8.2 13.4c0-.8.6-1.4 1.4-1.4.6 0 1 .3 1.4.8.4-.5.8-.8 1.4-.8.8 0 1.4.6 1.4 1.4 0 1.5-2.8 3.1-2.8 3.1s-2.8-1.6-2.8-3.1z"></path>
+          <path
+            d="M8.2 13.4c0-.8.6-1.4 1.4-1.4.6 0 1 .3 1.4.8.4-.5.8-.8 1.4-.8.8 0 1.4.6 1.4 1.4 0 1.5-2.8 3.1-2.8 3.1s-2.8-1.6-2.8-3.1z">
+          </path>
         </svg>
       </a>
       <a class="home-bio-link social-icon-link" href="https://www.buymeacoffee.com/johostudio" target="_blank"
         data-preview-title="buymeacoffee" data-preview-desc="buy me a matcha latte!" data-label="matcha latte"
         aria-label="matcha latte">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none"
+          stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round">
           <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
           <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
@@ -608,7 +626,8 @@
       </a>
       <a class="home-bio-link social-icon-link" href="mailto:contact@joho.studio" target="_blank"
         data-preview-title="Email" data-preview-desc="contact@joho.studio" data-label="Email" aria-label="Email">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none"
+          stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round">
           <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
           <polyline points="22,6 12,13 2,6"></polyline>
@@ -627,17 +646,14 @@
         data-preview-title="interactive arts & technology @ sfu" data-preview-desc="SIAT program overview"
         data-preview-img="https://www.sfu.ca/content/sfu/siat/contact/jcr:content/main_content/textimage/image.img.640.medium.jpg/1629221274072.jpg">interactive
         arts &amp; technology</a>
-      <span class="home-tagline-break-group">
-        <span class="home-tagline-separator">w/</span>
-        <a href="https://www.sfu.ca/chang-institute/home.html" target="_blank" class="home-bio-link home-tagline-link"
-          data-preview-title="chang institute innovation+entrepreneurship certificate @ sfu"
-          data-preview-desc="Chang I&E cert overview"
-          data-preview-img="https://www.sfu.ca/content/sfu/students/admission/programs/jcr:content/main_content/image.img.640.medium.jpg/1692298308611.jpg">innovation+
-          entrepreneurship</a>
-        <span class="home-tagline-separator">@</span><a target="_blank" class="home-bio-link home-tagline-link" data-preview-title="simon fraser university"
-          data-preview-desc="@ burnaby + surrey, BC"
-          data-preview-img="https://www.sfu.ca/content/sfu/fas/study/surrey-campus/jcr:content/main_content/textimage/image.img.640.medium.jpg/1741030492840.jpg">sfu</a>
-      </span>
+      <span class="home-tagline-separator">w/</span>
+      <a href="https://www.sfu.ca/chang-institute/home.html" target="_blank" class="home-bio-link home-tagline-link"
+        data-preview-title="chang institute innovation+entrepreneurship certificate @ sfu"
+        data-preview-desc="Chang I&E cert overview"
+        data-preview-img="https://www.sfu.ca/content/sfu/students/admission/programs/jcr:content/main_content/image.img.640.medium.jpg/1692298308611.jpg">innovation+entrepreneurship</a>
+      <span class="home-tagline-separator">@</span><a target="_blank" class="home-bio-link home-tagline-link"
+        data-preview-title="simon fraser university" data-preview-desc="@ burnaby + surrey, BC"
+        data-preview-img="https://www.sfu.ca/content/sfu/fas/study/surrey-campus/jcr:content/main_content/textimage/image.img.640.medium.jpg/1741030492840.jpg">sfu</a>
     </p>
 
     <ul class="home-bio-list">
@@ -649,9 +665,8 @@
           data-preview-img="">@theforumsfu</a>
       </li>
       <li>mechanical + electrical team @
-        <a class="home-bio-link" href="https://www.instagram.com/ewb.sfu/" target="_blank"
-          data-preview-title="EWB SFU — Sustain-EE"
-          data-preview-desc="Developing and prototyping mechanical parts for a sustainable wind energy project."
+        <a class="home-bio-link" href="https://www.instagram.com/ewb.sfu/" target="_blank" data-preview-title="EWB SFU"
+          data-preview-desc="Developing and prototyping mechanical parts for a sustainable energy projects."
           data-preview-img="">ewb sfu</a>
       </li>
       <li>multimedia work for
@@ -718,6 +733,17 @@
     (function () {
       var cablesFrame = document.getElementById('home-cables-frame');
       var stickersBooted = false;
+      var rootEl = document.documentElement;
+
+      function syncFallbackTheme() {
+        if (!cablesFrame || !rootEl) return;
+        var hasFrameSrc = !!cablesFrame.getAttribute('src');
+        if (hasFrameSrc) {
+          rootEl.classList.remove('home-frame-fallback');
+        } else {
+          rootEl.classList.add('home-frame-fallback');
+        }
+      }
 
       function loadCablesFrame() {
         if (!cablesFrame) return;
@@ -727,6 +753,7 @@
         if (!frameSrc) return;
 
         cablesFrame.setAttribute('src', frameSrc);
+        syncFallbackTheme();
       }
 
       function setupCablesFrame() {
@@ -801,6 +828,7 @@
       }
 
       setupCablesFrame();
+      syncFallbackTheme();
 
       var stickerLayer = document.querySelector('[data-sticker-layer]');
       if (stickerLayer) {
