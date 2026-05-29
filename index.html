@@ -95,6 +95,29 @@
       font-size: 11px;
     }
 
+    .home-credit {
+      margin: 14px 0 0;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 11px;
+      color: rgba(0, 0, 0, 0.5);
+      letter-spacing: -0.01em;
+      pointer-events: auto;
+    }
+
+    .home-credit a {
+      color: rgba(0, 0, 0, 0.65);
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
+      transition: color 0.18s ease;
+    }
+
+    .home-credit a:hover,
+    .home-credit a:focus-visible {
+      color: rgba(0, 0, 0, 0.92);
+      outline: none;
+    }
+
     .home-socials {
       display: flex;
       flex-wrap: wrap;
@@ -455,6 +478,11 @@
         padding: 1px 4px;
       }
 
+      .home-credit {
+        font-size: 10px;
+        margin-top: 10px;
+      }
+
       .home-socials {
         gap: 9px;
       }
@@ -567,27 +595,34 @@
     <p class="home-tagline pointer-events-auto">
       <a href="https://www.sfu.ca/fas/schools/sustainable-energy-engineering.html" target="_blank"
         class="home-bio-link home-tagline-link" data-preview-title="sustainable energy engineering @ sfu"
-        data-preview-desc="Program page"
+        data-preview-desc="SEE program overview"
         data-preview-img="https://www.tradelineinc.com/sites/default/files/styles/article_feature/public/2019-05/simon_2.jpg?itok=eEiBGL1g">sustainable
         energy engineering</a>
       +
       <a href="https://www.sfu.ca/siat.html" target="_blank" class="home-bio-link home-tagline-link"
         data-preview-title="interactive arts & technology @ sfu" data-preview-desc="SIAT program overview"
         data-preview-img="https://www.sfu.ca/content/sfu/siat/contact/jcr:content/main_content/textimage/image.img.640.medium.jpg/1629221274072.jpg">interactive
-        arts &amp; technology</a> @ <a target="_blank" class="home-bio-link home-tagline-link"
-        data-preview-title="simon fraser university" data-preview-desc="@ burnaby + surrey, BC"
+        arts &amp; technology</a>
+      w/
+      <a href="https://www.sfu.ca/chang-institute/home.html" target="_blank" class="home-bio-link home-tagline-link"
+        data-preview-title="chang institute innovation+entrepreneurship certificate @ sfu"
+        data-preview-desc="Chang I&E cert overview"
+        data-preview-img="https://www.sfu.ca/content/sfu/students/admission/programs/jcr:content/main_content/image.img.640.medium.jpg/1692298308611.jpg">innovation+
+        entrepreneurship</a>
+      @ <a target="_blank" class="home-bio-link home-tagline-link" data-preview-title="simon fraser university"
+        data-preview-desc="@ burnaby + surrey, BC"
         data-preview-img="https://www.sfu.ca/content/sfu/fas/study/surrey-campus/jcr:content/main_content/textimage/image.img.640.medium.jpg/1741030492840.jpg">sfu</a>
     </p>
 
     <ul class="home-bio-list">
-      <li>designing and building things across engineering, design + art</li>
-      <li>creative lead + graphic design
+      <li>designing, dreaming + building things across engineering, design + art</li>
+      <li>vp media, creative lead + graphic design
         <a class="home-bio-link" href="https://www.instagram.com/theforumsfu/" target="_blank"
           data-preview-title="The Forum @ SFU"
           data-preview-desc="Making cool graphics and taking cool photos for student events."
           data-preview-img="">@theforumsfu</a>
       </li>
-      <li>mechanical team @
+      <li>mechanical + electrical team @
         <a class="home-bio-link" href="https://www.instagram.com/ewb.sfu/" target="_blank"
           data-preview-title="EWB SFU — Sustain-EE"
           data-preview-desc="Developing and prototyping mechanical parts for a sustainable wind energy project."
@@ -622,6 +657,8 @@
         :)
       </li>
     </ul>
+    <p class="home-credit">home page made with <a href="https://cables.gl" target="_blank"
+        rel="noopener noreferrer">cables.gl</a>, snoopy, and lots of love :)</p>
   </div>
 
   <div class="link-preview" id="link-preview">

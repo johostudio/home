@@ -400,6 +400,16 @@
       text-transform: none;
     }
 
+    .artist-map-popup a {
+      color: #c7e0ff;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .artist-map-popup a:hover {
+      color: #e6f1ff;
+    }
+
     @media (max-width: 520px) {
       .song-rec-form {
         grid-template-columns: 1fr;
@@ -969,11 +979,31 @@
       }
 
       function popupHtml(entry, label) {
+        var artistName = String(entry.artist || '');
+        var safeArtist = artistName
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+        var safeOrigin = String(entry.origin || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+        var safeLabel = String(label || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+        var searchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(artistName + ' artist');
         var pieces = [
           '<div class="artist-map-popup">',
-          '<strong>' + entry.artist + '</strong><br>',
-          '<span>' + label + '</span><br>',
-          '<span>' + entry.origin + '</span>'
+          '<strong><a href="' + searchUrl + '" target="_blank" rel="noopener noreferrer">' + safeArtist + '</a></strong><br>',
+          '<span>' + safeLabel + '</span><br>',
+          '<span>' + safeOrigin + '</span>'
         ];
         if (entry.note) pieces.push('<br><span>' + entry.note + '</span>');
         pieces.push('</div>');
