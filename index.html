@@ -244,6 +244,10 @@
       margin: 0 2px;
     }
 
+    .home-tagline-break-group {
+      display: inline;
+    }
+
     .link-preview {
       display: none;
       position: fixed;
@@ -472,7 +476,7 @@
 
     @media (max-width: 600px) {
       #home-overlay {
-        padding: 0 18px 72px;
+        padding: 0 18px calc(env(safe-area-inset-bottom, 0px) + 28px);
       }
 
       .home-name {
@@ -487,6 +491,11 @@
 
       .home-tagline-separator {
         font-size: 10px;
+      }
+
+      .home-tagline-break-group {
+        display: block;
+        margin-top: 3px;
       }
 
       .home-bio-list {
@@ -618,15 +627,17 @@
         data-preview-title="interactive arts & technology @ sfu" data-preview-desc="SIAT program overview"
         data-preview-img="https://www.sfu.ca/content/sfu/siat/contact/jcr:content/main_content/textimage/image.img.640.medium.jpg/1629221274072.jpg">interactive
         arts &amp; technology</a>
-      <span class="home-tagline-separator">w/</span>
-      <a href="https://www.sfu.ca/chang-institute/home.html" target="_blank" class="home-bio-link home-tagline-link"
-        data-preview-title="chang institute innovation+entrepreneurship certificate @ sfu"
-        data-preview-desc="Chang I&E cert overview"
-        data-preview-img="https://www.sfu.ca/content/sfu/students/admission/programs/jcr:content/main_content/image.img.640.medium.jpg/1692298308611.jpg">innovation+
-        entrepreneurship</a>
-      <span class="home-tagline-separator">@</span><a target="_blank" class="home-bio-link home-tagline-link" data-preview-title="simon fraser university"
-        data-preview-desc="@ burnaby + surrey, BC"
-        data-preview-img="https://www.sfu.ca/content/sfu/fas/study/surrey-campus/jcr:content/main_content/textimage/image.img.640.medium.jpg/1741030492840.jpg">sfu</a>
+      <span class="home-tagline-break-group">
+        <span class="home-tagline-separator">w/</span>
+        <a href="https://www.sfu.ca/chang-institute/home.html" target="_blank" class="home-bio-link home-tagline-link"
+          data-preview-title="chang institute innovation+entrepreneurship certificate @ sfu"
+          data-preview-desc="Chang I&E cert overview"
+          data-preview-img="https://www.sfu.ca/content/sfu/students/admission/programs/jcr:content/main_content/image.img.640.medium.jpg/1692298308611.jpg">innovation+
+          entrepreneurship</a>
+        <span class="home-tagline-separator">@</span><a target="_blank" class="home-bio-link home-tagline-link" data-preview-title="simon fraser university"
+          data-preview-desc="@ burnaby + surrey, BC"
+          data-preview-img="https://www.sfu.ca/content/sfu/fas/study/surrey-campus/jcr:content/main_content/textimage/image.img.640.medium.jpg/1741030492840.jpg">sfu</a>
+      </span>
     </p>
 
     <ul class="home-bio-list">
