@@ -45,7 +45,7 @@ export default function Home() {
             <a href="/gallery.html" className="text-sm" style={{ color: '#e6eef6', letterSpacing: '-0.1rem' }}>GALLERY</a>
             <a href="/about.html" className="text-sm" style={{ color: '#e6eef6', letterSpacing: '-0.1rem' }}>ABOUT</a>
             <a href="/projects/vancouver.html" className="text-sm" style={{ color: '#e6eef6', letterSpacing: '-0.1rem' }}>VANCOUVER</a>
-            <a href="/hoshii.html" className="text-sm" style={{ color: '#e6eef6', letterSpacing: '-0.1rem' }}>hsoh</a>
+            <a href="/hoshii.html" className="text-sm" style={{ color: '#e6eef6', letterSpacing: '-0.1rem' }}>ihsoh</a>
           </div>
         </header>
 

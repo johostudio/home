@@ -1,7 +1,7 @@
 # Cloudflare Setup (Global Songs + Darkroom Uploads)
 
 This worker powers:
-- Global HSOH song recommendations (`/song-recs`)
+- Global ihsoh song recommendations (`/song-recs`)
 - Darkroom gallery uploads and listing (`/upload`, `/strips`)
 - Home page global visitor counter (`/visitor-count`)
 - Atlas saved cities + stamps (`/atlas-points`)

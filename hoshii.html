@@ -392,6 +392,23 @@
       text-transform: lowercase;
     }
 
+    .artist-map-popup-art {
+      display: block;
+      width: 82px;
+      height: 82px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 0.48rem;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .artist-map-popup-song {
+      display: block;
+      margin-top: 0.18rem;
+      color: rgba(230, 238, 246, 0.72);
+    }
+
     .artist-map-popup strong {
       color: #fff;
       font-weight: 500;
@@ -476,38 +493,7 @@
 
   <script src="scripts/site-header.js"></script>
 
-  <div class="sticker-layer" data-sticker-layer data-safe-bottom="0">
-    <button class="sticker" type="button" data-sticker data-size="196" data-x="1180" data-y="72" data-rotation="7"
-      aria-label="typhoon sticker">
-      <img src="gif/stickers/typhoon.png" alt="Typhoon sticker" loading="lazy">
-      <span class="sticker-album-label">Luke Chiang - TYPHOON</span>
-    </button>
-    <button class="sticker" type="button" data-sticker data-size="186" data-x="380" data-y="92" data-rotation="-6"
-      aria-label="pryvt back to reality vinyl">
-      <img src="gif/stickers/pryvtbacktoreality.png" alt="pryvt back to reality" loading="lazy">
-      <span class="sticker-album-label">PRYVT - BACK TO REALITY</span>
-    </button>
-    <button class="sticker" type="button" data-sticker data-size="184" data-x="580" data-y="350" data-rotation="6"
-      aria-label="pryvt scene vinyl">
-      <img src="gif/stickers/pryvtscene.png" alt="pryvt scene" loading="lazy">
-      <span class="sticker-album-label">PRYVT - &SCENE</span>
-    </button>
-    <button class="sticker" type="button" data-sticker data-size="188" data-x="1460" data-y="324" data-rotation="-7"
-      aria-label="hyukoh 24 vinyl">
-      <img src="gif/stickers/hyukoh24.png" alt="hyukoh 24" loading="lazy">
-      <span class="sticker-album-label">HYUKOH - 24: How to find true love and happiness</span>
-    </button>
-    <button class="sticker" type="button" data-sticker data-size="178" data-x="920" data-y="416" data-rotation="5"
-      aria-label="lil moshpit sikkk flip vinyl">
-      <img src="gif/stickers/lilmoshpitsikkkflip.png" alt="lil moshpit sikkk flip" loading="lazy">
-      <span class="sticker-album-label">Sik-K & Lil Moshpit - K-FLIP+</span>
-    </button>
-    <button class="sticker" type="button" data-sticker data-size="182" data-x="1580" data-y="132" data-rotation="-6"
-      aria-label="ado kyougen vinyl">
-      <img src="gif/stickers/adokyougen.png" alt="ado kyougen" loading="lazy">
-      <span class="sticker-album-label">Ado - Kyougen</span>
-    </button>
-  </div>
+  <div class="sticker-layer" id="ihsoh-album-stickers" data-sticker-layer data-safe-bottom="0"></div>
 
   <a href="index.html" class="back-btn relative z-10">← back</a>
 
@@ -518,7 +504,7 @@
         studio</h1>
       <p class="text-sm text-center text-white/55 mb-7 tracking-normal"
         style="font-family:'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight:400;">a music production project,
-        @hsoh.wav / 2026 q2+3</p>
+        @ihsoh.wav / 2026 </p>
 
       <div class="mt-6 p-6">
         <h2 class="text-xl font-normal mb-3 text-center"
@@ -538,13 +524,13 @@
       <div class="mt-8 p-2 text-center relative">
         <h2 class="hsoh-main-title mb-2 relative z-10" id="hsoh-dial" tabindex="0" role="button"
           aria-label="randomize studio dial code">+86</h2>
-        <p class="hsoh-subtitle relative z-10">@hsoh.wav</p>
+        <p class="hsoh-subtitle relative z-10">@ihsoh.wav</p>
         <div class="relative z-10 inline-block mt-3">
-          <a href="http://www.hsoh.tech" target="_blank" rel="noopener"
+          <a href="http://www.instagram.com/ihsoh.wav" target="_blank" rel="noopener"
             class="home-bio-link hsoh-link bg-white/10 hover:bg-[#c084fc]/20 px-6 py-3 rounded-full text-sm font-normal tracking-normal text-white transition-all shadow-[0_0_15px_rgba(192,132,252,0.15)] hover:shadow-[0_0_25px_rgba(192,132,252,0.3)] inline-flex items-center gap-2"
             data-preview-title="hsoh.tech" data-preview-desc="Music production project portal"
             data-preview-img="gif/thumbnails/hyukoh24.png">
-            visit hsoh.tech
+            tbd Q3+4
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               stroke-linecap="round" stroke-linejoin="round">
               <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -572,7 +558,8 @@
         <div class="artist-map-legend" aria-hidden="true">
           <span class="artist-map-chip"><span class="artist-map-dot" style="background:#fca5a5"></span>concerts i've
             been to</span>
-          <span class="artist-map-chip"><span class="artist-map-dot" style="background:#93c5fd"></span>top artists</span>
+          <span class="artist-map-chip"><span class="artist-map-dot" style="background:#93c5fd"></span>top
+            artists</span>
         </div>
       </section>
     </section>
@@ -592,6 +579,7 @@
   </div>
 
   <script src="scripts/cloudflare-config.js"></script>
+  <script src="scripts/ihsoh-music-data.js"></script>
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
   <script>
     (function () {
@@ -604,6 +592,51 @@
   </script>
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
+
+    (function () {
+      var layer = document.getElementById('ihsoh-album-stickers');
+      var data = window.IHSOH_MUSIC_DATA || {};
+      var songs = Array.isArray(data.songs) ? data.songs : [];
+      if (!layer || !songs.length) return;
+
+      function joinLabel(entry) {
+        var artist = String(entry.artist || '').trim();
+        var title = String(entry.album || entry.song || '').trim();
+        if (artist && title) return artist + ' - ' + title;
+        return artist || title || 'album art';
+      }
+
+      songs.forEach(function (entry) {
+        if (!entry || !entry.albumArt || entry.sticker === false) return;
+        var sticker = entry.sticker || {};
+        var label = joinLabel(entry);
+        var button = document.createElement('button');
+        button.className = 'sticker';
+        button.type = 'button';
+        button.setAttribute('data-sticker', '');
+        button.setAttribute('data-size', sticker.size || 184);
+        button.setAttribute('data-x', sticker.x || 0);
+        button.setAttribute('data-y', sticker.y || 0);
+        button.setAttribute('data-rotation', sticker.rotation || 0);
+        if (sticker.spawnBias) {
+          button.setAttribute('data-spawn-bias', sticker.spawnBias);
+        }
+        button.setAttribute('aria-label', (entry.albumArtAlt || label) + ' album art');
+
+        var img = document.createElement('img');
+        img.src = entry.albumArt;
+        img.alt = entry.albumArtAlt || label;
+        img.loading = 'lazy';
+
+        var caption = document.createElement('span');
+        caption.className = 'sticker-album-label';
+        caption.textContent = label;
+
+        button.appendChild(img);
+        button.appendChild(caption);
+        layer.appendChild(button);
+      });
+    })();
 
     (function () {
       var dial = document.getElementById('hsoh-dial');
@@ -958,18 +991,16 @@
       var mapNote = document.getElementById('hsoh-artist-map-note');
       if (!mapRoot) return;
 
-      var concertArtists = [
-        // Add artists whose concerts you've attended:
-        // { artist: 'Artist Name', origin: 'City, Country', lat: 0, lng: 0, note: 'Optional note' }
-      ];
+      var musicData = window.IHSOH_MUSIC_DATA || {};
 
-      var topArtists = [
-        { artist: 'HYUKOH', origin: 'Seoul, South Korea', lat: 37.5665, lng: 126.9780 },
-        { artist: 'Ado', origin: 'Tokyo, Japan', lat: 35.6762, lng: 139.6503 },
-        { artist: 'Sik-K', origin: 'Seoul, South Korea', lat: 37.5665, lng: 126.9780 },
-        { artist: 'Lil Moshpit', origin: 'Seoul, South Korea', lat: 37.5665, lng: 126.9780 },
-        { artist: 'NewJeans', origin: 'Seoul, South Korea', lat: 37.5665, lng: 126.9780 }
-      ];
+      function toArray(value) {
+        return Array.isArray(value) ? value : [];
+      }
+
+      function toFiniteNumber(value) {
+        var parsed = parseFloat(value);
+        return Number.isFinite(parsed) ? parsed : NaN;
+      }
 
       function createMarkerEl(color) {
         var el = document.createElement('div');
@@ -978,46 +1009,81 @@
         return el;
       }
 
+      function escapeHtml(value) {
+        return String(value || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function escapeAttr(value) {
+        return escapeHtml(value);
+      }
+
       function popupHtml(entry, label) {
         var artistName = String(entry.artist || '');
-        var safeArtist = artistName
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;')
-          .replace(/'/g, '&#39;');
-        var safeOrigin = String(entry.origin || '')
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;')
-          .replace(/'/g, '&#39;');
-        var safeLabel = String(label || '')
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;')
-          .replace(/'/g, '&#39;');
+        var safeArtist = escapeHtml(artistName);
+        var safeOrigin = escapeHtml(entry.origin || '');
+        var safeLabel = escapeHtml(label || '');
         var searchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(artistName + ' artist');
         var pieces = [
-          '<div class="artist-map-popup">',
+          '<div class="artist-map-popup">'
+        ];
+        if (entry.albumArt) {
+          pieces.push('<img class="artist-map-popup-art" src="' + escapeAttr(entry.albumArt) + '" alt="">');
+        }
+        pieces.push(
           '<strong><a href="' + searchUrl + '" target="_blank" rel="noopener noreferrer">' + safeArtist + '</a></strong><br>',
           '<span>' + safeLabel + '</span><br>',
           '<span>' + safeOrigin + '</span>'
-        ];
-        if (entry.note) pieces.push('<br><span>' + entry.note + '</span>');
+        );
+        if (entry.song || entry.album) {
+          pieces.push('<span class="artist-map-popup-song">' + escapeHtml(entry.song || entry.album) + '</span>');
+        }
+        if (entry.note) pieces.push('<br><span>' + escapeHtml(entry.note) + '</span>');
         pieces.push('</div>');
         return pieces.join('');
       }
 
+      function normalizePin(entry, defaultType, sourceSong) {
+        if (!entry) return null;
+        var lat = toFiniteNumber(entry.lat);
+        var lng = toFiniteNumber(entry.lng);
+        return {
+          artist: entry.artist || (sourceSong && sourceSong.artist) || '',
+          origin: entry.origin || (sourceSong && sourceSong.origin) || '',
+          lat: lat,
+          lng: lng,
+          note: entry.note || (sourceSong && sourceSong.note) || '',
+          type: String(entry.pinType || defaultType || (sourceSong && sourceSong.pinType) || 'top').toLowerCase(),
+          song: entry.song || (sourceSong && sourceSong.song) || '',
+          album: entry.album || (sourceSong && sourceSong.album) || '',
+          albumArt: entry.albumArt || (sourceSong && sourceSong.albumArt) || ''
+        };
+      }
+
+      function pinsFromSong(song) {
+        if (!song) return [];
+        var artists = toArray(song.mapArtists);
+        if (artists.length) {
+          return artists.map(function (artistEntry) {
+            return normalizePin(artistEntry, song.pinType || 'top', song);
+          });
+        }
+        return [normalizePin(song, song.pinType || 'top', song)];
+      }
+
       function allPins() {
-        return concertArtists.map(function (item) {
-          item.__type = 'concert';
-          return item;
-        }).concat(topArtists.map(function (item) {
-          item.__type = 'top';
-          return item;
-        })).filter(function (item) {
+        var pins = [];
+        toArray(musicData.songs).forEach(function (song) {
+          pins = pins.concat(pinsFromSong(song));
+        });
+        toArray(musicData.mapPins).forEach(function (entry) {
+          pins.push(normalizePin(entry, entry.pinType || 'top'));
+        });
+        return pins.filter(function (item) {
           return Number.isFinite(item.lat) && Number.isFinite(item.lng) && item.artist && item.origin;
         });
       }
@@ -1080,15 +1146,15 @@
         var pins = allPins();
         if (!pins.length) {
           if (mapNote) {
-            mapNote.textContent = 'add artists in the arrays inside hoshii.html to place pins.';
+            mapNote.textContent = 'add songs or mapPins in scripts/ihsoh-music-data.js to place pins.';
           }
           return;
         }
 
         var bounds = new mapboxgl.LngLatBounds();
         pins.forEach(function (entry) {
-          var color = entry.__type === 'concert' ? '#fca5a5' : '#93c5fd';
-          var label = entry.__type === 'concert' ? 'concert attended' : 'top artist';
+          var color = entry.type === 'concert' ? '#fca5a5' : '#93c5fd';
+          var label = entry.type === 'concert' ? 'concert attended' : 'top artist';
           new mapboxgl.Marker({ element: createMarkerEl(color) })
             .setLngLat([entry.lng, entry.lat])
             .setPopup(new mapboxgl.Popup({ offset: 10 }).setHTML(popupHtml(entry, label)))

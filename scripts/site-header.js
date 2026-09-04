@@ -365,7 +365,7 @@
   var items = [
     { key: 'gallery', label: 'gallery', href: base + 'gallery' },
     { key: 'archives', label: 'archives', href: base + 'archives' },
-    { key: 'hoshii', label: 'hsoh', href: base + 'hoshii' },
+    { key: 'hoshii', label: 'ihsoh', href: base + 'hoshii' },
     { key: 'resume', label: 'resume', href: base + 'resume' },
     { key: 'about', label: 'about', href: base + 'about' }
   ];
