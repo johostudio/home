@@ -42,6 +42,8 @@ export default function Home() {
           </h1>
 
           <div className="mt-2 flex gap-6 justify-center opacity-70">
+            <a href="/work.html" className="text-sm" style={{ color: '#e6eef6', letterSpacing: '-0.1rem' }}>WORK</a>
+            <a href="/autumn.html" className="text-sm" style={{ color: '#e6eef6', letterSpacing: '-0.1rem' }}>AUTUMN</a>
             <a href="/gallery.html" className="text-sm" style={{ color: '#e6eef6', letterSpacing: '-0.1rem' }}>GALLERY</a>
             <a href="/about.html" className="text-sm" style={{ color: '#e6eef6', letterSpacing: '-0.1rem' }}>ABOUT</a>
             <a href="/projects/vancouver.html" className="text-sm" style={{ color: '#e6eef6', letterSpacing: '-0.1rem' }}>VANCOUVER</a>

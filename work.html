@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en" style="background:#fff;">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>work</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+  <link rel="stylesheet" href="styles/tailwind-prod.css">
+  <style>
+    html,
+    body {
+      background: #fff;
+      color: #000;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    .work-page-main {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6rem 1.5rem;
+    }
+
+    .work-link {
+      color: #000;
+      font-size: clamp(1.8rem, 5vw, 4.5rem);
+      font-weight: 400;
+      line-height: 1;
+      letter-spacing: -0.075em;
+      text-decoration: none;
+      text-transform: lowercase;
+      transition: opacity 0.18s ease;
+    }
+
+    .work-link:hover,
+    .work-link:focus-visible {
+      opacity: 0.58;
+      outline: none;
+    }
+  </style>
+</head>
+
+<body>
+  <script src="scripts/site-header.js"></script>
+
+  <main class="work-page-main">
+    <a class="work-link" href="https://joho.design" target="_blank" rel="noopener">joho.design</a>
+  </main>
+
+  <script src="scripts/page-transitions.js"></script>
+</body>
+
+</html>

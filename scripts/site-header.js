@@ -3,11 +3,14 @@
   var inSub = path.indexOf('/projects/') !== -1;
   var base = inSub ? '../' : '';
   var isArchivePage = path.indexOf('archives') !== -1 || path.indexOf('atlas') !== -1 || path.indexOf('bookshelf') !== -1 || path.indexOf('scrambled') !== -1;
+  var isLightPage = path.indexOf('work') !== -1 || path.indexOf('autumn') !== -1;
   
   var isHome = (path === '/' || path.endsWith('/index.html') || path.endsWith('/index') || path === '' || path.indexOf('index') !== -1);
 
   var cur = '';
   if (path.indexOf('links') !== -1) cur = 'links';
+  else if (path.indexOf('work') !== -1) cur = 'work';
+  else if (path.indexOf('autumn') !== -1) cur = 'autumn';
   else if (path.indexOf('gallery') !== -1 || path.indexOf('writeups') !== -1) cur = 'gallery';
   else if (path.indexOf('about') !== -1) cur = 'about';
   else if (path.indexOf('vancouver') !== -1 || path.indexOf('project') !== -1) cur = 'vancouver';
@@ -363,6 +366,8 @@
   document.head.appendChild(style);
 
   var items = [
+    { key: 'work', label: 'work', href: base + 'work' },
+    { key: 'autumn', label: 'autumn', href: base + 'autumn' },
     { key: 'gallery', label: 'gallery', href: base + 'gallery' },
     { key: 'archives', label: 'archives', href: base + 'archives' },
     { key: 'hoshii', label: 'ihsoh', href: base + 'hoshii' },
@@ -382,7 +387,7 @@
 
   var header = document.createElement('header');
   header.className = 'jh-header';
-  if (isHome) {
+  if (isHome || isLightPage) {
     header.className += ' jh-home-header';
   }
   if (isArchivePage && !isHome) {
