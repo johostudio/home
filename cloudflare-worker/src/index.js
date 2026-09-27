@@ -75,6 +75,22 @@ function hasScrambledAdminAccess(request, env) {
   return !!providedToken && providedToken === configuredToken;
 }
 
+function hasCmsAdminAccess(request, env) {
+  var configuredToken = safeText(env.CMS_ADMIN_TOKEN || '', 256);
+  if (!configuredToken) {
+    configuredToken = safeText(env.PHOTOGRAPHY_ADMIN_TOKEN || '', 256);
+  }
+  if (!configuredToken) {
+    configuredToken = safeText(env.ATLAS_ADMIN_TOKEN || '', 256);
+  }
+  if (!configuredToken && env.ATLAS_ADMIN_PASSWORD) {
+    configuredToken = safeText(env.ATLAS_ADMIN_PASSWORD || '', 256);
+  }
+  if (!configuredToken) return false;
+  var providedToken = safeText(request.headers.get('x-admin-token') || '', 256);
+  return !!providedToken && providedToken === configuredToken;
+}
+
 function makeId() {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
@@ -807,6 +823,231 @@ async function deleteScrambledLink(id, request, env) {
   return json({ ok: true, id: id });
 }
 
+var CMS_COLLECTIONS = ['autumn', 'projects', 'bookshelf', 'music'];
+
+function safeCmsCollection(value) {
+  var collection = safeText(value, 40).toLowerCase();
+  return CMS_COLLECTIONS.indexOf(collection) === -1 ? '' : collection;
+}
+
+function safeCmsSlug(value) {
+  return safeText(value, 120)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 100);
+}
+
+function safeCmsOrder(value) {
+  var parsed = Number(value);
+  if (!Number.isFinite(parsed)) return 0;
+  return Math.max(-100000, Math.min(100000, Math.round(parsed)));
+}
+
+function safeCmsPublished(value) {
+  return value === false || value === 0 || value === '0' ? 0 : 1;
+}
+
+function safeCmsData(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  var encoded;
+  try {
+    encoded = JSON.stringify(value);
+  } catch (_e) {
+    return null;
+  }
+  if (!encoded || encoded.length > 50000) return null;
+  return encoded;
+}
+
+function cmsRow(row) {
+  var data = {};
+  try {
+    data = JSON.parse(row.data_json || '{}');
+  } catch (_e) { }
+  return {
+    id: row.id,
+    collection: row.collection,
+    slug: row.slug,
+    data: data,
+    sortOrder: Number(row.sort_order || 0),
+    published: Number(row.published || 0) === 1,
+    createdAt: Number(row.created_at || 0),
+    updatedAt: Number(row.updated_at || 0)
+  };
+}
+
+async function listContentItems(collection, request, env, url) {
+  var includeDrafts = url.searchParams.get('drafts') === '1';
+  if (includeDrafts && !hasCmsAdminAccess(request, env)) {
+    return json({ error: 'admin token required' }, 403);
+  }
+
+  var query = 'SELECT id, collection, slug, data_json, sort_order, published, created_at, updated_at FROM content_items WHERE collection = ?1';
+  if (!includeDrafts) query += ' AND published = 1';
+  query += ' ORDER BY sort_order ASC, updated_at DESC';
+
+  var result = await env.DB.prepare(query).bind(collection).all();
+  return json((result.results || []).map(cmsRow));
+}
+
+async function createContentItem(collection, request, env) {
+  if (!hasCmsAdminAccess(request, env)) {
+    return json({ error: 'admin token required' }, 403);
+  }
+
+  var body;
+  try {
+    body = await request.json();
+  } catch (_e) {
+    return json({ error: 'invalid json body' }, 400);
+  }
+
+  var slug = safeCmsSlug(body && body.slug);
+  var dataJson = safeCmsData(body && body.data);
+  if (!slug || !dataJson) {
+    return json({ error: 'slug and data object are required' }, 400);
+  }
+
+  var existing = await env.DB.prepare(
+    'SELECT id, created_at FROM content_items WHERE collection = ?1 AND slug = ?2'
+  ).bind(collection, slug).first();
+  var id = existing ? existing.id : makeId();
+  var now = Date.now();
+  var createdAt = existing ? existing.created_at : now;
+  var sortOrder = safeCmsOrder(body.sortOrder);
+  var published = safeCmsPublished(body.published);
+
+  await env.DB.prepare(
+    'INSERT INTO content_items (id, collection, slug, data_json, sort_order, published, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8) ON CONFLICT(collection, slug) DO UPDATE SET data_json = excluded.data_json, sort_order = excluded.sort_order, published = excluded.published, updated_at = excluded.updated_at'
+  ).bind(id, collection, slug, dataJson, sortOrder, published, createdAt, now).run();
+
+  var row = await env.DB.prepare(
+    'SELECT id, collection, slug, data_json, sort_order, published, created_at, updated_at FROM content_items WHERE collection = ?1 AND slug = ?2'
+  ).bind(collection, slug).first();
+  return json(cmsRow(row), existing ? 200 : 201);
+}
+
+async function updateContentItem(collection, id, request, env) {
+  if (!hasCmsAdminAccess(request, env)) {
+    return json({ error: 'admin token required' }, 403);
+  }
+
+  var existing = await env.DB.prepare(
+    'SELECT id, collection, slug, data_json, sort_order, published, created_at, updated_at FROM content_items WHERE id = ?1 AND collection = ?2'
+  ).bind(id, collection).first();
+  if (!existing) return json({ error: 'content item not found' }, 404);
+
+  var body;
+  try {
+    body = await request.json();
+  } catch (_e) {
+    return json({ error: 'invalid json body' }, 400);
+  }
+
+  var slug = safeCmsSlug(body && typeof body.slug !== 'undefined' ? body.slug : existing.slug);
+  var dataJson = typeof body.data === 'undefined' ? existing.data_json : safeCmsData(body.data);
+  if (!slug || !dataJson) {
+    return json({ error: 'slug and data object are required' }, 400);
+  }
+  var sortOrder = typeof body.sortOrder === 'undefined' ? existing.sort_order : safeCmsOrder(body.sortOrder);
+  var published = typeof body.published === 'undefined' ? existing.published : safeCmsPublished(body.published);
+  var now = Date.now();
+
+  try {
+    await env.DB.prepare(
+      'UPDATE content_items SET slug = ?1, data_json = ?2, sort_order = ?3, published = ?4, updated_at = ?5 WHERE id = ?6 AND collection = ?7'
+    ).bind(slug, dataJson, sortOrder, published, now, id, collection).run();
+  } catch (_e) {
+    return json({ error: 'slug already exists in this collection' }, 409);
+  }
+
+  var row = await env.DB.prepare(
+    'SELECT id, collection, slug, data_json, sort_order, published, created_at, updated_at FROM content_items WHERE id = ?1'
+  ).bind(id).first();
+  return json(cmsRow(row));
+}
+
+async function deleteContentItem(collection, id, request, env) {
+  if (!hasCmsAdminAccess(request, env)) {
+    return json({ error: 'admin token required' }, 403);
+  }
+  await env.DB.prepare('DELETE FROM content_items WHERE id = ?1 AND collection = ?2').bind(id, collection).run();
+  return json({ ok: true, id: id });
+}
+
+async function batchContentItems(collection, request, env) {
+  if (!hasCmsAdminAccess(request, env)) {
+    return json({ error: 'admin token required' }, 403);
+  }
+
+  var body;
+  try {
+    body = await request.json();
+  } catch (_e) {
+    return json({ error: 'invalid json body' }, 400);
+  }
+  var items = Array.isArray(body && body.items) ? body.items.slice(0, 250) : [];
+  if (!items.length) return json({ error: 'items array is required' }, 400);
+
+  var now = Date.now();
+  var statements = [];
+  for (var i = 0; i < items.length; i += 1) {
+    var item = items[i] || {};
+    var slug = safeCmsSlug(item.slug);
+    var dataJson = safeCmsData(item.data);
+    if (!slug || !dataJson) {
+      return json({ error: 'every item needs a valid slug and data object' }, 400);
+    }
+    statements.push(env.DB.prepare(
+      'INSERT INTO content_items (id, collection, slug, data_json, sort_order, published, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?7) ON CONFLICT(collection, slug) DO UPDATE SET data_json = excluded.data_json, sort_order = excluded.sort_order, published = excluded.published, updated_at = excluded.updated_at'
+    ).bind(makeId(), collection, slug, dataJson, safeCmsOrder(item.sortOrder), safeCmsPublished(item.published), now));
+  }
+
+  await env.DB.batch(statements);
+  return json({ ok: true, count: statements.length });
+}
+
+async function uploadContentAsset(collection, request, env) {
+  if (!hasCmsAdminAccess(request, env)) {
+    return json({ error: 'admin token required' }, 403);
+  }
+
+  var formData;
+  try {
+    formData = await request.formData();
+  } catch (_e) {
+    return json({ error: 'invalid form data' }, 400);
+  }
+
+  var file = formData.get('file');
+  if (!(file instanceof File)) {
+    return json({ error: 'image file is required' }, 400);
+  }
+  if (!String(file.type || '').startsWith('image/')) {
+    return json({ error: 'only image uploads are supported' }, 400);
+  }
+  if (file.size > 15 * 1024 * 1024) {
+    return json({ error: 'image must be 15 MB or smaller' }, 400);
+  }
+
+  var allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'avif'];
+  var ext = (file.name && file.name.includes('.')) ? file.name.split('.').pop().toLowerCase() : 'jpg';
+  if (allowedExtensions.indexOf(ext) === -1) ext = 'jpg';
+  var id = makeId();
+  var key = 'cms/' + collection + '/' + id + '.' + ext;
+  var publicBaseUrl = (env.R2_PUBLIC_BASE_URL || '').replace(/\/$/, '');
+  if (!publicBaseUrl) {
+    return json({ error: 'R2_PUBLIC_BASE_URL is not configured' }, 500);
+  }
+
+  await env.STRIPS_BUCKET.put(key, await file.arrayBuffer(), {
+    httpMetadata: { contentType: file.type || 'image/jpeg' }
+  });
+
+  return json({ id: id, url: publicBaseUrl + '/' + key, key: key }, 201);
+}
+
 function publicConfig(env) {
   return json({
     mapboxPublicToken: (env.MAPBOX_PUBLIC_TOKEN || '').trim(),
@@ -830,6 +1071,31 @@ export default {
 
     if (request.method === 'GET' && path === '/public-config') {
       return publicConfig(env);
+    }
+
+    if (path.startsWith('/content/')) {
+      var contentParts = path.slice('/content/'.length).split('/').filter(Boolean);
+      var contentCollection = safeCmsCollection(contentParts[0] || '');
+      if (!contentCollection) return json({ error: 'unknown content collection' }, 404);
+
+      if (request.method === 'GET' && contentParts.length === 1) {
+        return listContentItems(contentCollection, request, env, url);
+      }
+      if (request.method === 'POST' && contentParts.length === 1) {
+        return createContentItem(contentCollection, request, env);
+      }
+      if (request.method === 'POST' && contentParts[1] === 'batch') {
+        return batchContentItems(contentCollection, request, env);
+      }
+      if (request.method === 'POST' && contentParts[1] === 'upload') {
+        return uploadContentAsset(contentCollection, request, env);
+      }
+      if (request.method === 'PUT' && contentParts.length === 2) {
+        return updateContentItem(contentCollection, contentParts[1], request, env);
+      }
+      if (request.method === 'DELETE' && contentParts.length === 2) {
+        return deleteContentItem(contentCollection, contentParts[1], request, env);
+      }
     }
 
     if (request.method === 'GET' && path === '/song-recs') {

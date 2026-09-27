@@ -4,6 +4,27 @@
   if (!grid || !filtersNav) return;
   var FILTER_STORAGE_KEY = 'jh_gallery_filter';
 
+  function mergeProjects(records) {
+    var merged = GALLERY_PROJECTS.slice();
+    window.JOHO_CMS.flatten(records).forEach(function (managed) {
+      var index = merged.findIndex(function (project) { return project.slug === managed.slug; });
+      if (index === -1) merged.push(managed);
+      else merged[index] = Object.assign({}, merged[index], managed);
+    });
+    return merged;
+  }
+
+  function escapeHtml(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function boot(projects) {
+
   var categoryLabelByKey = {};
   var validFilters = { all: true };
   GALLERY_CATEGORIES.forEach(function (cat) {
@@ -16,8 +37,8 @@
     filtersNav.appendChild(btn);
   });
 
-  var sortedAll = GALLERY_PROJECTS.slice().sort(function (a, b) {
-    return b.date.localeCompare(a.date);
+  var sortedAll = projects.slice().sort(function (a, b) {
+    return String(b.date || '').localeCompare(String(a.date || ''));
   });
   var sortedAllVisible = sortedAll.filter(function (p) {
     return p.category !== 'misc';
@@ -98,13 +119,14 @@
       card.setAttribute('aria-label', project.title);
 
       var catLabel = categoryLabelByKey[project.category] || project.category;
-      var dateParts = project.date.split('-');
+      var dateParts = String(project.date || '').split('-');
       var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      var dateStr = months[parseInt(dateParts[1], 10) - 1] + ' ' + dateParts[0];
+      var monthIndex = parseInt(dateParts[1], 10) - 1;
+      var dateStr = dateParts[0] ? ((months[monthIndex] ? months[monthIndex] + ' ' : '') + dateParts[0]) : '';
 
       var thumbHTML = '';
       if (project.thumb) {
-        thumbHTML = '<div class="project-thumb"><img src="' + project.thumb + '" alt="' + project.title + '" loading="lazy" decoding="async" fetchpriority="low" width="112" height="112"></div>';
+        thumbHTML = '<div class="project-thumb"><img src="' + escapeHtml(project.thumb) + '" alt="' + escapeHtml(project.title) + '" loading="lazy" decoding="async" fetchpriority="low" width="112" height="112"></div>';
       } else {
         thumbHTML = '<div class="project-thumb"><div class="project-thumb-placeholder">&starf;</div></div>';
       }
@@ -113,11 +135,11 @@
         thumbHTML +
         '<div class="project-info">' +
         '<div class="project-meta-row">' +
-        '<span class="project-date">' + dateStr + '</span>' +
-        '<span class="project-category-tag">' + catLabel + '</span>' +
+        '<span class="project-date">' + escapeHtml(dateStr) + '</span>' +
+        '<span class="project-category-tag">' + escapeHtml(catLabel) + '</span>' +
         '</div>' +
-        '<div class="project-title">' + project.title + '</div>' +
-        '<div class="project-desc">' + project.description + '</div>' +
+        '<div class="project-title">' + escapeHtml(project.title) + '</div>' +
+        '<div class="project-desc">' + escapeHtml(project.description) + '</div>' +
         '<span class="project-read-more">Read more &rarr;</span>' +
         '</div>';
 
@@ -162,4 +184,13 @@
     }
   }
   setActiveFilter(initial);
+  }
+
+  if (window.JOHO_CMS) {
+    window.JOHO_CMS.list('projects')
+      .then(function (records) { boot(mergeProjects(records)); })
+      .catch(function () { boot(GALLERY_PROJECTS); });
+  } else {
+    boot(GALLERY_PROJECTS);
+  }
 })();

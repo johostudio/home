@@ -10,7 +10,6 @@
   <link rel="stylesheet" href="styles/tailwind-prod.css">
   <link rel="stylesheet" href="styles/dot-grid.css">
   <link rel="stylesheet" href="styles/clocks.css">
-  <link href="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css" rel="stylesheet" />
   <style>
     .home-bio-link {
       font-weight: 400;
@@ -302,131 +301,6 @@
       letter-spacing: -0.01em;
     }
 
-    .artist-map-shell {
-      margin-top: 0.9rem;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      padding: 0.86rem;
-      background: rgba(255, 255, 255, 0.03);
-      letter-spacing: -0.015em;
-    }
-
-    .artist-map-shell h3 {
-      margin: 0;
-      font-size: 0.84rem;
-      font-weight: 400;
-      text-transform: lowercase;
-      letter-spacing: -0.02em;
-      color: rgba(230, 238, 246, 0.92);
-    }
-
-    .artist-map-note {
-      margin-top: 0.35rem;
-      margin-bottom: 0.56rem;
-      font-size: 0.66rem;
-      color: rgba(230, 238, 246, 0.58);
-      line-height: 1.3;
-      letter-spacing: -0.01em;
-    }
-
-    #hsoh-artist-map {
-      width: 100%;
-      height: 230px;
-      border-radius: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      background: #05070c;
-      overflow: hidden;
-      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.32);
-    }
-
-    .artist-map-legend {
-      margin-top: 0.5rem;
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 0.6rem;
-      font-size: 0.62rem;
-      color: rgba(230, 238, 246, 0.62);
-    }
-
-    .artist-map-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.33rem;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      padding: 0.15rem 0.5rem;
-      background: rgba(255, 255, 255, 0.03);
-    }
-
-    .artist-map-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      display: inline-block;
-      box-shadow: 0 0 8px rgba(0, 0, 0, 0.35);
-    }
-
-    .artist-map-marker {
-      width: 12px;
-      height: 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.75);
-      box-shadow: 0 0 0 2px rgba(9, 14, 22, 0.86), 0 0 14px rgba(0, 0, 0, 0.4);
-      cursor: pointer;
-    }
-
-    .mapboxgl-popup-content,
-    .mapboxgl-popup-tip {
-      background: rgba(8, 13, 20, 0.96) !important;
-      color: rgba(230, 238, 246, 0.92);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-    }
-
-    .artist-map-popup {
-      min-width: 150px;
-      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-      font-size: 0.68rem;
-      letter-spacing: -0.01em;
-      line-height: 1.34;
-      text-transform: lowercase;
-    }
-
-    .artist-map-popup-art {
-      display: block;
-      width: 82px;
-      height: 82px;
-      object-fit: cover;
-      border-radius: 8px;
-      margin-bottom: 0.48rem;
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      background: rgba(255, 255, 255, 0.06);
-    }
-
-    .artist-map-popup-song {
-      display: block;
-      margin-top: 0.18rem;
-      color: rgba(230, 238, 246, 0.72);
-    }
-
-    .artist-map-popup strong {
-      color: #fff;
-      font-weight: 500;
-      font-size: 0.73rem;
-      letter-spacing: -0.015em;
-      text-transform: none;
-    }
-
-    .artist-map-popup a {
-      color: #c7e0ff;
-      text-decoration: underline;
-      text-underline-offset: 2px;
-    }
-
-    .artist-map-popup a:hover {
-      color: #e6f1ff;
-    }
-
     @media (max-width: 520px) {
       .song-rec-form {
         grid-template-columns: 1fr;
@@ -550,18 +424,12 @@
         <ul class="song-rec-list" id="song-rec-list"></ul>
       </section>
 
-      <section class="artist-map-shell">
-        <h3>concert + artist origin map</h3>
-        <p class="artist-map-note" id="hsoh-artist-map-note">concert artists and top artists pinned by where they
-          originated from.</p>
-        <div id="hsoh-artist-map" aria-label="artist origins world map"></div>
-        <div class="artist-map-legend" aria-hidden="true">
-          <span class="artist-map-chip"><span class="artist-map-dot" style="background:#fca5a5"></span>concerts i've
-            been to</span>
-          <span class="artist-map-chip"><span class="artist-map-dot" style="background:#93c5fd"></span>top
-            artists</span>
-        </div>
-      </section>
+      <p class="text-center mt-6 mb-0">
+        <a class="home-bio-link hsoh-link" href="music-library.html"
+          data-preview-title="music library" data-preview-desc="records, releases, and things on repeat"
+          data-preview-img="gif/thumbnails/hyukoh24.png">browse music library &rarr;</a>
+      </p>
+
     </section>
   </main>
 
@@ -580,7 +448,6 @@
 
   <script src="scripts/cloudflare-config.js"></script>
   <script src="scripts/ihsoh-music-data.js"></script>
-  <script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
   <script>
     (function () {
       var s = document.createElement('script');
@@ -984,212 +851,6 @@
       });
 
       loadSongs();
-    })();
-
-    (function () {
-      var mapRoot = document.getElementById('hsoh-artist-map');
-      var mapNote = document.getElementById('hsoh-artist-map-note');
-      if (!mapRoot) return;
-
-      var musicData = window.IHSOH_MUSIC_DATA || {};
-
-      function toArray(value) {
-        return Array.isArray(value) ? value : [];
-      }
-
-      function toFiniteNumber(value) {
-        var parsed = parseFloat(value);
-        return Number.isFinite(parsed) ? parsed : NaN;
-      }
-
-      function createMarkerEl(color) {
-        var el = document.createElement('div');
-        el.className = 'artist-map-marker';
-        el.style.background = color;
-        return el;
-      }
-
-      function escapeHtml(value) {
-        return String(value || '')
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;')
-          .replace(/'/g, '&#39;');
-      }
-
-      function escapeAttr(value) {
-        return escapeHtml(value);
-      }
-
-      function popupHtml(entry, label) {
-        var artistName = String(entry.artist || '');
-        var safeArtist = escapeHtml(artistName);
-        var safeOrigin = escapeHtml(entry.origin || '');
-        var safeLabel = escapeHtml(label || '');
-        var searchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(artistName + ' artist');
-        var pieces = [
-          '<div class="artist-map-popup">'
-        ];
-        if (entry.albumArt) {
-          pieces.push('<img class="artist-map-popup-art" src="' + escapeAttr(entry.albumArt) + '" alt="">');
-        }
-        pieces.push(
-          '<strong><a href="' + searchUrl + '" target="_blank" rel="noopener noreferrer">' + safeArtist + '</a></strong><br>',
-          '<span>' + safeLabel + '</span><br>',
-          '<span>' + safeOrigin + '</span>'
-        );
-        if (entry.song || entry.album) {
-          pieces.push('<span class="artist-map-popup-song">' + escapeHtml(entry.song || entry.album) + '</span>');
-        }
-        if (entry.note) pieces.push('<br><span>' + escapeHtml(entry.note) + '</span>');
-        pieces.push('</div>');
-        return pieces.join('');
-      }
-
-      function normalizePin(entry, defaultType, sourceSong) {
-        if (!entry) return null;
-        var lat = toFiniteNumber(entry.lat);
-        var lng = toFiniteNumber(entry.lng);
-        return {
-          artist: entry.artist || (sourceSong && sourceSong.artist) || '',
-          origin: entry.origin || (sourceSong && sourceSong.origin) || '',
-          lat: lat,
-          lng: lng,
-          note: entry.note || (sourceSong && sourceSong.note) || '',
-          type: String(entry.pinType || defaultType || (sourceSong && sourceSong.pinType) || 'top').toLowerCase(),
-          song: entry.song || (sourceSong && sourceSong.song) || '',
-          album: entry.album || (sourceSong && sourceSong.album) || '',
-          albumArt: entry.albumArt || (sourceSong && sourceSong.albumArt) || ''
-        };
-      }
-
-      function pinsFromSong(song) {
-        if (!song) return [];
-        var artists = toArray(song.mapArtists);
-        if (artists.length) {
-          return artists.map(function (artistEntry) {
-            return normalizePin(artistEntry, song.pinType || 'top', song);
-          });
-        }
-        return [normalizePin(song, song.pinType || 'top', song)];
-      }
-
-      function allPins() {
-        var pins = [];
-        toArray(musicData.songs).forEach(function (song) {
-          pins = pins.concat(pinsFromSong(song));
-        });
-        toArray(musicData.mapPins).forEach(function (entry) {
-          pins.push(normalizePin(entry, entry.pinType || 'top'));
-        });
-        return pins.filter(function (item) {
-          return Number.isFinite(item.lat) && Number.isFinite(item.lng) && item.artist && item.origin;
-        });
-      }
-
-      function renderMap() {
-        if (typeof mapboxgl === 'undefined') {
-          mapRoot.style.display = 'flex';
-          mapRoot.style.alignItems = 'center';
-          mapRoot.style.justifyContent = 'center';
-          mapRoot.textContent = 'map failed to load right now.';
-          return;
-        }
-
-        mapboxgl.accessToken = (window.MAPBOX_ACCESS_TOKEN || '').trim();
-
-        var globeRasterStyle = {
-          version: 8,
-          sources: {
-            darkRaster: {
-              type: 'raster',
-              tiles: [
-                'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-                'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-                'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-                'https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
-              ],
-              tileSize: 256,
-              attribution: '\u00A9 OpenStreetMap contributors \u00A9 CARTO'
-            }
-          },
-          layers: [
-            { id: 'dark-raster-layer', type: 'raster', source: 'darkRaster' }
-          ]
-        };
-
-        var map = new mapboxgl.Map({
-          container: 'hsoh-artist-map',
-          style: globeRasterStyle,
-          projection: 'globe',
-          center: [116.4, 35.6],
-          zoom: 1.42,
-          pitch: 28,
-          bearing: -12,
-          attributionControl: false,
-          dragRotate: false,
-          pitchWithRotate: false
-        });
-        map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-left');
-        map.on('style.load', function () {
-          map.setProjection({ name: 'globe' });
-          map.setFog({
-            color: 'rgb(18, 28, 56)',
-            'high-color': 'rgb(48, 78, 138)',
-            'horizon-blend': 0.12,
-            'space-color': 'rgb(4, 7, 12)',
-            'star-intensity': 0.55
-          });
-        });
-
-        var pins = allPins();
-        if (!pins.length) {
-          if (mapNote) {
-            mapNote.textContent = 'add songs or mapPins in scripts/ihsoh-music-data.js to place pins.';
-          }
-          return;
-        }
-
-        var bounds = new mapboxgl.LngLatBounds();
-        pins.forEach(function (entry) {
-          var color = entry.type === 'concert' ? '#fca5a5' : '#93c5fd';
-          var label = entry.type === 'concert' ? 'concert attended' : 'top artist';
-          new mapboxgl.Marker({ element: createMarkerEl(color) })
-            .setLngLat([entry.lng, entry.lat])
-            .setPopup(new mapboxgl.Popup({ offset: 10 }).setHTML(popupHtml(entry, label)))
-            .addTo(map);
-          bounds.extend([entry.lng, entry.lat]);
-        });
-
-        if (!bounds.isEmpty()) {
-          map.fitBounds(bounds, { padding: { top: 26, bottom: 26, left: 26, right: 26 }, maxZoom: 3, duration: 0 });
-        }
-      }
-
-      function bootArtistMap() {
-        var runtimeWorkerBase = (window.CLOUDFLARE_WORKER_URL || '').trim().replace(/\/$/, '');
-        if (!window.MAPBOX_ACCESS_TOKEN && runtimeWorkerBase) {
-          fetch(runtimeWorkerBase + '/public-config')
-            .then(function (res) {
-              if (!res.ok) throw new Error('public config unavailable');
-              return res.json();
-            })
-            .then(function (data) {
-              if (data && data.mapboxPublicToken) {
-                window.MAPBOX_ACCESS_TOKEN = data.mapboxPublicToken;
-              }
-            })
-            .catch(function () { })
-            .then(function () {
-              renderMap();
-            });
-          return;
-        }
-        renderMap();
-      }
-
-      bootArtistMap();
     })();
 
     (function () {

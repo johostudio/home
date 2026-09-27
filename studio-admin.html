@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>studio cms</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0a0b0d;
+      --panel: #111317;
+      --line: #2a2d33;
+      --muted: #8f949d;
+      --text: #f2f2ef;
+      --accent: #b7e4c7;
+      --danger: #ff9b9b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      letter-spacing: 0;
+    }
+
+    button,
+    input,
+    select,
+    textarea { font: inherit; letter-spacing: 0; }
+
+    button { cursor: pointer; }
+
+    .cms-shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr);
+    }
+
+    .cms-sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      border-right: 1px solid var(--line);
+      padding: 28px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      background: #0d0f12;
+    }
+
+    .cms-brand {
+      color: var(--text);
+      text-decoration: none;
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .cms-brand small {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 400;
+    }
+
+    .cms-tabs { display: grid; gap: 4px; }
+
+    .cms-tab {
+      width: 100%;
+      border: 0;
+      border-radius: 5px;
+      background: transparent;
+      color: var(--muted);
+      padding: 10px 11px;
+      text-align: left;
+      text-transform: lowercase;
+    }
+
+    .cms-tab:hover,
+    .cms-tab.active {
+      color: var(--text);
+      background: #1a1d22;
+    }
+
+    .cms-sidebar-footer {
+      margin-top: auto;
+      display: grid;
+      gap: 8px;
+    }
+
+    .cms-sidebar-footer a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 12px;
+    }
+
+    .cms-main { min-width: 0; padding: 28px; }
+
+    .cms-topbar {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .cms-title { margin: 0; font-size: 28px; font-weight: 500; line-height: 1; }
+    .cms-kicker { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
+
+    .cms-auth { display: flex; align-items: center; gap: 8px; }
+    .cms-auth input { width: min(260px, 34vw); }
+
+    .cms-workspace {
+      display: grid;
+      grid-template-columns: minmax(260px, 0.72fr) minmax(420px, 1.28fr);
+      gap: 0;
+      min-height: calc(100vh - 126px);
+    }
+
+    .cms-index {
+      border-right: 1px solid var(--line);
+      padding: 22px 22px 22px 0;
+    }
+
+    .cms-editor { padding: 22px 0 48px 28px; }
+
+    .cms-section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .cms-section-head h2 { margin: 0; font-size: 14px; font-weight: 500; }
+
+    .cms-button {
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      padding: 7px 11px;
+      background: #191c21;
+      color: var(--text);
+    }
+
+    .cms-button:hover { border-color: #4a4e57; background: #20242a; }
+    .cms-button.primary { background: var(--accent); border-color: var(--accent); color: #102018; }
+    .cms-button.danger { color: var(--danger); }
+
+    .cms-list { display: grid; gap: 6px; }
+
+    .cms-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      padding: 11px 12px;
+      background: var(--panel);
+    }
+
+    .cms-row.active { border-color: var(--accent); }
+    .cms-row-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cms-row-meta { margin-top: 4px; color: var(--muted); font-size: 11px; }
+
+    .cms-row-actions { display: flex; gap: 4px; }
+    .cms-row-actions button { min-height: 30px; padding: 4px 8px; font-size: 11px; }
+
+    .cms-empty {
+      border-top: 1px solid var(--line);
+      padding: 18px 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .cms-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .cms-field { min-width: 0; display: grid; gap: 6px; }
+    .cms-field.full { grid-column: 1 / -1; }
+
+    .cms-field label {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: lowercase;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: #0f1114;
+      color: var(--text);
+      padding: 10px 11px;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus { border-color: var(--accent); }
+
+    textarea { min-height: 118px; resize: vertical; line-height: 1.5; }
+
+    .cms-upload {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      margin-top: 2px;
+    }
+
+    .cms-upload input[type="file"] {
+      min-height: 36px;
+      padding: 6px 8px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .cms-checkbox {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text);
+      min-height: 40px;
+    }
+
+    .cms-checkbox input { width: 16px; height: 16px; margin: 0; }
+
+    .cms-actions {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-top: 1px solid var(--line);
+      padding-top: 18px;
+      margin-top: 4px;
+    }
+
+    .cms-action-group { display: flex; gap: 8px; }
+    .cms-status { color: var(--muted); font-size: 12px; min-height: 18px; }
+    .cms-status.error { color: var(--danger); }
+    .cms-status.success { color: var(--accent); }
+
+    @media (max-width: 900px) {
+      .cms-shell { grid-template-columns: 1fr; }
+      .cms-sidebar { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); padding: 18px; }
+      .cms-tabs { grid-template-columns: repeat(4, 1fr); }
+      .cms-tab { text-align: center; padding: 9px 5px; }
+      .cms-sidebar-footer { display: none; }
+      .cms-main { padding: 20px; }
+      .cms-workspace { grid-template-columns: 1fr; }
+      .cms-index { border-right: 0; border-bottom: 1px solid var(--line); padding: 20px 0; }
+      .cms-editor { padding: 20px 0 42px; }
+    }
+
+    @media (max-width: 560px) {
+      .cms-topbar { align-items: stretch; flex-direction: column; }
+      .cms-auth { align-items: stretch; flex-direction: column; }
+      .cms-auth input { width: 100%; }
+      .cms-form { grid-template-columns: 1fr; }
+      .cms-field.full { grid-column: auto; }
+      .cms-actions { grid-column: auto; align-items: stretch; flex-direction: column; }
+      .cms-action-group { width: 100%; }
+      .cms-action-group .cms-button { flex: 1; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="cms-shell">
+    <aside class="cms-sidebar">
+      <a class="cms-brand" href="index.html">johostudio<small>content studio</small></a>
+      <nav class="cms-tabs" aria-label="CMS collections">
+        <button class="cms-tab active" type="button" data-collection="autumn">autumn</button>
+        <button class="cms-tab" type="button" data-collection="projects">projects</button>
+        <button class="cms-tab" type="button" data-collection="bookshelf">bookshelf</button>
+        <button class="cms-tab" type="button" data-collection="music">music</button>
+      </nav>
+      <div class="cms-sidebar-footer">
+        <a href="autumn.html">view autumn</a>
+        <a href="gallery.html">view projects</a>
+        <a href="bookshelf.html">view bookshelf</a>
+        <a href="music-library.html">view music library</a>
+      </div>
+    </aside>
+
+    <main class="cms-main">
+      <header class="cms-topbar">
+        <div>
+          <h1 class="cms-title" id="collection-title">autumn</h1>
+          <p class="cms-kicker">published entries appear on the live site immediately.</p>
+        </div>
+        <div class="cms-auth">
+          <input id="admin-token" type="password" placeholder="photography / CMS admin token" autocomplete="current-password" />
+          <button class="cms-button" id="connect-button" type="button">connect</button>
+        </div>
+      </header>
+
+      <div class="cms-workspace">
+        <section class="cms-index" aria-label="Content entries">
+          <div class="cms-section-head">
+            <h2 id="entry-count">entries</h2>
+            <button class="cms-button" id="new-button" type="button">+ new</button>
+          </div>
+          <div class="cms-list" id="entry-list"></div>
+        </section>
+
+        <section class="cms-editor" aria-label="Content editor">
+          <div class="cms-section-head">
+            <h2 id="editor-title">new entry</h2>
+          </div>
+          <form class="cms-form" id="editor-form">
+            <div class="cms-field full">
+              <label for="entry-slug">slug</label>
+              <input id="entry-slug" name="slug" type="text" required placeholder="entry-name" />
+            </div>
+            <div class="cms-field">
+              <label for="entry-order">sort order</label>
+              <input id="entry-order" name="sortOrder" type="number" step="1" value="0" />
+            </div>
+            <div class="cms-field">
+              <label>visibility</label>
+              <label class="cms-checkbox"><input id="entry-published" name="published" type="checkbox" checked /> published</label>
+            </div>
+            <div id="collection-fields" class="cms-field full"></div>
+            <div class="cms-actions">
+              <p class="cms-status" id="cms-status" role="status"></p>
+              <div class="cms-action-group">
+                <button class="cms-button danger" id="delete-button" type="button" hidden>delete</button>
+                <button class="cms-button primary" type="submit">save entry</button>
+              </div>
+            </div>
+          </form>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="scripts/cloudflare-config.js"></script>
+  <script src="scripts/content-api.js"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      var TOKEN_KEY = 'joho_cms_admin_token_v1';
+      var definitions = {
+        autumn: [
+          { key: 'title', label: 'title', required: true },
+          { key: 'date', label: 'date', type: 'date' },
+          { key: 'image', label: 'image url or path', required: true, full: true },
+          { key: 'alt', label: 'image alt text', full: true },
+          { key: 'location', label: 'location' },
+          { key: 'href', label: 'optional link' },
+          { key: 'caption', label: 'caption', type: 'textarea', full: true }
+        ],
+        projects: [
+          { key: 'title', label: 'project title', required: true },
+          { key: 'category', label: 'category', type: 'select', required: true, options: ['engineering', 'graphic-design', 'brand-design', 'ui-ux', 'videography', 'photography', 'production', 'motion-graphics', 'illustration', 'urban-architecture', 'diy-projects', 'misc'] },
+          { key: 'date', label: 'date (yyyy-mm)', placeholder: '2026-09' },
+          { key: 'thumb', label: 'thumbnail url or path' },
+          { key: 'href', label: 'custom page or external link', full: true },
+          { key: 'description', label: 'description', type: 'textarea', full: true }
+        ],
+        bookshelf: [
+          { key: 'title', label: 'book title', required: true },
+          { key: 'author', label: 'author', required: true },
+          { key: 'rating', label: 'rating / 10', type: 'number', step: '0.1' },
+          { key: 'status', label: 'status', type: 'select', options: ['reading', 'finished', 'want-to-read'] },
+          { key: 'year', label: 'publication year', type: 'number' },
+          { key: 'cover', label: 'cover image override' },
+          { key: 'url', label: 'book page override', full: true },
+          { key: 'review', label: 'review', type: 'textarea', full: true }
+        ],
+        music: [
+          { key: 'title', label: 'release title', required: true },
+          { key: 'artist', label: 'artist', required: true },
+          { key: 'album', label: 'album' },
+          { key: 'year', label: 'year', type: 'number' },
+          { key: 'format', label: 'format', type: 'select', options: ['album', 'ep', 'single', 'mixtape', 'playlist'] },
+          { key: 'favorite', label: 'favorite', type: 'checkbox' },
+          { key: 'cover', label: 'cover image url or path', full: true },
+          { key: 'link', label: 'listen link', full: true },
+          { key: 'note', label: 'notes', type: 'textarea', full: true }
+        ]
+      };
+
+      var state = { collection: 'autumn', items: [], editingId: '' };
+      var tokenInput = document.getElementById('admin-token');
+      var listEl = document.getElementById('entry-list');
+      var countEl = document.getElementById('entry-count');
+      var fieldsRoot = document.getElementById('collection-fields');
+      var form = document.getElementById('editor-form');
+      var statusEl = document.getElementById('cms-status');
+      var deleteButton = document.getElementById('delete-button');
+      var slugInput = document.getElementById('entry-slug');
+      var slugWasEdited = false;
+
+      try { tokenInput.value = window.sessionStorage.getItem(TOKEN_KEY) || ''; } catch (_e) { }
+
+      function token() { return tokenInput.value.trim(); }
+
+      function setStatus(message, kind) {
+        statusEl.textContent = message || '';
+        statusEl.className = 'cms-status' + (kind ? ' ' + kind : '');
+      }
+
+      function slugify(value) {
+        return String(value || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      }
+
+      function escapeHtml(value) {
+        return String(value == null ? '' : value)
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      }
+
+      function renderFields(data) {
+        fieldsRoot.innerHTML = '';
+        fieldsRoot.className = 'cms-field full';
+        var inner = document.createElement('div');
+        inner.className = 'cms-form';
+
+        definitions[state.collection].forEach(function (field) {
+          var wrap = document.createElement('div');
+          wrap.className = 'cms-field' + (field.full ? ' full' : '');
+          var label = document.createElement('label');
+          label.setAttribute('for', 'field-' + field.key);
+          label.textContent = field.label;
+          wrap.appendChild(label);
+
+          var input;
+          if (field.type === 'textarea') {
+            input = document.createElement('textarea');
+          } else if (field.type === 'select') {
+            input = document.createElement('select');
+            (field.options || []).forEach(function (optionValue) {
+              var option = document.createElement('option');
+              option.value = optionValue;
+              option.textContent = optionValue.replace(/-/g, ' ');
+              input.appendChild(option);
+            });
+          } else if (field.type === 'checkbox') {
+            input = document.createElement('input');
+            input.type = 'checkbox';
+            label.className = 'cms-checkbox';
+            label.textContent = '';
+            label.appendChild(input);
+            label.appendChild(document.createTextNode(' ' + field.label));
+            wrap.innerHTML = '';
+            wrap.appendChild(label);
+          } else {
+            input = document.createElement('input');
+            input.type = field.type || 'text';
+          }
+
+          input.id = 'field-' + field.key;
+          input.name = field.key;
+          input.dataset.fieldKey = field.key;
+          if (field.required) input.required = true;
+          if (field.placeholder) input.placeholder = field.placeholder;
+          if (field.step) input.step = field.step;
+          if (field.type === 'checkbox') {
+            input.checked = !!(data && data[field.key]);
+          } else {
+            input.value = data && data[field.key] != null ? data[field.key] : '';
+          }
+          if (field.type !== 'checkbox') {
+            wrap.appendChild(input);
+            if (['image', 'thumb', 'cover'].indexOf(field.key) !== -1) {
+              var uploadRow = document.createElement('div');
+              uploadRow.className = 'cms-upload';
+              var fileInput = document.createElement('input');
+              fileInput.type = 'file';
+              fileInput.accept = 'image/jpeg,image/png,image/webp,image/gif,image/avif';
+              fileInput.setAttribute('aria-label', 'choose image to upload');
+              var uploadButton = document.createElement('button');
+              uploadButton.type = 'button';
+              uploadButton.className = 'cms-button';
+              uploadButton.textContent = 'upload';
+              uploadButton.addEventListener('click', async function () {
+                if (!token()) {
+                  setStatus('enter the admin token first.', 'error');
+                  return;
+                }
+                if (!fileInput.files || !fileInput.files[0]) {
+                  setStatus('choose an image first.', 'error');
+                  return;
+                }
+                uploadButton.disabled = true;
+                setStatus('uploading image...');
+                try {
+                  var uploaded = await window.JOHO_CMS.upload(state.collection, fileInput.files[0], token());
+                  input.value = uploaded.url;
+                  fileInput.value = '';
+                  setStatus('image uploaded. save the entry to publish it.', 'success');
+                } catch (error) {
+                  setStatus(error.message, 'error');
+                } finally {
+                  uploadButton.disabled = false;
+                }
+              });
+              uploadRow.appendChild(fileInput);
+              uploadRow.appendChild(uploadButton);
+              wrap.appendChild(uploadRow);
+            }
+          }
+          inner.appendChild(wrap);
+        });
+
+        fieldsRoot.appendChild(inner);
+        var titleField = fieldsRoot.querySelector('[data-field-key="title"]');
+        if (titleField) {
+          titleField.addEventListener('input', function () {
+            if (!state.editingId && !slugWasEdited) slugInput.value = slugify(titleField.value);
+          });
+        }
+      }
+
+      function displayTitle(item) {
+        var data = item.data || {};
+        return data.title || data.name || item.slug;
+      }
+
+      function renderList() {
+        countEl.textContent = state.items.length + (state.items.length === 1 ? ' entry' : ' entries');
+        if (!state.items.length) {
+          listEl.innerHTML = '<div class="cms-empty">no entries in this collection yet.</div>';
+          return;
+        }
+        listEl.innerHTML = state.items.map(function (item) {
+          return '<article class="cms-row' + (item.id === state.editingId ? ' active' : '') + '" data-id="' + escapeHtml(item.id) + '">' +
+            '<div><div class="cms-row-title">' + escapeHtml(displayTitle(item)) + '</div>' +
+            '<div class="cms-row-meta">' + (item.published ? 'published' : 'draft') + ' · ' + escapeHtml(item.slug) + '</div></div>' +
+            '<div class="cms-row-actions"><button class="cms-button" type="button" data-action="edit">edit</button></div>' +
+            '</article>';
+        }).join('');
+      }
+
+      function resetEditor(item) {
+        state.editingId = item ? item.id : '';
+        slugWasEdited = !!item;
+        document.getElementById('editor-title').textContent = item ? 'edit entry' : 'new entry';
+        slugInput.value = item ? item.slug : '';
+        document.getElementById('entry-order').value = item ? item.sortOrder : state.items.length;
+        document.getElementById('entry-published').checked = item ? item.published : true;
+        deleteButton.hidden = !item;
+        renderFields(item ? item.data : {});
+        renderList();
+        setStatus('');
+      }
+
+      async function loadCollection() {
+        if (!token()) {
+          state.items = [];
+          renderList();
+          setStatus('enter the admin token to load drafts.', 'error');
+          return;
+        }
+        setStatus('loading...');
+        try {
+          try { window.sessionStorage.setItem(TOKEN_KEY, token()); } catch (_e) { }
+          state.items = await window.JOHO_CMS.list(state.collection, { drafts: true, token: token(), cache: false });
+          resetEditor(null);
+          setStatus('connected.', 'success');
+        } catch (error) {
+          state.items = [];
+          renderList();
+          setStatus(error.message, 'error');
+        }
+      }
+
+      function switchCollection(collection) {
+        state.collection = collection;
+        state.items = [];
+        state.editingId = '';
+        document.getElementById('collection-title').textContent = collection;
+        document.querySelectorAll('.cms-tab').forEach(function (tab) {
+          tab.classList.toggle('active', tab.dataset.collection === collection);
+        });
+        resetEditor(null);
+        loadCollection();
+      }
+
+      function formData() {
+        var data = {};
+        definitions[state.collection].forEach(function (field) {
+          var input = fieldsRoot.querySelector('[data-field-key="' + field.key + '"]');
+          if (!input) return;
+          if (field.type === 'checkbox') data[field.key] = input.checked;
+          else if (field.type === 'number') data[field.key] = input.value === '' ? null : Number(input.value);
+          else data[field.key] = input.value.trim();
+        });
+        return data;
+      }
+
+      form.addEventListener('submit', async function (event) {
+        event.preventDefault();
+        if (!token()) {
+          setStatus('enter the admin token first.', 'error');
+          return;
+        }
+        setStatus('saving...');
+        try {
+          var saved = await window.JOHO_CMS.save(state.collection, {
+            id: state.editingId || undefined,
+            slug: slugInput.value,
+            sortOrder: Number(document.getElementById('entry-order').value || 0),
+            published: document.getElementById('entry-published').checked,
+            data: formData()
+          }, token());
+          var found = state.items.findIndex(function (item) { return item.id === saved.id; });
+          if (found === -1) state.items.push(saved);
+          else state.items[found] = saved;
+          state.items.sort(function (a, b) { return a.sortOrder - b.sortOrder; });
+          resetEditor(saved);
+          setStatus('saved and published.', 'success');
+        } catch (error) {
+          setStatus(error.message, 'error');
+        }
+      });
+
+      deleteButton.addEventListener('click', async function () {
+        if (!state.editingId) return;
+        var current = state.items.find(function (item) { return item.id === state.editingId; });
+        if (!window.confirm('Delete "' + displayTitle(current || {}) + '"?')) return;
+        setStatus('deleting...');
+        try {
+          await window.JOHO_CMS.remove(state.collection, state.editingId, token());
+          state.items = state.items.filter(function (item) { return item.id !== state.editingId; });
+          resetEditor(null);
+          setStatus('deleted.', 'success');
+        } catch (error) {
+          setStatus(error.message, 'error');
+        }
+      });
+
+      slugInput.addEventListener('input', function () { slugWasEdited = true; });
+      document.getElementById('connect-button').addEventListener('click', loadCollection);
+      document.getElementById('new-button').addEventListener('click', function () { resetEditor(null); });
+      listEl.addEventListener('click', function (event) {
+        var row = event.target.closest('.cms-row');
+        if (!row || !event.target.closest('[data-action="edit"]')) return;
+        var item = state.items.find(function (entry) { return entry.id === row.dataset.id; });
+        if (item) resetEditor(item);
+      });
+      document.querySelector('.cms-tabs').addEventListener('click', function (event) {
+        var tab = event.target.closest('[data-collection]');
+        if (tab) switchCollection(tab.dataset.collection);
+      });
+
+      resetEditor(null);
+      if (token()) loadCollection();
+    })();
+  </script>
+</body>
+
+</html>

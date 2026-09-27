@@ -77,3 +77,20 @@ ON scrambled_links(source_id, target_id);
 
 CREATE INDEX IF NOT EXISTS idx_scrambled_nodes_updated_at
 ON scrambled_nodes(updated_at DESC);
+
+CREATE TABLE IF NOT EXISTS content_items (
+  id TEXT PRIMARY KEY,
+  collection TEXT NOT NULL,
+  slug TEXT NOT NULL,
+  data_json TEXT NOT NULL,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  published INTEGER NOT NULL DEFAULT 1,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_content_items_collection_slug
+ON content_items(collection, slug);
+
+CREATE INDEX IF NOT EXISTS idx_content_items_collection_order
+ON content_items(collection, published, sort_order, updated_at DESC);

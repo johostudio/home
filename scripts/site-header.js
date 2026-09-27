@@ -14,7 +14,7 @@
   else if (path.indexOf('gallery') !== -1 || path.indexOf('writeups') !== -1) cur = 'gallery';
   else if (path.indexOf('about') !== -1) cur = 'about';
   else if (path.indexOf('vancouver') !== -1 || path.indexOf('project') !== -1) cur = 'vancouver';
-  else if (path.indexOf('hoshii') !== -1) cur = 'hoshii';
+  else if (path.indexOf('hoshii') !== -1 || path.indexOf('music-library') !== -1) cur = 'hoshii';
   else if (path.indexOf('resume') !== -1) cur = 'resume';
   else if (isArchivePage) cur = 'archives';
   var galleryFilterStorageKey = 'jh_gallery_filter';

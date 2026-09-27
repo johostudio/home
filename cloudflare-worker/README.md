@@ -7,6 +7,7 @@ This worker powers:
 - Atlas saved cities + stamps (`/atlas-points`)
 - Atlas stamp image uploads to R2 (`/atlas-stamp-upload`)
 - Photography client gallery database + uploads (`/client-photos`)
+- Portfolio CMS collections for autumn, projects, bookshelf, and music (`/content/:collection`)
 
 ## 1) Prereqs
 
@@ -38,6 +39,7 @@ Edit `cloudflare-worker/wrangler.toml`:
 - Set `OPEN_LIBRARY_QUERY` for bookshelf page (Open Library search query)
 - Set `ATLAS_ADMIN_TOKEN` or `ATLAS_ADMIN_PASSWORD` (required for atlas entry deletes from UI)
 - Set `PHOTOGRAPHY_ADMIN_TOKEN` (required for photography uploads/deletes from admin page)
+- Set `CMS_ADMIN_TOKEN` (recommended for the studio CMS; falls back to the existing photography/atlas token)
 
 If you do not have a custom domain for R2 yet, create a public bucket domain in Cloudflare and use that URL.
 
@@ -95,6 +97,13 @@ This URL is consumed by both:
 - `POST /client-photos/batch` -> import existing photo URLs + metadata in bulk (requires `x-admin-token`)
 - `PUT /client-photos/:id` -> edit existing photo metadata (date/location/url) (requires `x-admin-token`)
 - `DELETE /client-photos/:id` -> delete a client photo (requires `x-admin-token`)
+- `GET /content/:collection` -> published CMS entries (`autumn`, `projects`, `bookshelf`, or `music`)
+- `GET /content/:collection?drafts=1` -> all entries (requires `x-admin-token`)
+- `POST /content/:collection` -> create or upsert by slug (requires `x-admin-token`)
+- `POST /content/:collection/batch` -> batch upsert (requires `x-admin-token`)
+- `POST /content/:collection/upload` -> upload a CMS image to R2 (requires `x-admin-token`)
+- `PUT /content/:collection/:id` -> edit an entry (requires `x-admin-token`)
+- `DELETE /content/:collection/:id` -> delete an entry (requires `x-admin-token`)
 
 ## Notes
 
