@@ -225,6 +225,8 @@
       font-size: 11px;
     }
 
+    .cms-inline-action { display: flex; justify-content: flex-end; margin-top: 2px; }
+
     .cms-checkbox {
       display: inline-flex;
       align-items: center;
@@ -254,7 +256,7 @@
     @media (max-width: 900px) {
       .cms-shell { grid-template-columns: 1fr; }
       .cms-sidebar { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); padding: 18px; }
-      .cms-tabs { grid-template-columns: repeat(4, 1fr); }
+      .cms-tabs { grid-template-columns: repeat(3, 1fr); }
       .cms-tab { text-align: center; padding: 9px 5px; }
       .cms-sidebar-footer { display: none; }
       .cms-main { padding: 20px; }
@@ -285,12 +287,16 @@
         <button class="cms-tab" type="button" data-collection="projects">projects</button>
         <button class="cms-tab" type="button" data-collection="bookshelf">bookshelf</button>
         <button class="cms-tab" type="button" data-collection="music">music</button>
+        <button class="cms-tab" type="button" data-collection="floating-icons">floating icons</button>
+        <button class="cms-tab" type="button" data-collection="resume">resume</button>
       </nav>
       <div class="cms-sidebar-footer">
         <a href="autumn.html">view autumn</a>
         <a href="gallery.html">view projects</a>
         <a href="bookshelf.html">view bookshelf</a>
         <a href="music-library.html">view music library</a>
+        <a href="about.html">view floating icons</a>
+        <a href="resume-editor.html">open resume editor</a>
       </div>
     </aside>
 
@@ -389,8 +395,24 @@
           { key: 'format', label: 'format', type: 'select', options: ['album', 'ep', 'single', 'mixtape', 'playlist'] },
           { key: 'favorite', label: 'favorite', type: 'checkbox' },
           { key: 'cover', label: 'cover image url or path', full: true },
-          { key: 'link', label: 'listen link', full: true },
+          { key: 'link', label: 'spotify / last.fm release link', full: true },
           { key: 'note', label: 'notes', type: 'textarea', full: true }
+        ],
+        'floating-icons': [
+          { key: 'title', label: 'icon name', required: true },
+          { key: 'page', label: 'page', type: 'select', required: true, options: ['about', 'ihsoh'] },
+          { key: 'image', label: 'image url or path', required: true, full: true },
+          { key: 'alt', label: 'image alt text', full: true },
+          { key: 'caption', label: 'hover caption', type: 'textarea', full: true },
+          { key: 'x', label: 'x position', type: 'number' },
+          { key: 'y', label: 'y position', type: 'number' },
+          { key: 'size', label: 'size', type: 'number' },
+          { key: 'rotation', label: 'rotation', type: 'number' },
+          { key: 'spawnBias', label: 'mobile spawn bias', type: 'select', options: ['', 'left-top', 'right-top', 'left-bottom', 'right-bottom'] }
+        ],
+        resume: [
+          { key: 'title', label: 'page name', required: true },
+          { key: 'html', label: 'resume content html', type: 'textarea', required: true, full: true }
         ]
       };
 
@@ -422,6 +444,33 @@
         return String(value == null ? '' : value)
           .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
           .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      }
+
+      function applyMusicMetadata(metadata) {
+        var values = {
+          cover: metadata.cover,
+          title: metadata.title,
+          artist: metadata.artist,
+          year: metadata.year,
+          format: metadata.format
+        };
+        Object.keys(values).forEach(function (key) {
+          var input = fieldsRoot.querySelector('[data-field-key="' + key + '"]');
+          if (!input || values[key] == null || values[key] === '') return;
+          if (key === 'cover' || !String(input.value || '').trim()) input.value = values[key];
+        });
+      }
+
+      async function fetchMusicMetadata() {
+        if (!token()) throw new Error('enter the admin token first.');
+        var linkInput = fieldsRoot.querySelector('[data-field-key="link"]');
+        var sourceUrl = linkInput ? linkInput.value.trim() : '';
+        if (!sourceUrl) throw new Error('paste a Spotify or Last.fm release link first.');
+        setStatus('fetching release artwork...');
+        var metadata = await window.JOHO_CMS.lookupMusic(sourceUrl, token());
+        applyMusicMetadata(metadata);
+        setStatus('artwork linked from ' + metadata.source + '.', 'success');
+        return metadata;
       }
 
       function renderFields(data) {
@@ -512,6 +561,27 @@
               uploadRow.appendChild(fileInput);
               uploadRow.appendChild(uploadButton);
               wrap.appendChild(uploadRow);
+            }
+            if (state.collection === 'music' && field.key === 'link') {
+              var lookupRow = document.createElement('div');
+              lookupRow.className = 'cms-inline-action';
+              var lookupButton = document.createElement('button');
+              lookupButton.type = 'button';
+              lookupButton.className = 'cms-button';
+              lookupButton.textContent = 'fetch artwork';
+              lookupButton.title = 'Fetch release artwork and metadata';
+              lookupButton.addEventListener('click', async function () {
+                lookupButton.disabled = true;
+                try {
+                  await fetchMusicMetadata();
+                } catch (error) {
+                  setStatus(error.message, 'error');
+                } finally {
+                  lookupButton.disabled = false;
+                }
+              });
+              lookupRow.appendChild(lookupButton);
+              wrap.appendChild(lookupRow);
             }
           }
           inner.appendChild(wrap);
@@ -611,6 +681,10 @@
         }
         setStatus('saving...');
         try {
+          if (state.collection === 'music') {
+            var musicData = formData();
+            if (musicData.link && !musicData.cover) await fetchMusicMetadata();
+          }
           var saved = await window.JOHO_CMS.save(state.collection, {
             id: state.editingId || undefined,
             slug: slugInput.value,

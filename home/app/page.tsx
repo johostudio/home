@@ -69,7 +69,7 @@ export default function Home() {
           {/* Contact */}
           <section className="w-full text-center mb-16">
             <h2 className="text-2xl mb-4">find me :</h2>
-            <p><a style={{ color: '#c084fc' }} href="mailto:96joho@gmail.com">96joho@gmail.com</a></p>
+            <p><a style={{ color: '#c084fc' }} href="mailto:home@joho.studio">home@joho.studio</a></p>
           </section>
         </main>
 

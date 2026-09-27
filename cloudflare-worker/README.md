@@ -7,7 +7,8 @@ This worker powers:
 - Atlas saved cities + stamps (`/atlas-points`)
 - Atlas stamp image uploads to R2 (`/atlas-stamp-upload`)
 - Photography client gallery database + uploads (`/client-photos`)
-- Portfolio CMS collections for autumn, projects, bookshelf, and music (`/content/:collection`)
+- Portfolio CMS collections for autumn, projects, bookshelf, music, floating icons, and resume content (`/content/:collection`)
+- Spotify/Last.fm release artwork lookup for music entries (`/music-lookup`)
 
 ## 1) Prereqs
 
@@ -63,6 +64,14 @@ Seed the music library with Spotify artwork and release links:
 wrangler d1 execute database1 --file=seeds/music-library.sql
 ```
 
+Seed all existing floating icons and the current resume:
+
+```bash
+wrangler d1 execute database1 --file=seeds/floating-icons.sql
+node ../scripts/build-resume-seed.mjs
+wrangler d1 execute database1 --file=seeds/resume.sql
+```
+
 ## 5) Deploy worker
 
 ```bash
@@ -88,6 +97,7 @@ This URL is consumed by both:
 - `darkroom.html` upload/gallery endpoints
 - `projects/photography-client.html` gallery read endpoint (`/client-photos`)
 - `projects/photography-client-admin.html` admin upload/delete endpoint (`/client-photos`)
+- `studio-admin.html` collection editor and `resume-editor.html` visual resume editor
 
 ## 7) API overview
 
@@ -109,7 +119,8 @@ This URL is consumed by both:
 - `POST /client-photos/batch` -> import existing photo URLs + metadata in bulk (requires `x-admin-token`)
 - `PUT /client-photos/:id` -> edit existing photo metadata (date/location/url) (requires `x-admin-token`)
 - `DELETE /client-photos/:id` -> delete a client photo (requires `x-admin-token`)
-- `GET /content/:collection` -> published CMS entries (`autumn`, `projects`, `bookshelf`, or `music`)
+- `POST /music-lookup` -> fetch release artwork/metadata from an approved Spotify or Last.fm URL (requires `x-admin-token`)
+- `GET /content/:collection` -> published CMS entries (`autumn`, `projects`, `bookshelf`, `music`, `floating-icons`, or `resume`)
 - `GET /content/:collection?drafts=1` -> all entries (requires `x-admin-token`)
 - `POST /content/:collection` -> create or upsert by slug (requires `x-admin-token`)
 - `POST /content/:collection/batch` -> batch upsert (requires `x-admin-token`)

@@ -103,6 +103,17 @@
     });
   }
 
+  function lookupMusic(url, token) {
+    return request('/music-lookup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-token': token || ''
+      },
+      body: JSON.stringify({ url: url || '' })
+    });
+  }
+
   function flatten(items) {
     return (Array.isArray(items) ? items : []).map(function (item) {
       return Object.assign({
@@ -120,6 +131,7 @@
     remove: remove,
     batch: batch,
     upload: upload,
+    lookupMusic: lookupMusic,
     flatten: flatten
   };
 })();

@@ -285,7 +285,7 @@
   <!-- Self-injecting site header -->
   <script src="scripts/site-header.js"></script>
 
-  <div class="sticker-layer" data-sticker-layer data-safe-bottom="0">
+  <div class="sticker-layer" id="about-floating-icons" data-sticker-layer data-safe-bottom="0">
     <button class="sticker" type="button" data-sticker data-size="148" data-x="18" data-y="18" data-rotation="-8"
       aria-label="snoopy sticker">
       <img src="https://upload.wikimedia.org/wikipedia/en/5/53/Snoopy_Peanuts.png" alt="Snoopy sticker" loading="lazy">
@@ -425,6 +425,18 @@
     </div>
   </div>
 
+  <script src="scripts/cloudflare-config.js"></script>
+  <script src="scripts/content-api.js"></script>
+  <script src="scripts/floating-icons-cms.js"></script>
+  <script>
+    window.JOHO_FLOATING_ICONS_READY = window.JOHO_FLOATING_ICONS.load({
+      page: 'about',
+      layer: '#about-floating-icons',
+      captionClass: 'sticker-desc-label',
+      defaultSize: 120
+    });
+  </script>
+
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
 
@@ -479,7 +491,9 @@
     onerror="this.onerror=null;this.src='https://unpkg.com/interactjs/dist/interact.min.js';"></script>
   <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"
     onerror="this.onerror=null;this.src='https://unpkg.com/animejs@3.2.1/lib/anime.min.js';"></script>
-  <script src="scripts/stickers.js"></script>
+  <script>
+    window.JOHO_FLOATING_ICONS.loadStickerEngine(window.JOHO_FLOATING_ICONS_READY, 'scripts/stickers.js');
+  </script>
   <script src="scripts/page-transitions.js"></script>
   <script src="scripts/dot-grid.js"></script>
   <script src="scripts/clocks.js"></script>

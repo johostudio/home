@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>resume editor</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <style>
+    :root {
+      --bg: #0b0d10;
+      --panel: #12151a;
+      --line: #2b3038;
+      --text: #eef1f5;
+      --muted: #8d96a3;
+      --accent: #b7e4c7;
+      --danger: #ff8b8b;
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); }
+
+    body {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      letter-spacing: 0;
+      overflow: hidden;
+    }
+
+    button,
+    input { font: inherit; letter-spacing: 0; }
+
+    .editor-shell { min-height: 100vh; display: grid; grid-template-rows: auto minmax(0, 1fr); }
+
+    .editor-toolbar {
+      position: relative;
+      z-index: 2;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    .editor-brand {
+      margin-right: 8px;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .editor-token {
+      width: min(240px, 26vw);
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: #0c0e12;
+      color: var(--text);
+      padding: 7px 10px;
+      outline: none;
+    }
+
+    .editor-token:focus { border-color: var(--accent); }
+
+    .editor-button {
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: #191d23;
+      color: var(--text);
+      padding: 7px 10px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .editor-button:hover { border-color: #515966; background: #20252d; }
+    .editor-button.primary { margin-left: auto; background: var(--accent); border-color: var(--accent); color: #102018; }
+    .editor-button:disabled { cursor: wait; opacity: 0.55; }
+
+    .editor-status {
+      min-width: 100px;
+      color: var(--muted);
+      font-size: 11px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .editor-status.success { color: var(--accent); }
+    .editor-status.error { color: var(--danger); }
+
+    .resume-frame { width: 100%; height: 100%; border: 0; background: #071021; }
+
+    @media (max-width: 850px) {
+      body { overflow: auto; }
+      .editor-toolbar { flex-wrap: wrap; }
+      .editor-token { width: min(100%, 260px); }
+      .editor-button.primary { margin-left: 0; }
+      .editor-status { order: 3; width: 100%; }
+      .resume-frame { min-height: calc(100vh - 100px); }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="editor-shell">
+    <header class="editor-toolbar">
+      <a class="editor-brand" href="studio-admin.html">resume editor</a>
+      <input class="editor-token" id="admin-token" type="password" placeholder="CMS admin token" autocomplete="current-password">
+      <button class="editor-button" id="connect-button" type="button">connect</button>
+      <button class="editor-button" id="undo-button" type="button">undo</button>
+      <button class="editor-button" id="link-button" type="button">edit selected link</button>
+      <button class="editor-button" id="image-button" type="button">edit selected image</button>
+      <span class="editor-status" id="editor-status" role="status">loading preview...</span>
+      <button class="editor-button primary" id="save-button" type="button">save resume</button>
+    </header>
+    <iframe class="resume-frame" id="resume-frame" src="resume.html?editor=1" title="Editable resume preview"></iframe>
+  </main>
+
+  <script src="scripts/cloudflare-config.js"></script>
+  <script src="scripts/content-api.js"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      var TOKEN_KEY = 'joho_cms_admin_token_v1';
+      var frame = document.getElementById('resume-frame');
+      var tokenInput = document.getElementById('admin-token');
+      var status = document.getElementById('editor-status');
+      var saveButton = document.getElementById('save-button');
+      var record = null;
+      var selectedElement = null;
+      var ready = false;
+
+      try { tokenInput.value = window.sessionStorage.getItem(TOKEN_KEY) || ''; } catch (_e) { }
+
+      function token() { return tokenInput.value.trim(); }
+
+      function setStatus(message, kind) {
+        status.textContent = message || '';
+        status.className = 'editor-status' + (kind ? ' ' + kind : '');
+      }
+
+      function resumeDocument() {
+        return frame.contentDocument || (frame.contentWindow && frame.contentWindow.document);
+      }
+
+      function resumeContainer() {
+        var doc = resumeDocument();
+        return doc && doc.querySelector('#resume-content .resume-container');
+      }
+
+      function clearSelection() {
+        if (selectedElement) selectedElement.classList.remove('resume-editor-selected');
+        selectedElement = null;
+      }
+
+      function selectElement(element) {
+        clearSelection();
+        selectedElement = element;
+        if (selectedElement) selectedElement.classList.add('resume-editor-selected');
+      }
+
+      function prepareFrame() {
+        var doc = resumeDocument();
+        var container = resumeContainer();
+        if (!doc || !container) return;
+        var gate = doc.getElementById('password-gate');
+        var content = doc.getElementById('resume-content');
+        if (gate) gate.style.display = 'none';
+        if (content) content.classList.add('unlocked');
+        container.contentEditable = 'true';
+        container.spellcheck = true;
+
+        if (!doc.getElementById('resume-editor-style')) {
+          var style = doc.createElement('style');
+          style.id = 'resume-editor-style';
+          style.textContent =
+            '.resume-container[contenteditable="true"]{outline:none;padding-bottom:80px}' +
+            '.resume-container[contenteditable="true"] .resume-section:hover{outline:1px dashed rgba(183,228,199,.36);outline-offset:7px}' +
+            '.resume-editor-selected{outline:2px solid #b7e4c7!important;outline-offset:4px!important}';
+          doc.head.appendChild(style);
+        }
+
+        if (!doc.documentElement.dataset.resumeEditorBound) {
+          doc.documentElement.dataset.resumeEditorBound = 'true';
+          doc.addEventListener('click', function (event) {
+            var target = event.target.closest('a, img');
+            if (target) {
+              event.preventDefault();
+              event.stopPropagation();
+              selectElement(target);
+            } else {
+              clearSelection();
+            }
+          }, true);
+          doc.addEventListener('input', function () { setStatus('unsaved changes'); });
+        }
+
+        ready = true;
+        setStatus(token() ? 'ready to connect' : 'preview ready');
+      }
+
+      async function loadRecord() {
+        if (!token()) {
+          setStatus('enter the CMS admin token', 'error');
+          return;
+        }
+        try {
+          window.sessionStorage.setItem(TOKEN_KEY, token());
+        } catch (_e) { }
+        setStatus('loading CMS resume...');
+        var records = await window.JOHO_CMS.list('resume', { drafts: true, token: token(), cache: false });
+        record = records.find(function (item) { return item.slug === 'page'; }) || null;
+        if (record && record.data && record.data.html) {
+          var container = resumeContainer();
+          if (container) container.innerHTML = record.data.html;
+        }
+        prepareFrame();
+        setStatus(record ? 'connected' : 'connected - using page content', 'success');
+      }
+
+      function selected(tagName) {
+        if (!selectedElement || selectedElement.tagName.toLowerCase() !== tagName) return null;
+        return selectedElement;
+      }
+
+      document.getElementById('connect-button').addEventListener('click', function () {
+        loadRecord().catch(function (error) { setStatus(error.message, 'error'); });
+      });
+
+      document.getElementById('undo-button').addEventListener('click', function () {
+        var doc = resumeDocument();
+        if (doc) doc.execCommand('undo');
+        setStatus('unsaved changes');
+      });
+
+      document.getElementById('link-button').addEventListener('click', function () {
+        var link = selected('a');
+        if (!link) {
+          setStatus('select a link in the resume first', 'error');
+          return;
+        }
+        var next = window.prompt('link url', link.getAttribute('href') || '');
+        if (next !== null && next.trim()) {
+          link.setAttribute('href', next.trim());
+          setStatus('unsaved changes');
+        }
+      });
+
+      document.getElementById('image-button').addEventListener('click', function () {
+        var image = selected('img');
+        if (!image) {
+          setStatus('select an image in the resume first', 'error');
+          return;
+        }
+        var next = window.prompt('image url or path', image.getAttribute('src') || '');
+        if (next !== null && next.trim()) {
+          image.setAttribute('src', next.trim());
+          setStatus('unsaved changes');
+        }
+      });
+
+      saveButton.addEventListener('click', async function () {
+        if (!ready || !resumeContainer()) {
+          setStatus('resume preview is not ready', 'error');
+          return;
+        }
+        if (!token()) {
+          setStatus('enter the CMS admin token', 'error');
+          return;
+        }
+        saveButton.disabled = true;
+        setStatus('saving resume...');
+        try {
+          var clone = resumeContainer().cloneNode(true);
+          clone.removeAttribute('contenteditable');
+          clone.querySelectorAll('.resume-editor-selected').forEach(function (item) {
+            item.classList.remove('resume-editor-selected');
+          });
+          record = await window.JOHO_CMS.save('resume', {
+            id: record ? record.id : undefined,
+            slug: 'page',
+            sortOrder: 0,
+            published: true,
+            data: { title: 'Resume page', html: clone.innerHTML }
+          }, token());
+          clearSelection();
+          setStatus('saved to the live resume', 'success');
+        } catch (error) {
+          setStatus(error.message, 'error');
+        } finally {
+          saveButton.disabled = false;
+        }
+      });
+
+      frame.addEventListener('load', function () {
+        var frameReady = frame.contentWindow && frame.contentWindow.JOHO_RESUME_READY;
+        Promise.resolve(frameReady).catch(function () { return false; }).then(function () {
+          prepareFrame();
+          if (token()) return loadRecord();
+        }).catch(function (error) {
+          setStatus(error.message, 'error');
+        });
+      });
+    })();
+  </script>
+</body>
+
+</html>

@@ -823,7 +823,7 @@ async function deleteScrambledLink(id, request, env) {
   return json({ ok: true, id: id });
 }
 
-var CMS_COLLECTIONS = ['autumn', 'projects', 'bookshelf', 'music'];
+var CMS_COLLECTIONS = ['autumn', 'projects', 'bookshelf', 'music', 'floating-icons', 'resume'];
 
 function safeCmsCollection(value) {
   var collection = safeText(value, 40).toLowerCase();
@@ -858,6 +858,148 @@ function safeCmsData(value) {
   }
   if (!encoded || encoded.length > 50000) return null;
   return encoded;
+}
+
+function decodeMusicMeta(value) {
+  return String(value || '')
+    .replace(/&amp;/gi, '&')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&#x27;/gi, "'")
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .trim();
+}
+
+function musicMetaContent(html, key) {
+  var tags = String(html || '').match(/<meta\b[^>]*>/gi) || [];
+  for (var i = 0; i < tags.length; i += 1) {
+    var nameMatch = tags[i].match(/\b(?:property|name)=["']([^"']+)["']/i);
+    if (!nameMatch || nameMatch[1].toLowerCase() !== key.toLowerCase()) continue;
+    var contentMatch = tags[i].match(/\bcontent=["']([^"']*)["']/i);
+    if (contentMatch) return decodeMusicMeta(contentMatch[1]);
+  }
+  return '';
+}
+
+function normalizeSpotifyCover(value) {
+  var url = safeText(value, 1200);
+  var marker = '/image/';
+  var markerIndex = url.indexOf(marker);
+  if (markerIndex === -1) return url;
+  var imageId = url.slice(markerIndex + marker.length).split(/[?#]/)[0];
+  imageId = imageId.replace(/^ab67616d00001e02/, 'ab67616d0000b273');
+  return imageId ? 'https://i.scdn.co/image/' + imageId : url;
+}
+
+function safeMusicSourceUrl(value) {
+  var raw = safeText(value, 1200);
+  if (!raw) return null;
+  var parsed;
+  try {
+    parsed = new URL(raw);
+  } catch (_e) {
+    return null;
+  }
+  if (parsed.protocol !== 'https:') return null;
+  var host = parsed.hostname.toLowerCase().replace(/^www\./, '');
+  var isSpotify = host === 'open.spotify.com';
+  var isLastFm = host === 'last.fm' && parsed.pathname.indexOf('/music/') === 0;
+  if (!isSpotify && !isLastFm) return null;
+  return { url: parsed.toString(), source: isSpotify ? 'spotify' : 'lastfm' };
+}
+
+async function readMusicMetadata(value) {
+  var source = safeMusicSourceUrl(value);
+  if (!source) throw new Error('use a Spotify or Last.fm release link');
+
+  var result = {
+    source: source.source,
+    link: source.url,
+    title: '',
+    artist: '',
+    cover: '',
+    year: null,
+    format: ''
+  };
+
+  if (source.source === 'spotify') {
+    try {
+      var oembedResponse = await fetch(
+        'https://open.spotify.com/oembed?url=' + encodeURIComponent(source.url),
+        { headers: { accept: 'application/json' } }
+      );
+      if (oembedResponse.ok) {
+        var oembed = await oembedResponse.json();
+        result.title = safeText(oembed && oembed.title, 200);
+        result.cover = normalizeSpotifyCover(oembed && oembed.thumbnail_url);
+      }
+    } catch (_e) { }
+  }
+
+  try {
+    var pageResponse = await fetch(source.url, {
+      headers: {
+        accept: 'text/html,application/xhtml+xml',
+        'user-agent': 'Mozilla/5.0 (compatible; joho-studio-cms/1.0)'
+      }
+    });
+    if (pageResponse.ok) {
+      var html = await pageResponse.text();
+      var pageImage = musicMetaContent(html, 'og:image');
+      var pageTitle = musicMetaContent(html, 'og:title');
+      var description = musicMetaContent(html, 'og:description');
+      if (pageImage) result.cover = source.source === 'spotify' ? normalizeSpotifyCover(pageImage) : pageImage;
+      if (!result.title && pageTitle) {
+        result.title = pageTitle.replace(/\s+[\-|\u2013]\s+(Album|EP|Song|Playlist).*$/i, '').trim();
+      }
+
+      var parts = description.split(/\s*\u00b7\s*/).filter(Boolean);
+      if (parts.length) result.artist = safeText(parts[0], 200);
+      for (var partIndex = 0; partIndex < parts.length; partIndex += 1) {
+        var lowerPart = parts[partIndex].toLowerCase();
+        if (['album', 'ep', 'single', 'mixtape', 'playlist'].indexOf(lowerPart) !== -1) {
+          result.format = lowerPart;
+        }
+        var yearMatch = parts[partIndex].match(/\b(19|20)\d{2}\b/);
+        if (yearMatch) result.year = Number(yearMatch[0]);
+      }
+    }
+  } catch (_e) { }
+
+  if (!result.cover) throw new Error('artwork was not found for that release');
+  return result;
+}
+
+async function enrichCmsData(collection, value) {
+  if (collection !== 'music' || !value || typeof value !== 'object' || Array.isArray(value)) return value;
+  var data = Object.assign({}, value);
+  if (safeText(data.cover, 1200) || !safeText(data.link, 1200)) return data;
+  try {
+    var metadata = await readMusicMetadata(data.link);
+    data.cover = metadata.cover;
+    if (!safeText(data.title, 200) && metadata.title) data.title = metadata.title;
+    if (!safeText(data.artist, 200) && metadata.artist) data.artist = metadata.artist;
+    if (!safeText(data.format, 40) && metadata.format) data.format = metadata.format;
+    if (!data.year && metadata.year) data.year = metadata.year;
+  } catch (_e) { }
+  return data;
+}
+
+async function lookupMusicMetadata(request, env) {
+  if (!hasCmsAdminAccess(request, env)) {
+    return json({ error: 'admin token required' }, 403);
+  }
+  var body;
+  try {
+    body = await request.json();
+  } catch (_e) {
+    return json({ error: 'invalid json body' }, 400);
+  }
+  try {
+    return json(await readMusicMetadata(body && body.url));
+  } catch (error) {
+    return json({ error: error && error.message ? error.message : 'music lookup failed' }, 400);
+  }
 }
 
 function cmsRow(row) {
@@ -904,7 +1046,8 @@ async function createContentItem(collection, request, env) {
   }
 
   var slug = safeCmsSlug(body && body.slug);
-  var dataJson = safeCmsData(body && body.data);
+  var enrichedData = await enrichCmsData(collection, body && body.data);
+  var dataJson = safeCmsData(enrichedData);
   if (!slug || !dataJson) {
     return json({ error: 'slug and data object are required' }, 400);
   }
@@ -946,7 +1089,8 @@ async function updateContentItem(collection, id, request, env) {
   }
 
   var slug = safeCmsSlug(body && typeof body.slug !== 'undefined' ? body.slug : existing.slug);
-  var dataJson = typeof body.data === 'undefined' ? existing.data_json : safeCmsData(body.data);
+  var updatedData = typeof body.data === 'undefined' ? null : await enrichCmsData(collection, body.data);
+  var dataJson = typeof body.data === 'undefined' ? existing.data_json : safeCmsData(updatedData);
   if (!slug || !dataJson) {
     return json({ error: 'slug and data object are required' }, 400);
   }
@@ -995,7 +1139,8 @@ async function batchContentItems(collection, request, env) {
   for (var i = 0; i < items.length; i += 1) {
     var item = items[i] || {};
     var slug = safeCmsSlug(item.slug);
-    var dataJson = safeCmsData(item.data);
+    var enrichedData = await enrichCmsData(collection, item.data);
+    var dataJson = safeCmsData(enrichedData);
     if (!slug || !dataJson) {
       return json({ error: 'every item needs a valid slug and data object' }, 400);
     }
@@ -1071,6 +1216,10 @@ export default {
 
     if (request.method === 'GET' && path === '/public-config') {
       return publicConfig(env);
+    }
+
+    if (request.method === 'POST' && path === '/music-lookup') {
+      return lookupMusicMetadata(request, env);
     }
 
     if (path.startsWith('/content/')) {

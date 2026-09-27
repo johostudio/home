@@ -448,6 +448,8 @@
 
   <script src="scripts/cloudflare-config.js"></script>
   <script src="scripts/ihsoh-music-data.js"></script>
+  <script src="scripts/content-api.js"></script>
+  <script src="scripts/floating-icons-cms.js"></script>
   <script>
     (function () {
       var s = document.createElement('script');
@@ -504,6 +506,13 @@
         layer.appendChild(button);
       });
     })();
+
+    window.JOHO_FLOATING_ICONS_READY = window.JOHO_FLOATING_ICONS.load({
+      page: 'ihsoh',
+      layer: '#ihsoh-album-stickers',
+      captionClass: 'sticker-album-label',
+      defaultSize: 184
+    });
 
     (function () {
       var dial = document.getElementById('hsoh-dial');
@@ -912,7 +921,9 @@
     onerror="this.onerror=null;this.src='https://unpkg.com/interactjs/dist/interact.min.js';"></script>
   <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"
     onerror="this.onerror=null;this.src='https://unpkg.com/animejs@3.2.1/lib/anime.min.js';"></script>
-  <script src="scripts/stickers.js"></script>
+  <script>
+    window.JOHO_FLOATING_ICONS.loadStickerEngine(window.JOHO_FLOATING_ICONS_READY, 'scripts/stickers.js');
+  </script>
   <script src="scripts/page-transitions.js"></script>
   <script src="scripts/dot-grid.js"></script>
   <script src="scripts/clocks.js"></script>

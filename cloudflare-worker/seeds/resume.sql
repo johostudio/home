@@ -1,257 +1,11 @@
-<!doctype html>
-<html lang="en">
-
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Resume — joho's studio</title>
-  <link rel="icon" type="image/x-icon" href="favicon.ico" />
-  <link rel="stylesheet" href="styles/tailwind-prod.css">
-  <link rel="stylesheet" href="styles/dot-grid.css">
-  <link rel="stylesheet" href="styles/clocks.css">
-  <style>
-    /* Resume-specific styles */
-    body {
-      font-family: Helvetica, Arial, sans-serif;
-    }
-
-    /* Password gate */
-    #password-gate {
-      position: fixed;
-      inset: 0;
-      z-index: 50;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding-bottom: 20vh;
-      background: transparent;
-    }
-
-    #password-gate.hidden {
-      display: none;
-    }
-
-    #password-gate input {
-      background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 6px;
-      padding: 10px 16px;
-      color: #e6eef6;
-      font-family: Helvetica, Arial, sans-serif;
-      font-size: 15px;
-      width: 280px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    #password-gate input:focus {
-      border-color: #c084fc;
-    }
-
-    #password-gate input::placeholder {
-      color: rgba(255, 255, 255, 0.3);
-    }
-
-    #pw-error {
-      color: #f87171;
-      font-size: 14px;
-      margin-top: 10px;
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-
-    #pw-error.visible {
-      opacity: 1;
-    }
-
-    /* Resume content */
-    #resume-content {
-      display: none;
-    }
-
-    #resume-content.unlocked {
-      display: block;
-    }
-
-    /* Section styles inspired by inwoo.ca, adapted to dark theme */
-    .resume-container {
-      max-width: 600px;
-      width: 100%;
-      margin: 0 auto;
-      padding: 40px 24px 80px;
-    }
-
-    .resume-section {
-      padding: 20px 0;
-    }
-
-    .resume-section .section-title {
-      font-size: 17px;
-      font-weight: 700;
-      color: #e6eef6;
-      margin-bottom: 16px;
-      letter-spacing: 0.02em;
-    }
-
-    .resume-section .entry {
-      margin-bottom: 20px;
-      padding-left: 16px;
-    }
-
-    .resume-section .entry .entry-title {
-      font-size: 15px;
-      color: #e6eef6;
-      font-weight: 400;
-    }
-
-    .resume-section .entry .entry-title a {
-      color: #c084fc;
-      text-decoration: none;
-    }
-
-    .resume-section .entry .entry-title a:hover {
-      text-decoration: underline;
-    }
-
-    .resume-section .entry .entry-meta {
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.45);
-      margin-top: 4px;
-    }
-
-    .resume-section .entry .entry-desc {
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.5);
-      font-style: italic;
-      margin-top: 6px;
-      line-height: 1.5;
-    }
-
-    /* Hero */
-    .resume-hero h1 {
-      font-size: 36px;
-      font-weight: 700;
-      color: #e6eef6;
-      margin-bottom: 8px;
-      letter-spacing: -0.04em;
-    }
-
-    .resume-hero .hero-icons {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin-left: 4px;
-    }
-
-    .resume-icon-link {
-      color: rgba(255, 255, 255, 0.35);
-      transition: all 0.18s;
-      text-decoration: none;
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-    }
-
-    .resume-icon-link:hover {
-      color: #c084fc;
-    }
-
-    .resume-icon-link::after {
-      content: attr(data-tip);
-      position: absolute;
-      bottom: calc(100% + 6px);
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(7, 16, 33, 0.93);
-      color: #e6eef6;
-      font-size: 10px;
-      white-space: nowrap;
-      padding: 4px 8px;
-      border-radius: 5px;
-      border: 1px solid rgba(192, 132, 252, 0.15);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.15s;
-      font-weight: 400;
-      letter-spacing: 0.02em;
-    }
-
-    .resume-icon-link:hover::after {
-      opacity: 1;
-    }
-
-    .resume-hero .meta {
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.4);
-    }
-
-    /* About bio */
-    .bio-text {
-      font-size: 15px;
-      color: rgba(255, 255, 255, 0.7);
-      line-height: 1.7;
-      padding-left: 16px;
-    }
-
-    /* Contact entries */
-    .contact-row {
-      padding-left: 16px;
-      margin-bottom: 12px;
-    }
-
-    .contact-row .label {
-      font-size: 15px;
-      color: #e6eef6;
-    }
-
-    .contact-row .value {
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.45);
-    }
-
-    .contact-row .value a {
-      color: #c084fc;
-      text-decoration: none;
-    }
-
-    .contact-row .value a:hover {
-      text-decoration: underline;
-    }
-
-    /* Skills list */
-    .skills-list {
-      padding-left: 16px;
-      font-size: 15px;
-      color: rgba(255, 255, 255, 0.7);
-      line-height: 1.8;
-    }
-  </style>
-</head>
-
-<body class="min-h-screen bg-[#071021] text-[#e6eef6]">
-  <!-- Dot Grid Background -->
-  <div class="dot-grid-wrapper"></div>
-  <!-- Self-injecting site header -->
-  <script src="scripts/site-header.js"></script>
-
-  <!-- Password Gate -->
-  <div id="password-gate">
-    <p style="font-size:15px; color:rgba(255,255,255,0.5); margin-bottom:16px;">this page requires a password...</p>
-    <input type="password" id="pw-input" placeholder="enter password" autocomplete="off" />
-    <p id="pw-error">incorrect password</p>
-    <p style="font-size:12px; color:rgba(255,255,255,0.3); margin-top:32px; font-style:italic;">hint: airport code of
-      the cities that raised me</p>
-  </div>
-
-  <!-- Back button (always visible above gate) -->
-  <a href="." class="back-btn relative z-10" style="z-index:60;">&#8592; back</a>
-
-  <!-- Resume Content (hidden until password entered) -->
-  <div id="resume-content" class="relative z-10 pt-36">
-    <div class="resume-container">
-
-      <!-- HERO -->
+INSERT INTO content_items (
+  id, collection, slug, data_json, sort_order, published, created_at, updated_at
+)
+VALUES (
+  'resume-page',
+  'resume',
+  'page',
+  json_object('title', 'Resume page', 'html', '<!-- HERO -->
       <section class="resume-section resume-hero">
         <h1 class="flex items-center gap-3">
           johnny ho
@@ -430,7 +184,7 @@
           <p class="entry-title">Media Coordinator @ <a href="https://www.instagram.com/sfucac/" target="_blank">SFU
               CAC</a></p>
           <p class="entry-meta">sep 2025 – present</p>
-          <p class="entry-desc">i lowk don't know what i do here, but vibes yk?</p>
+          <p class="entry-desc">i lowk don''t know what i do here, but vibes yk?</p>
         </div>
         <div class="entry">
           <p class="entry-title">Mentor + Coach @ <a href="https://www.start2finishonline.org/brainworx"
@@ -480,7 +234,7 @@
         <div class="entry">
           <p class="entry-title"><a href="projects/vancouver">project:vancouver</a></p>
           <p class="entry-meta">jan 2021 - present</p>
-          <p class="entry-desc">A set of twelve 'projects', set across all different mediums and fields...my
+          <p class="entry-desc">A set of twelve ''projects'', set across all different mediums and fields...my
             dreams and goals.</p>
         </div>
 
@@ -492,7 +246,7 @@
         </div>
 
         <div class="entry">
-          <p class="entry-title"><a href="https://ewbsfu.github.io/">wind vane @ ewb 'sustain-ee'</a></p>
+          <p class="entry-title"><a href="https://ewbsfu.github.io/">wind vane @ ewb ''sustain-ee''</a></p>
           <p class="entry-meta">jan 2026 – may 2026</p>
           <p class="entry-desc">prototyping a wind vane for an wind-based project (archived).</p>
         </div>
@@ -520,7 +274,7 @@
 
         <div class="entry">
           <p class="entry-title"><a href="https://fbcyouthprogram.ca/ccsbc/">sustainable food workshops @ fraser basin
-              council 'ccsbc'</a></p>
+              council ''ccsbc''</a></p>
           <p class="entry-meta">aug 2023 – apr 2024</p>
           <p class="entry-desc">with the fraser basin ccsbc team, we led workshops and community events about
             sustainable
@@ -537,7 +291,7 @@
             <a href="https://www.youtube.com/watch?v=PAy6QMcoT-o" class="block hover:opacity-80 transition-opacity">
               <div
                 style="aspect-ratio:16/9; background:rgba(255,255,255,0.05); border-radius:6px; overflow:hidden; border:1px solid rgba(255,255,255,0.1);">
-                <!-- User: please replace 'placeholder.jpg' with your actual screenshot -->
+                <!-- User: please replace ''placeholder.jpg'' with your actual screenshot -->
                 <img src="gif/thumbnails/whatweusedtobe.png" alt="what used to be - film screenshot"
                   style="width:100%; height:100%; object-fit:cover; opacity:1;">
               </div>
@@ -553,7 +307,7 @@
             <a href="https://www.youtube.com/watch?v=5yKRPkG97Z4" class="block hover:opacity-80 transition-opacity">
               <div
                 style="aspect-ratio:16/9; background:rgba(255,255,255,0.05); border-radius:6px; overflow:hidden; border:1px solid rgba(255,255,255,0.1);">
-                <!-- User: please replace 'placeholder.jpg' with your actual screenshot -->
+                <!-- User: please replace ''placeholder.jpg'' with your actual screenshot -->
                 <img src="gif/thumbnails/NWJNS-RIGHTNOW.png" alt="NWJNS-RIGHTNOW - film screenshot"
                   style="width:100%; height:100%; object-fit:cover; opacity:1;">
               </div>
@@ -563,7 +317,7 @@
                 typography</a></p>
             <p class="entry-meta">2025</p>
           </div>
-          <p class="entry-desc">[iat 100 summer 2025] kinetic typography video for newjeans' "right now".</p>
+          <p class="entry-desc">[iat 100 summer 2025] kinetic typography video for newjeans'' "right now".</p>
         </div>
 
         <div class="entry">
@@ -571,7 +325,7 @@
             <a href="https://www.youtube.com/watch?v=7nlBsqW12-g" class="block hover:opacity-80 transition-opacity">
               <div
                 style="aspect-ratio:16/9; background:rgba(255,255,255,0.05); border-radius:6px; overflow:hidden; border:1px solid rgba(255,255,255,0.1);">
-                <!-- User: please replace 'placeholder.jpg' with your actual screenshot -->
+                <!-- User: please replace ''placeholder.jpg'' with your actual screenshot -->
                 <img src="gif/thumbnails/MEMOIR02.png" alt="memoir02"
                   style="width:100%; height:100%; object-fit:cover; opacity:1;">
               </div>
@@ -587,7 +341,7 @@
             <a href="https://www.youtube.com/watch?v=xDQcMHPIASg" class="block hover:opacity-80 transition-opacity">
               <div
                 style="aspect-ratio:16/9; background:rgba(255,255,255,0.05); border-radius:6px; overflow:hidden; border:1px solid rgba(255,255,255,0.1);">
-                <!-- User: please replace 'placeholder.jpg' with your actual screenshot -->
+                <!-- User: please replace ''placeholder.jpg'' with your actual screenshot -->
                 <img src="gif/thumbnails/MEMOIR03 - YT.png" alt="a memoir: a hackathon experience"
                   style="width:100%; height:100%; object-fit:cover; opacity:1;">
               </div>
@@ -595,7 +349,7 @@
             <p class="entry-title mt-2"><a href="https://www.youtube.com/watch?v=xDQcMHPIASg">MEMOIR [003]</a></p>
             <p class="entry-meta">2026</p>
           </div>
-          <p class="entry-desc">a short memoir about a good time w/ friends @ ubc htc '26.</p>
+          <p class="entry-desc">a short memoir about a good time w/ friends @ ubc htc ''26.</p>
         </div>
 
 
@@ -604,7 +358,7 @@
             <a href="https://www.youtube.com/watch?v=RbEKY2Nl9do" class="block hover:opacity-80 transition-opacity">
               <div
                 style="aspect-ratio:16/9; background:rgba(255,255,255,0.05); border-radius:6px; overflow:hidden; border:1px solid rgba(255,255,255,0.1);">
-                <!-- User: please replace 'placeholder.jpg' with your actual screenshot -->
+                <!-- User: please replace ''placeholder.jpg'' with your actual screenshot -->
                 <img src="gif/thumbnails/FINAL PHOTO_15.1.2 (1) (1).png" alt="old photos - film screenshot"
                   style="width:100%; height:100%; object-fit:cover; opacity:1;">
               </div>
@@ -627,67 +381,22 @@
             <p class="entry-title mt-2"><a href="https://www.youtube.com/watch?v=apK5kau4vqA">instagram moments</a></p>
             <p class="entry-meta">2026</p>
           </div>
-          <p class="entry-desc">[sparkjam 2026] 'instagram moments', a cinematic short film for a design jam, made in
+          <p class="entry-desc">[sparkjam 2026] ''instagram moments'', a cinematic short film for a design jam, made in
             less than 30 hours. </p>
         </div>
 
         <!-- FOOTER -->
         <footer class="text-center mt-6 w-full mb-10">
-          <small>© <span id="year"></span> joho's studio 昌栢</small>
+          <small>© <span id="year"></span> joho''s studio 昌栢</small>
           <div class="text-sm mt-2">ALL RIGHTS RESERVED. ®</div>
-        </footer>
-
-
-
-    </div>
-  </div>
-
-  <script src="scripts/cloudflare-config.js"></script>
-  <script src="scripts/content-api.js"></script>
-  <script src="scripts/resume-cms.js"></script>
-  <script>
-    // Year
-    const yearEl = document.getElementById('year');
-    if (yearEl) yearEl.textContent = new Date().getFullYear();
-
-    // Password gate (hash-based — password is not stored in source)
-    (function () {
-      // SHA-256 hashes of the correct passwords ('khn' and 'yvr')
-      const PASS_HASH_1 = '791613f2f64ec876ee123bd04961a4554c2b5b7631b64f4ee727ad703d05e17b';
-      const PASS_HASH_2 = '553da2fdd637e71a901a7b28e9379e2f77b7c9d3d2bbd1192196f8367095f117';
-
-      async function sha256(str) {
-        const buf = new TextEncoder().encode(str);
-        const hash = await crypto.subtle.digest('SHA-256', buf);
-        return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-      }
-
-      const gate = document.getElementById('password-gate');
-      const input = document.getElementById('pw-input');
-      const error = document.getElementById('pw-error');
-      const content = document.getElementById('resume-content');
-
-      input.addEventListener('keydown', async function (e) {
-        if (e.key === 'Enter') {
-          const hashed = await sha256(input.value.toLowerCase());
-          if (hashed === PASS_HASH_1 || hashed === PASS_HASH_2) {
-            gate.classList.add('hidden');
-            content.classList.add('unlocked');
-          } else {
-            error.classList.add('visible');
-            input.value = '';
-            setTimeout(function () { error.classList.remove('visible'); }, 2000);
-          }
-        }
-      });
-
-      // Auto-focus password input
-      setTimeout(function () { input.focus(); }, 100);
-    })();
-  </script>
-  <script src="scripts/page-transitions.js"></script>
-  <script src="scripts/dot-grid.js"></script>
-  <script src="scripts/clocks.js"></script>
-</body>
-
-</html>
+        </footer>'),
+  0,
+  1,
+  CAST(strftime('%s', 'now') AS INTEGER) * 1000,
+  CAST(strftime('%s', 'now') AS INTEGER) * 1000
+)
+ON CONFLICT(collection, slug) DO UPDATE SET
+  data_json = excluded.data_json,
+  sort_order = excluded.sort_order,
+  published = excluded.published,
+  updated_at = excluded.updated_at;
