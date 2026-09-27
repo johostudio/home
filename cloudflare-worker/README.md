@@ -57,6 +57,12 @@ Import the archived portfolio projects into the CMS:
 wrangler d1 execute database1 --file=seeds/past-projects.sql
 ```
 
+Seed the music library with Spotify artwork and release links:
+
+```bash
+wrangler d1 execute database1 --file=seeds/music-library.sql
+```
+
 ## 5) Deploy worker
 
 ```bash
