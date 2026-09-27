@@ -51,6 +51,12 @@ Run migration:
 wrangler d1 execute database1 --file=schema.sql
 ```
 
+Import the archived portfolio projects into the CMS:
+
+```bash
+wrangler d1 execute database1 --file=seeds/past-projects.sql
+```
+
 ## 5) Deploy worker
 
 ```bash
