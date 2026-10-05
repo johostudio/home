@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>nullspace (無) - joho's studio</title>
+  <link rel="icon" type="image/x-icon" href="../favicon.ico" />
+  <link rel="stylesheet" href="../styles/tailwind-prod.css">
+  <link rel="stylesheet" href="../styles/dot-grid.css">
+  <link rel="stylesheet" href="../styles/clocks.css">
+  <link rel="stylesheet" href="../styles/writeup.css">
+</head>
+<body class="min-h-screen bg-[#071021] text-[#e6eef6]">
+  <div class="dot-grid-wrapper"></div>
+  <script src="../scripts/site-header.js"></script>
+
+  <main class="writeup-main relative z-10">
+    <a href="../gallery.html" class="writeup-back">&larr; back to gallery</a>
+
+    <header class="writeup-header">
+      <h1>nullspace (無)</h1>
+      <div class="writeup-meta">
+        <span class="writeup-date">Oct 2026</span>
+        <span class="writeup-tag">Engineering</span>
+      </div>
+    </header>
+
+    <div class="writeup-body" id="writeup-body"></div>
+  </main>
+
+  <script type="text/markdown" id="writeup-md">
+## Description
+
+nullspace (無) is a dreamlike, browser-based 3D experience about impossible space. Built at StormHacks 2026, it turns the idea of 無 — void, nothingness, or neither yes nor no — into a world that has to be understood by moving through it.
+
+## Inspiration
+
+We were inspired by non-Euclidean geometry, impossible architecture, and the feeling of exploring a place that quietly changes its own rules. Instead of explaining those ideas as theory, we wanted players to encounter them directly and learn through experimentation.
+
+## What it does
+
+Players explore a sequence of surreal rooms and spatial puzzles. Portal-like panels connect spaces that should not fit together, while movement can alter scale, gravity, lighting, and the player's reading of the environment. The experience rewards curiosity: progress comes from noticing how the world behaves, then using those rules differently.
+
+## How we built it
+
+The experience was built with React and TypeScript, using Three.js for the real-time 3D world and Vite for the development pipeline. Zustand manages shared experience state, while Tailwind supports the interface surrounding the 3D scenes. Figma and Procreate were used to shape the visual direction before and during implementation.
+
+## Challenges we ran into
+
+The most difficult system was portal traversal. The player, camera, scene objects, gravity, scale, and lighting all needed to transform together without breaking the illusion. We also had to keep every mechanic connected to the non-Euclidean concept instead of letting the project become a collection of unrelated visual effects.
+
+## Accomplishments that we're proud of
+
+We are proud that the spatial transitions feel like part of one cohesive experience. The portals, changes in scale and gravity, restrained interface, and dreamlike art direction all support the same central idea. Building that level of atmosphere in a browser during a hackathon made nullspace one of our favourite projects to work on.
+
+## What we learned
+
+We learned a great deal about real-time 3D graphics in the browser and about translating mathematical ideas into understandable interactions. More importantly, we learned how much iteration a strange idea needs before it becomes intuitive: the best results came from testing, revising, and staying patient when a mechanic did not work the first time.
+
+## What's next for nullspace
+
+Future work would focus on lighting, shadows, performance, accessibility, and support across more devices. We would also like to expand the world with spaces based on spherical and hyperbolic geometry, new impossible structures, more puzzles, and a deeper story connecting the rooms.
+
+## Built With
+
+- figma
+- procreate
+- react
+- tailwind
+- three.js
+- typescript
+- vite
+- zustand
+
+## Try it out
+
+- [Launch nullspace](https://stormhacks2026-swart.vercel.app/)
+- [View the GitHub repository](https://github.com/martinlcam/stormhacks2026)
+
+## Team
+
+- Johnny Ho
+- Martin Cam
+- Owen Skippen
+- Alexander Ng
+
+## Devpost
+
+- [View nullspace on Devpost](https://devpost.com/software/wu-neither-up-or-down-a-web-experience)
+
+## Project Images
+
+<iframe src="https://www.youtube.com/embed/DsieY6ab464" title="nullspace (無) visual demo" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+![nullspace title screen](https://d112y698adiu2z.cloudfront.net/photos/production/software_photos/005/504/077/datas/gallery.jpg)
+![nullspace landing scene one](https://d112y698adiu2z.cloudfront.net/photos/production/software_photos/005/509/988/datas/gallery.jpg)
+![nullspace landing scene two](https://d112y698adiu2z.cloudfront.net/photos/production/software_photos/005/509/987/datas/gallery.jpg)
+![nullspace gallery scene one](https://d112y698adiu2z.cloudfront.net/photos/production/software_photos/005/509/986/datas/gallery.jpg)
+![nullspace gallery scene two](https://d112y698adiu2z.cloudfront.net/photos/production/software_photos/005/509/989/datas/gallery.jpg)
+![nullspace gallery scene three](https://d112y698adiu2z.cloudfront.net/photos/production/software_photos/005/511/124/datas/gallery.jpg)
+![nullspace gallery scene four](https://d112y698adiu2z.cloudfront.net/photos/production/software_photos/005/511/125/datas/gallery.jpg)
+![nullspace gallery scene five](https://d112y698adiu2z.cloudfront.net/photos/production/software_photos/005/511/853/datas/gallery.jpg)
+![nullspace gallery scene six](https://d112y698adiu2z.cloudfront.net/photos/production/software_photos/005/511/126/datas/gallery.jpg)
+![nullspace ending scene](https://d112y698adiu2z.cloudfront.net/photos/production/software_photos/005/511/722/datas/gallery.jpg)
+  </script>
+
+  <footer class="text-center mt-16 w-full mb-10 relative z-10">
+    <small>&copy; <span id="year"></span> joho's studio</small>
+    <div class="text-sm mt-2">ALL RIGHTS RESERVED.</div>
+  </footer>
+
+  <script>
+    const y = document.getElementById('year');
+    if (y) y.textContent = new Date().getFullYear();
+  </script>
+  <script src="../scripts/writeup-renderer.js"></script>
+  <script src="../scripts/page-transitions.js"></script>
+  <script src="../scripts/dot-grid.js"></script>
+  <script src="../scripts/clocks.js"></script>
+</body>
+</html>

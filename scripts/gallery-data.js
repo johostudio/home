@@ -14,6 +14,14 @@ var GALLERY_CATEGORIES = [
 
 var GALLERY_PROJECTS = [
   {
+    slug: 'nullspace',
+    title: 'nullspace (無)',
+    category: 'engineering',
+    date: '2026-10',
+    description: 'A dreamlike browser experience about portals, impossible spaces, and non-Euclidean geometry.',
+    thumb: 'https://d112y698adiu2z.cloudfront.net/photos/production/software_thumbnail_photos/005/503/748/datas/medium.png'
+  },
+  {
     slug: 'bioboat',
     title: 'bioboat @ sfu see',
     category: 'engineering',
