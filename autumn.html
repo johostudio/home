@@ -18,38 +18,83 @@
 
     .autumn-page-main {
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 6rem 1.5rem;
+      padding: 8rem 1rem 1rem;
     }
 
     .autumn-page-main.has-gallery {
-      display: block;
-      padding-top: 9rem;
+      padding-bottom: 5rem;
     }
 
-    .autumn-tba {
-      margin: 0;
+    .autumn-preview {
+      width: min(1440px, 100%);
+      margin: 0 auto;
+      overflow: hidden;
+      border: 1px solid rgba(0, 0, 0, 0.18);
+      border-radius: 4px;
+      background: #fff;
+    }
+
+    .autumn-preview-bar {
+      min-height: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.6rem 0.8rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.14);
+      font-size: 0.72rem;
+      line-height: 1.2;
+    }
+
+    .autumn-preview-url {
+      min-width: 0;
+      overflow: hidden;
+      color: rgba(0, 0, 0, 0.48);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .autumn-preview-live::before {
+      content: "";
+      display: inline-block;
+      width: 0.38rem;
+      height: 0.38rem;
+      margin-right: 0.45rem;
+      border-radius: 50%;
+      background: #48a868;
+      vertical-align: 0.08em;
+    }
+
+    .autumn-preview-open {
+      flex: 0 0 auto;
       color: #000;
-      font-size: clamp(1.8rem, 5vw, 4.5rem);
-      font-weight: 400;
-      line-height: 1;
-      letter-spacing: -0.075em;
-      text-transform: lowercase;
       text-decoration: none;
       transition: opacity 0.18s ease;
     }
 
-    .autumn-tba:hover,
-    .autumn-tba:focus-visible {
-      opacity: 0.58;
+    .autumn-preview-open:hover,
+    .autumn-preview-open:focus-visible {
+      opacity: 0.5;
       outline: none;
+    }
+
+    .autumn-preview-frame {
+      height: calc(100vh - 11.25rem);
+      height: calc(100dvh - 11.25rem);
+      min-height: 520px;
+      background: #fff;
+    }
+
+    .autumn-preview-frame iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #fff !important;
     }
 
     .autumn-gallery {
       width: min(1160px, 100%);
-      margin: 0 auto;
+      margin: 4rem auto 0;
     }
 
     .autumn-gallery[hidden] { display: none; }
@@ -97,15 +142,44 @@
       font-size: 0.68rem;
       line-height: 1.4;
     }
+
+    @media (max-width: 768px) {
+      .autumn-page-main {
+        padding: 5rem 0.5rem 0.5rem;
+      }
+
+      .autumn-preview-frame {
+        height: calc(100vh - 7.9rem);
+        height: calc(100dvh - 7.9rem);
+        min-height: 500px;
+      }
+
+      .autumn-preview-bar {
+        padding-inline: 0.7rem;
+      }
+
+      .autumn-gallery {
+        margin-top: 3rem;
+      }
+    }
   </style>
 </head>
 
 <body>
   <script src="scripts/site-header.js"></script>
 
-  <main class="autumn-page-main" aria-label="Autumn gallery">
-    <a class="autumn-tba" id="autumn-empty" href="https://snoopystudio.framer.website/" target="_blank"
-      rel="noopener noreferrer">snoopy's studio</a>
+  <main class="autumn-page-main" aria-label="Autumn">
+    <section class="autumn-preview" aria-label="Live preview of Snoopy's Studio">
+      <div class="autumn-preview-bar">
+        <span class="autumn-preview-url autumn-preview-live">snoopystudio.framer.website</span>
+        <a class="autumn-preview-open" href="https://snoopystudio.framer.website/" target="_blank"
+          rel="noopener noreferrer">open site &#8599;</a>
+      </div>
+      <div class="autumn-preview-frame">
+        <iframe src="https://snoopystudio.framer.website/" title="Snoopy's Studio live website preview"
+          loading="eager" allow="fullscreen"></iframe>
+      </div>
+    </section>
     <section class="autumn-gallery" id="autumn-gallery" hidden>
       <h1>autumn</h1>
       <div class="autumn-grid" id="autumn-grid"></div>
@@ -117,7 +191,6 @@
   <script>
     (function () {
       var main = document.querySelector('.autumn-page-main');
-      var empty = document.getElementById('autumn-empty');
       var gallery = document.getElementById('autumn-gallery');
       var grid = document.getElementById('autumn-grid');
 
@@ -142,7 +215,6 @@
               (item.caption ? '<p class="autumn-item-meta">' + escapeHtml(item.caption) + '</p>' : '') +
               '</' + tag + '>';
           }).join('');
-          empty.hidden = true;
           gallery.hidden = false;
           main.classList.add('has-gallery');
         })
