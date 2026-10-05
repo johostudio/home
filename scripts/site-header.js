@@ -1,6 +1,6 @@
 ; (function () {
   var path = window.location.pathname;
-  var inSub = path.indexOf('/projects/') !== -1;
+  var inSub = path.indexOf('/projects/') !== -1 || path.indexOf('/writeups/') !== -1;
   var base = inSub ? '../' : '';
   var isArchivePage = path.indexOf('archives') !== -1 || path.indexOf('atlas') !== -1 || path.indexOf('bookshelf') !== -1 || path.indexOf('scrambled') !== -1;
   var isLightPage = path.indexOf('work') !== -1 || path.indexOf('autumn') !== -1;
